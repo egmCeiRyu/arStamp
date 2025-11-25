@@ -153,6 +153,23 @@
         window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
       }
     });
+    
+    document.addEventListener('DOMContentLoaded', () => {
+    const modelToUpdate = localStorage.getItem('thumbnailToUpdate');
+    
+    if (modelToUpdate) {
+        const targetThumb = document.querySelector(`.thumbnail-link[data-name="${modelToUpdate}"]`);
+        
+        if (targetThumb) {
+            const newImgSrc = `thumbnails/${modelToUpdate}_thumb.png`;
+            const imgElement = targetThumb.querySelector('.thumbnail-img');
+            imgElement.src = newImgSrc;
+        }
+        
+        // Limpa o armazenamento
+        localStorage.removeItem('thumbnailToUpdate');
+        }
+    });
 
     //hosokawaLink.addEventListener("click", () => {
     //  window.location.href = 'https://www.hosokawamicron.co.jp/jp/';

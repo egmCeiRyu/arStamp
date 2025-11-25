@@ -78,7 +78,6 @@
     scale="1 1 1"
     orbit-sensitivity="2"
     exposure="1.4"  
-    
     ar-modes="webxr scene-viewer quick-look">
 
                     <!--
@@ -479,6 +478,15 @@
         // ✅ This is the correct way to trigger AR programmatically
         modelViewer.activateAR();
       }
+      
+      specButton.addEventListener('click', () => {
+      // Salva a chave do modelo (ex: 'model2')
+      if (modelKey) {
+        localStorage.setItem('thumbnailToUpdate', modelKey);
+      }
+      // Redireciona
+      window.location.href = 'newMenu.html'; 
+      });
 
       // When the user taps the AR button
       arButton.addEventListener('click', (event) => {
