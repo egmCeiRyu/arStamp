@@ -104,7 +104,7 @@
       <!-- Botão voltar -->
       <img id="ar-button" src="icon/arbtn.png" slot="ar-button" alt="arbtn">
       <div id="controls">
-        <!--<button class="hideDim" type="button">寸法：オン</button>-->
+        <button class="hideDim" type="button">寸法：オン</button>
       </div>
     </model-viewer>
   
@@ -117,11 +117,9 @@
         <img class="specification" src="icon/specbtn.png" alt="specification" > 
       </a>
       
-      <!--
       <a id="controlsLink">
         <img class="controls" src="icon/explanationbtn.png" alt="controls" id="controlsButton">
       </a>
-      -->
 
       <script>
         // Dynamically build the sousa.html link
@@ -136,13 +134,11 @@
       </script>
     </div>
 
-    <!--
     <div id="arOverlay" class="ar-overlay">
       <div class="loadingText">
          <img src="icon/explanation.png">
       </div>
     </div>
-    -->
 
     <!-- Sobreposição de especificações -->
     <div class="spec-overlay" id="specOverlay">
@@ -443,12 +439,12 @@
         //modelViewer.addEventListener('camera-change', renderSVG);
       //});
 //
-        //modelViewer.addEventListener('load', () => {
-        //  const size = modelViewer.getDimensions();
-        //  const maxDim = Math.max(size.x, size.y, size.z);
-        //  const suggestedDistance = maxDim * 10.5; // Ajuste o fator conforme necessário
-        //  modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
-      //});
+        modelViewer.addEventListener('load', () => {
+          const size = modelViewer.getDimensions();
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const suggestedDistance = maxDim * 10.5; // Ajuste o fator conforme necessário
+          modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
+      });
 
         modelViewer.addEventListener('fullscreenchange', () => {
           const arButtons = modelViewer.shadowRoot?.querySelectorAll('button[slot="ar-button"]');
