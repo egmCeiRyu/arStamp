@@ -10,28 +10,33 @@
     <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
     
     <style>
+        /* Styles for touch/interaction optimization */
         #controls, label, button, .glass, .dim { touch-action: manipulation; }
         .hideDim { font: normal 12pt Arial; font-weight: 500; color: white; pointer-events: auto; border-radius: 115px; }
         
+        /* Styles for full-screen overlay/iframe handling */
         body.no-scroll { overflow: hidden; position: fixed; width: 100%; height: 100%; top: 0; left: 0; }
-
         #iframeWrapper {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; overflow-y: auto;
+            display: none; /* Inicia oculto */
+            flex-direction: column; overflow-y: auto;
             -webkit-overflow-scrolling: touch; z-index: 9999;
             justify-content: center; align-items: center;
         }
-
         #iframeWrapper iframe {
             width: 85vw; height: 71vh; max-width: 546px;
             background-color: white; border: 1px solid #ccc;
             border-radius: 8px; overflow-y: auto;
         }
+        /* Styles for Spec Overlay (also starts hidden) */
+        .spec-overlay { display: none; }
     </style>
 </head>
 
 <body>
-    <model-viewer ar id="modelViewer"
+    <model-viewer 
+        ar 
+        id="modelViewer"
         shadow-intensity="1"
         shadow-softness="1"
         camera-controls
@@ -66,7 +71,7 @@
 
     <div class="spec-overlay" id="specOverlay">
         <h2>製品仕様</h2>
-        <p>・概要 逆円錐型のケーシング内で回転するパドルによって 粉体に強力な衝撃・せん断力を与え、攪拌・分散し、 精密混合を行うバッチ式の高速せん断型混合機です。 ・特長 短い時間で均一な混合が可能</p>
+        <p>・概要 (Descrição Padrão)</p>
 
         <a id="modelLink" href="#" target="_blank">製品仕様</a>
 
@@ -97,7 +102,6 @@
         let modelKey = "";
         if (modelUrl) {
             modelViewer.setAttribute('src', modelUrl);
-            // Obtém a chave do modelo (ex: 'models/model2.glb' -> 'model2')
             modelKey = modelUrl.split('/').pop().split('.')[0];
         }
 
@@ -108,19 +112,20 @@
             controlsLink.href = `sousa.html`;
         }
 
-        // 3. Lógica do Botão de Especificações (Retorno e Atualização)
-        // O Botão 'specButton' agora salva o estado e retorna para a página de menu.
+        // 3. Lógica do Botão de Especificações (SALVA E RETORNA)
         specButton.addEventListener('click', () => {
-            // Salva a chave do modelo para que o menu possa atualizar a thumbnail
+            // 1. Salva a chave do modelo para atualizar o thumbnail no menu
             if (modelKey) {
                 localStorage.setItem('thumbnailToUpdate', modelKey);
             }
-            // Redireciona para a página do menu
+            // 2. Redireciona para a página do menu
             window.location.href = 'newMenu.html';
         });
 
-        // 4. Lógica de Sobreposição de Especificações (Original)
-        // Isso permite que o overlay de specs seja aberto se o usuário mudar de ideia
+        // 4. Lógica de Sobreposição de Especificações (Exibição/Fechamento)
+        // Se desejar que o specButton ABRA o overlay ANTES de voltar:
+        // specButton.addEventListener('click', () => { specOverlay.style.display = 'flex'; });
+        
         closeSpec.addEventListener('click', () => {
             specOverlay.style.display = 'none';
             iframeWrapper.style.display = 'none';
@@ -132,20 +137,16 @@
             modelIframe.src = '';
         });
 
-        // Lógica de Carregamento de Especificações (Simulação ou JSON externo)
-        // Se você usar um arquivo JSON externo, use o bloco fetch abaixo.
-        // Se usar um objeto JS interno (como no seu código original), defina-o aqui.
-
-        // Bloco de exemplo se você estiver lendo de 'modelSpecs.json'
+        // Lógica de Carregamento de Especificações (Aguardando modelSpecs.json)
         fetch('modelSpecs.json')
             .then(response => response.json())
             .then(modelSpecs => {
+                const modelLink = document.getElementById('modelLink');
                 if (modelKey && modelSpecs[modelKey]) {
                     const spec = modelSpecs[modelKey];
                     specOverlay.querySelector('h2').textContent = spec.title;
                     specOverlay.querySelector('p').textContent = spec.description;
 
-                    const modelLink = document.getElementById('modelLink');
                     if (spec.link) {
                         modelLink.style.display = 'inline';
                         modelLink.onclick = (e) => {
@@ -156,22 +157,22 @@
                     } else {
                         modelLink.style.display = 'none';
                     }
-                } else if (modelKey) {
-                    // Modelo encontrado, mas sem dados em modelSpecs
+                } else {
                     specOverlay.querySelector('h2').textContent = "仕様情報がありません";
                     specOverlay.querySelector('p').textContent = "このモデルの仕様はまだ登録されていません。";
-                    document.getElementById('modelLink').style.display = 'none';
+                    modelLink.style.display = 'none';
                 }
             })
             .catch(error => console.error("Erro ao carregar modelSpecs.json:", error));
 
-        // 5. Lógica do AR Overlay
+        // 5. Lógica do AR Overlay (Correção da Ativação do AR)
         let arJustStarted = false;
         let arTimeout = null;
 
         function startAR() {
             arOverlay.style.display = 'none';
             arJustStarted = false;
+            // FUNÇÃO CORRETA PARA ATIVAR O AR
             modelViewer.activateAR();
         }
 
@@ -182,7 +183,8 @@
                 arOverlay.style.display = 'flex';
                 arJustStarted = true;
 
-                arTimeout = setTimeout(startAR, 1000);
+                // Pequeno atraso para exibir o overlay antes de tentar iniciar o AR
+                arTimeout = setTimeout(startAR, 1000); 
             }
         });
 
@@ -193,35 +195,28 @@
             }
         });
 
-        // 6. Configurações e Eventos do Model Viewer
-        modelViewer.addEventListener('load', () => {
-            // Ajuste da órbita inicial com base no tamanho do modelo
-            const size = modelViewer.getDimensions();
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const suggestedDistance = maxDim * 1.5; // Fator ajustado para um zoom razoável
-            modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
-        });
-
+        // Lógica ao sair do modo AR ou ao carregar o modelo
         modelViewer.addEventListener('ar-status', (event) => {
-            // Lógica para esconder o AR Overlay ao sair do modo AR
             if (event.detail.status === 'not-presenting') {
                 arOverlay.style.display = 'none';
                 arJustStarted = false;
                 clearTimeout(arTimeout);
             }
-
-            // Lógica para esconder o botão de screenshot nativo no Quick Look (iOS)
+            
+            // Lógica para esconder o botão nativo do AR/screenshot no Quick Look (iOS)
             const shadowRoot = modelViewer.shadowRoot;
             if (shadowRoot) {
                 const screenshotButton = shadowRoot.querySelector('button[slot="ar-button"]');
                 const isPresenting = event.detail.status === 'presenting';
-                
                 if (screenshotButton) {
-                    // Esconde se estiver em AR, mostra ao sair
                     screenshotButton.style.display = isPresenting ? 'none' : ''; 
                 }
             }
         });
-    </script>
-</body>
-</html>
+
+        modelViewer.addEventListener('load', () => {
+            // Ajuste da órbita inicial com base no tamanho do modelo
+            const size = modelViewer.getDimensions();
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const suggestedDistance = maxDim * 1.5; 
+            modelViewer.cameraOrbit = `0deg 75deg ${suggest
