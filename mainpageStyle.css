@@ -10,18 +10,17 @@
         margin: auto;
       }
 
-      /*
       .page-wrapper {
         display: flex;
         align-content: center;
-        margin-top: 30%;
+        margin-top: 29%;
         flex-direction: column;
         color: #ffffff;
         font-family: 'Roboto', sans-serif;
         background-color: #ffffff;
-        height: 368px;
+        height: 566px;
+        padding-top: 50px;
       }
-      */
       
       /*
       #main-content,
