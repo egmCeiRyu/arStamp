@@ -1,227 +1,614 @@
 <!DOCTYPE html>
 <html lang="jp">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>3D Model Viewer</title>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>3D Model Viewer</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <link rel="stylesheet" href="modelviewer_style.css">
+  <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css"> 
+  <style>  
+    #controls{
+      touch-action: manipulation;
+    }
+    label{
+      touch-action: manipulation;
+    }
+    button{
+      touch-action: manipulation;
+    }
+    .glass{
+      touch-action: manipulation;
+    }
+    .dim{
+      touch-action: manipulation;
+    }
+    .hideDim{
+      font: normal 12pt Arial;
+      font-weight: 500;
+      color: white;
+      pointer-events: auto;
+      border-radius: 115px;
+    }
     
-    <link rel="stylesheet" href="modelviewer_style.css">
-    <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
-    
-    <style>
-        #controls, label, button, .glass, .dim { touch-action: manipulation; }
-        .hideDim { font: normal 12pt Arial; font-weight: 500; color: white; pointer-events: auto; border-radius: 115px; }
-        
-        body.no-scroll { overflow: hidden; position: fixed; width: 100%; height: 100%; top: 0; left: 0; }
+    body.no-scroll {
+      overflow: hidden;
+      position: fixed;   /* lock the page */
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
 
-        #iframeWrapper {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; overflow-y: auto;
-            -webkit-overflow-scrolling: touch; z-index: 9999;
-            justify-content: center; align-items: center;
-        }
+    #iframeWrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;                  /* enable scrolling only inside iframe wrapper */
+      -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
 
-        #iframeWrapper iframe {
-            width: 85vw; height: 71vh; max-width: 546px;
-            background-color: white; border: 1px solid #ccc;
-            border-radius: 8px; overflow-y: auto;
-        }
-    </style>
+    #iframeWrapper iframe {
+      width: 85vw;
+      height: 71vh;
+      max-width: 546px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow-y: auto; /* enable scrolling inside iframe */
+    }
+  </style>
 </head>
 
 <body>
-    <model-viewer ar id="modelViewer"
-        shadow-intensity="1"
-        shadow-softness="1"
-        camera-controls
-        touch-action="pan-y, pan-x, none"
-        camera-orbit="-25deg 75deg auto"
-        scale="1 1 1"
-        orbit-sensitivity="2"
-        exposure="1.4"
-        ar-modes="webxr scene-viewer quick-look">
+    
+  <model-viewer ar id="modelViewer"
+    shadow-intensity="1"
+    shadow-softness="1"
+    camera-controls
+    touch-action="pan-y, pan-x, none"
+    camera-orbit="-25deg 75deg auto"
+    scale="1 1 1"
+    orbit-sensitivity="2"
+    exposure="1.4"  
+    ar-modes="webxr scene-viewer quick-look">
 
-        <img id="ar-button" src="icon/arbtn.png" slot="ar-button" alt="arbtn">
-        <div id="controls">
-            </div>
+                    <!--
+                    <button style="background-color:rgb(0,0,0)" slot="hotspot-dot+X-Y+Z" class="dot" data-position="1 -1 1" data-normal="1 0 0"></button>
+                    <button slot="hotspot-dim+X-Y" class="dim" data-position="1 -1 0" data-normal="1 0 0"></button>
+                    <button style="background-color:rgb(0,0,0)" slot="hotspot-dot+X-Y-Z" class="dot" data-position="1 -1 -1" data-normal="1 0 0"></button>
+                    <button slot="hotspot-dim+X-Z" class="dim" data-position="1 0 -1" data-normal="1 0 0"></button>
+                    <button style="background-color:rgb(0,0,0)" slot="hotspot-dot+X+Y-Z" class="dot" data-position="1 1 -1" data-normal="0 1 0"></button>
+                    <button slot="hotspot-dim+Y-Z" class="dim" data-position="0 -1 -1" data-normal="0 1 0"></button>
+                    <button style="background-color:rgb(0,0,0)" slot="hotspot-dot-X+Y-Z" class="dot" data-position="-1 1 -1" data-normal="0 1 0"></button>
+                    <button slot="hotspot-dim-X-Z" class="dim" data-position="-1 0 -1" data-normal="-1 0 0"></button>
+                    <button style="background-color:rgb(0,0,0)" slot="hotspot-dot-X-Y-Z" class="dot" data-position="-1 -1 -1" data-normal="-1 0 0"></button>
+                    <button slot="hotspot-dim-X-Y" class="dim" data-position="-1 -1 0" data-normal="-1 0 0"></button>
+                    <button style="background-color:rgb(0,0,0)" slot="hotspot-dot-X-Y+Z" class="dot" data-position="-1 -1 1" data-normal="-1 0 0"></button>
+                    <svg id="dimLines" width="100%" height="100%" class="dimensionLineContainer">
+                      <line class="dimensionLine"></line>
+                      <line class="dimensionLine"></line>
+                      <line class="dimensionLine"></line>
+                      <line class="dimensionLine"></line>
+                      <line class="dimensionLine"></line>
+                    </svg>
+                    -->
+      <!-- Botão voltar -->
+      <img id="ar-button" src="icon/arbtn.png" slot="ar-button" alt="arbtn">
+      <div id="controls">
+        <!--<button class="hideDim" type="button">寸法：オン</button>-->
+      </div>
     </model-viewer>
-
+  
     <div id="buttonsGRP">
-        <a href="newMenu.html">
-            </a>
+      <a href="newMenu.html">
+        <!--<img class="return" src="icon/returnbtn.png" alt="return">-->
+      </a>
 
-        <a id="specButton">
-            <img class="specification" src="icon/specbtn.png" alt="specification" >
-        </a>
+      <a id="specButton">
+        <img class="specification" src="icon/specbtn.png" alt="specification" > 
+      </a>
+      
+      <a id="controlsLink">
+        <!--<img class="controls" src="icon/explanationbtn.png" alt="controls" id="controlsButton">-->
+      </a>
 
-        <a id="controlsLink">
-            </a>
+      <script>
+        // Dynamically build the sousa.html link
+        const modelParam = new URLSearchParams(window.location.search).get('model');
+        const controlsLink = document.getElementById('controlsLink');
+
+        if (modelParam) {
+          controlsLink.href = `sousa.html?model=${encodeURIComponent(modelParam)}`;
+        } else {
+          controlsLink.href = `sousa.html`;
+        }
+      </script>
     </div>
 
     <div id="arOverlay" class="ar-overlay">
-        <div class="loadingText">
-            </div>
+      <div class="loadingText">
+         <!--<img src="icon/explanation.png">-->
+      </div>
     </div>
 
+    <!-- Sobreposição de especificações -->
     <div class="spec-overlay" id="specOverlay">
-        <h2>製品仕様</h2>
-        <p>・概要 逆円錐型のケーシング内で回転するパドルによって 粉体に強力な衝撃・せん断力を与え、攪拌・分散し、 精密混合を行うバッチ式の高速せん断型混合機です。 ・特長 短い時間で均一な混合が可能</p>
+      <h2>製品仕様</h2>
 
-        <a id="modelLink" href="#" target="_blank">製品仕様</a>
+      <p>・概要 逆円錐型のケーシング内で回転するパドルによって 粉体に強力な衝撃・せん断力を与え、攪拌・分散し、
+        精密混合を行うバッチ式の高速せん断型混合機です。  ・特長 短い時間で均一な混合が可能</p>
+
+      <a id="modelLink" href="#" target="_blank">製品仕様</a> 
 
         <div id="iframeWrapper">
-            <button id="closeIframeBtn">×</button>
-            <iframe title="model" id="modelIframe"></iframe>
+          <button id="closeIframeBtn">
+            ×
+          </button>
+
+          <iframe  title="model"
+                  id="modelIframe">
+          </iframe>
+
         </div>
 
         <img src="icon/returnbtn.png" class="return1" id="closeSpec">
         <br><br>
+
     </div>
 
     <script type="module">
-        // 1. Variáveis e Seletores
-        const urlParams = new URLSearchParams(window.location.search);
-        const modelUrl = urlParams.get('model');
-        const modelViewer = document.getElementById('modelViewer');
-        const arButton = document.getElementById('ar-button');
-        const arOverlay = document.getElementById('arOverlay');
-        const specOverlay = document.getElementById('specOverlay');
-        const specButton = document.getElementById('specButton');
-        const closeSpec = document.getElementById('closeSpec');
-        const iframeWrapper = document.getElementById('iframeWrapper');
-        const modelIframe = document.getElementById('modelIframe');
-        const closeIframeBtn = document.getElementById('closeIframeBtn');
-        const controlsLink = document.getElementById('controlsLink');
+      const urlParams = new URLSearchParams(window.location.search);
+      const modelUrl = urlParams.get('model');
+      const modelViewer = document.getElementById('modelViewer');
+      //checkbox on/off
+      //const checkbox = modelViewer.querySelector('#show-dimensions');
+      //const toggleButton = modelViewer.querySelector(".hideDim");
+      //
+      //const dimElements = [
+      //  ...modelViewer.querySelectorAll('button[slot^="hotspot-dim"]'),
+      //  modelViewer.querySelector('#dimLines')
+      //];
+      
+      
+      //let dimsVisible = true; // state tracker
+//
+      //function setVisibility(visible) {
+      //  dimElements.forEach((el) => {
+      //    if (visible) {
+      //      el.classList.remove('hide');
+      //    } else {
+      //      el.classList.add('hide');
+      //    }
+      //  });
+      //  dimsVisible = visible;
+      //}
 
-        let modelKey = "";
-        if (modelUrl) {
-            modelViewer.setAttribute('src', modelUrl);
-            // Obtém a chave do modelo (ex: 'models/model2.glb' -> 'model2')
-            modelKey = modelUrl.split('/').pop().split('.')[0];
-        }
+      //// Toggle on button click
+      //toggleButton.addEventListener('click', () => {
+      //  setVisibility(!dimsVisible);
+      //    if (toggleButton.textContent === '寸法：オン') {
+    //// If it's 'Turn On', change it to 'Turn Off'
+      //      toggleButton.style.backgroundColor = "red";
+      //      toggleButton.textContent = '寸法：オフ';
+      //    } else {
+      //      // Otherwise, change it back to 'Turn On'
+      //      toggleButton.style.backgroundColor = "green";
+      //      toggleButton.textContent = '寸法：オン';
+      //    }
+      //    });
+//
+      //// Initialize
+      //setVisibility(true);
+      //toggleButton.style.backgroundColor = "green";
 
-        // 2. Lógica para o Link de Controles (sousa.html)
-        if (modelUrl) {
-            controlsLink.href = `sousa.html?model=${encodeURIComponent(modelUrl)}`;
+
+      if (modelUrl) {
+        modelViewer.setAttribute('src', modelUrl);
+      }
+
+      // === ESPECIFICAÇÕES POR MODELO ===
+      const modelSpecs = {
+        model1: {
+          title: "ACMパルベライザ",
+          description: "木製フレームと布張りの座面を備えたモダンなデザインの椅子。軽量で耐久性があります。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/167.html?page=1",
+        },
+        model2: {
+          title: "Model2",
+          description: "最大6人まで対応可能。ガラス天板と金属脚を備えたスタイリッシュなダイニングテーブル。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/168.html?page=1",
+        },
+        model3: {
+          title: "Model3",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/169.html?page=1",
+        },
+        model4: {
+          title: "Model4",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/170.html?page=1",
+        },
+        model5: {
+          title: "Model5",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/171.html?page=1",
+        },
+        model6: {
+          title: "Model6",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/172.html?page=1",
+        },
+        model7: {
+          title: "Model7",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/173.html?page=1",
+        },
+        model8: {
+          title: "Model8",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/174.html?page=1",
+        },
+        model9: {
+          title: "Model9",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/175.html?page=1",
+        },
+        model10: {
+          title: "Model10",
+          description: "LEDライト内蔵のモダンな天井ランプ。省エネで温かい光を提供します。",
+          //link:"https://www.hosokawamicron.co.jp/en/product/machines/detail/176.html?page=1",
+        },
+        // Adicione mais conforme necessário
+      };
+
+      const specButton = document.getElementById('specButton');
+      const specOverlay = document.getElementById('specOverlay');
+      const closeSpec = document.getElementById('closeSpec');
+
+      // Obter nome base do modelo (ex: chair.glb -> chair)
+      let modelKey = "";
+      if (modelUrl) {
+        modelKey = modelUrl.split('/').pop().split('.')[0]; // 'chair.glb' → 'chair'
+
+      if (modelSpecs[modelKey]) {
+        const spec = modelSpecs[modelKey];
+        specOverlay.querySelector('h2').textContent = spec.title;
+        specOverlay.querySelector('p').textContent = spec.description;
+
+      const modelLink = document.getElementById('modelLink');
+      const iframeWrapper = document.getElementById('iframeWrapper');
+      const modelIframe = document.getElementById('modelIframe');
+
+    // Define o comportamento do link e iframe
+    if (spec.link) {
+      modelLink.style.display = 'inline';
+
+      modelLink.onclick = (e) => {
+        e.preventDefault(); // Impede abrir nova aba
+        modelIframe.src = spec.link;
+        iframeWrapper.style.display = 'block';
+      };
+    } else {
+      modelLink.style.display = 'none';
+      iframeWrapper.style.display = 'none';
+    }
         } else {
-            controlsLink.href = `sousa.html`;
+          specOverlay.querySelector('h2').textContent = "仕様情報がありません";
+          specOverlay.querySelector('p').textContent = "このモデルの仕様はまだ登録されていません。";
+          document.getElementById('modelLink').style.display = 'none';
         }
+      }
 
-        // 3. Lógica do Botão de Especificações (Retorno e Atualização)
-        // O Botão 'specButton' agora salva o estado e retorna para a página de menu.
-        specButton.addEventListener('click', () => {
-            // Salva a chave do modelo para que o menu possa atualizar a thumbnail
-            if (modelKey) {
-                localStorage.setItem('thumbnailToUpdate', modelKey);
-            }
-            // Redireciona para a página do menu
-            window.location.href = 'newMenu.html';
-        });
+      const closeIframeBtn = document.getElementById('closeIframeBtn');
+      const iframeWrapper = document.getElementById('iframeWrapper');
 
-        // 4. Lógica de Sobreposição de Especificações (Original)
-        // Isso permite que o overlay de specs seja aberto se o usuário mudar de ideia
-        closeSpec.addEventListener('click', () => {
-            specOverlay.style.display = 'none';
-            iframeWrapper.style.display = 'none';
-            modelIframe.src = "";
-        });
+    closeIframeBtn.addEventListener('click', () => {
+      iframeWrapper.style.display = 'none';
+      const iframe = document.getElementById('modelIframe');
+      iframe.src = ''; // Optional: stop loading
+    });
 
-        closeIframeBtn.addEventListener('click', () => {
-            iframeWrapper.style.display = 'none';
-            modelIframe.src = '';
-        });
+      specButton.addEventListener('click', () => {
+        specOverlay.style.display = 'flex';
+      });
 
-        // Lógica de Carregamento de Especificações (Simulação ou JSON externo)
-        // Se você usar um arquivo JSON externo, use o bloco fetch abaixo.
-        // Se usar um objeto JS interno (como no seu código original), defina-o aqui.
+      closeSpec.addEventListener('click', () => {
+        specOverlay.style.display = 'none';
+      });
 
-        // Bloco de exemplo se você estiver lendo de 'modelSpecs.json'
-        fetch('modelSpecs.json')
-            .then(response => response.json())
-            .then(modelSpecs => {
-                if (modelKey && modelSpecs[modelKey]) {
-                    const spec = modelSpecs[modelKey];
-                    specOverlay.querySelector('h2').textContent = spec.title;
-                    specOverlay.querySelector('p').textContent = spec.description;
+      modelViewer.addEventListener('load', () => {
+        const scene = modelViewer.scene;
+        //const light = scene.shadowLight;
+        //light.direction.set(0.5, -1, 0.5);
+      });
 
-                    const modelLink = document.getElementById('modelLink');
-                    if (spec.link) {
-                        modelLink.style.display = 'inline';
-                        modelLink.onclick = (e) => {
-                            e.preventDefault();
-                            modelIframe.src = spec.link;
-                            iframeWrapper.style.display = 'block';
-                        };
-                    } else {
-                        modelLink.style.display = 'none';
-                    }
-                } else if (modelKey) {
-                    // Modelo encontrado, mas sem dados em modelSpecs
-                    specOverlay.querySelector('h2').textContent = "仕様情報がありません";
-                    specOverlay.querySelector('p').textContent = "このモデルの仕様はまだ登録されていません。";
-                    document.getElementById('modelLink').style.display = 'none';
-                }
-            })
-            .catch(error => console.error("Erro ao carregar modelSpecs.json:", error));
+      //const dimElements = [...modelViewer.querySelectorAll('button'), modelViewer.querySelector('#dimLines')];
 
-        // 5. Lógica do AR Overlay
-        let arJustStarted = false;
-        let arTimeout = null;
+        // update svg
+        //function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+        //  if (dotHotspot1 && dotHotspot2) {
+        //    svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
+        //    svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
+        //    svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
+        //    svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
+//
+        //    // use provided optional hotspot to tie visibility of this svg line to
+        //    if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+        //      svgLine.classList.add('hide');
+        //    }
+        //    else {
+        //      svgLine.classList.remove('hide');
+        //    }
+        //  }
+        //}
 
-        function startAR() {
-            arOverlay.style.display = 'none';
-            arJustStarted = false;
-            modelViewer.activateAR();
-        }
+        //const dimLines = modelViewer.querySelectorAll('line');
+//
+        //const renderSVG = () => {
+        //  drawLine(dimLines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
+        //  drawLine(dimLines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
+        //  drawLine(dimLines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z')); // always visible
+        //  drawLine(dimLines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
+        //  drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
+        //};
 
-        arButton.addEventListener('click', (event) => {
-            if (!arJustStarted) {
-                event.preventDefault();
-                event.stopPropagation();
-                arOverlay.style.display = 'flex';
-                arJustStarted = true;
+        //modelViewer.addEventListener('load', () => {
+        //  const center = modelViewer.getBoundingBoxCenter();
+        //  const size = modelViewer.getDimensions();
+//
+        //  const x2 = size.x / 2;
+        //  const y2 = size.y / 2;
+        //  const z2 = size.z / 2;
+//
+       //modelViewer.updateHotspot({
+        // name: 'hotspot-dot+X-Y+Z',
+        // position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`
+       //});
+//
+       //modelViewer.updateHotspot({
+        // name: 'hotspot-dim+X-Y',
+        // position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
+       //});
+       //modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent =
+        // `${(size.z * 1.0).toFixed(1)} メートル`;
+//
+       //modelViewer.updateHotspot({
+        // name: 'hotspot-dot+X-Y-Z',
+        // position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`
+       //});
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dim+X-Z',
+        //  position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
+        //});
+        //modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent =
+        //  `${(size.y * 1.0).toFixed(1)} メートル`;
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dot+X+Y-Z',
+        //  position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`
+        //});
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dim+Y-Z',
+        //  position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`
+        //});
+        //modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent =
+        //  `${(size.x * 1.0).toFixed(1)} メートル`;
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dot-X+Y-Z',
+        //  position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`
+        //});
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dim-X-Z',
+        //  position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
+        //});
+        //modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent =
+        //  `${(size.y * 1.0).toFixed(1)} メートル`;
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dot-X-Y-Z',
+        //  position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`
+        //});
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dim-X-Y',
+        //  position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
+        //});
+        //modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent =
+        //  `${(size.z * 1.0).toFixed(1)} メートル`;
+//
+        //modelViewer.updateHotspot({
+        //  name: 'hotspot-dot-X-Y+Z',
+        //  position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
+        //});
+//
+        //renderSVG();
 
-                arTimeout = setTimeout(startAR, 1000);
-            }
-        });
-
-        arOverlay.addEventListener('click', () => {
-            if (arJustStarted) {
-                clearTimeout(arTimeout);
-                startAR();
-            }
-        });
-
-        // 6. Configurações e Eventos do Model Viewer
+        //modelViewer.addEventListener('camera-change', renderSVG);
+      //});
+//
         modelViewer.addEventListener('load', () => {
-            // Ajuste da órbita inicial com base no tamanho do modelo
-            const size = modelViewer.getDimensions();
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const suggestedDistance = maxDim * 1.5; // Fator ajustado para um zoom razoável
-            modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
-        });
+          const size = modelViewer.getDimensions();
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const suggestedDistance = maxDim * 10.5; // Ajuste o fator conforme necessário
+          modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
+      });
 
-        modelViewer.addEventListener('ar-status', (event) => {
-            // Lógica para esconder o AR Overlay ao sair do modo AR
-            if (event.detail.status === 'not-presenting') {
-                arOverlay.style.display = 'none';
-                arJustStarted = false;
-                clearTimeout(arTimeout);
-            }
+        modelViewer.addEventListener('fullscreenchange', () => {
+          const arButtons = modelViewer.shadowRoot?.querySelectorAll('button[slot="ar-button"]');
+          if (arButtons && arButtons.length > 1) {
+            for (let i = 1; i < arButtons.length; i++) {
+              arButtons[i].remove();
+          }
+        }
+      });
 
-            // Lógica para esconder o botão de screenshot nativo no Quick Look (iOS)
-            const shadowRoot = modelViewer.shadowRoot;
-            if (shadowRoot) {
-                const screenshotButton = shadowRoot.querySelector('button[slot="ar-button"]');
-                const isPresenting = event.detail.status === 'presenting';
-                
-                if (screenshotButton) {
-                    // Esconde se estiver em AR, mostra ao sair
-                    screenshotButton.style.display = isPresenting ? 'none' : ''; 
-                }
-            }
-        });
+        closeSpec.addEventListener('click', () => {
+        specOverlay.style.display = 'none';
+        iframeWrapper.style.display = 'none'; // Esconde iframe ao fechar
+        modelIframe.src = ""; // Limpa conteúdo do iframe
+      });
+
     </script>
+
+
+    <script type="module">
+      const modelViewer = document.getElementById('modelViewer');
+      const arButton = document.querySelector('#ar-button'); // your visible AR button
+      const arOverlay = document.getElementById('arOverlay');
+
+      let arJustStarted = false;
+      let arTimeout = null;
+
+      function startAR() {
+        arOverlay.style.display = 'none';
+        arJustStarted = false;
+
+        // ✅ This is the correct way to trigger AR programmatically
+        modelViewer.activateAR();
+      }
+      
+      specButton.addEventListener('click', () => {
+      // Salva a chave do modelo (ex: 'model2')
+      if (modelKey) {
+        localStorage.setItem('thumbnailToUpdate', modelKey);
+      }
+      // Redireciona
+      window.location.href = 'newMenu.html'; 
+      });
+
+      // When the user taps the AR button
+      arButton.addEventListener('click', (event) => {
+        if (!arJustStarted) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          arOverlay.style.display = 'flex';
+          arJustStarted = true;
+
+          arTimeout = setTimeout(() => {
+            startAR();
+          }, 1000);
+        }
+      });
+
+      // When the user taps the overlay
+      arOverlay.addEventListener('click', () => {
+        if (arJustStarted) {
+          clearTimeout(arTimeout);
+          startAR();
+        }
+      });
+
+      // When exiting AR mode
+      modelViewer.addEventListener('ar-status', (event) => {
+        if (event.detail.status === 'not-presenting') {
+          arOverlay.style.display = 'none';
+          arJustStarted = false;
+          clearTimeout(arTimeout);
+        }
+      });
+
+  </script>
+
+  <script type="module">
+  const modelViewer = document.getElementById('modelViewer');
+  const modelUrl = new URLSearchParams(window.location.search).get('model');
+  const modelKey = modelUrl ? modelUrl.split('/').pop().split('.')[0] : "";
+
+  const specButton = document.getElementById('specButton');
+  const specOverlay = document.getElementById('specOverlay');
+  const closeSpec = document.getElementById('closeSpec');
+  const modelLink = document.getElementById('modelLink');
+  const iframeWrapper = document.getElementById('iframeWrapper');
+  const modelIframe = document.getElementById('modelIframe');
+
+  fetch('modelSpecs.json')
+    .then(response => response.json())
+    .then(modelSpecs => {
+      if (modelKey && modelSpecs[modelKey]) {
+        const spec = modelSpecs[modelKey];
+        specOverlay.querySelector('h2').innerHTML = spec.title;
+        specOverlay.querySelector('p').innerHTML = spec.description;
+
+        if (spec.link) {
+          modelLink.style.display = 'inline';
+          modelLink.onclick = (e) => {
+            e.preventDefault();
+            modelIframe.src = spec.link;
+            iframeWrapper.style.display = 'block';
+          };
+        } else {
+          modelLink.style.display = 'none';
+        }
+      } else {
+        specOverlay.querySelector('h2').textContent = "仕様情報がありません";
+        specOverlay.querySelector('p').textContent = "このモデルの仕様はまだ登録されていません。";
+        modelLink.style.display = 'none';
+      }
+    });
+
+    specButton.addEventListener('click', () => {
+      specOverlay.style.display = 'flex';
+    });
+
+    closeSpec.addEventListener('click', () => {
+      specOverlay.style.display = 'none';
+      iframeWrapper.style.display = 'none';
+      modelIframe.src = "";
+    });
+  </script>
+  
+  <script>     
+    modelViewer.addEventListener('ar-status', (event) => {
+    if (event.detail.status === 'presenting') {
+      // Estamos em AR (iOS Quick Look ou outros modos)
+      // Tenta achar o botão de captura de tela no shadow DOM
+      const shadowRoot = modelViewer.shadowRoot;
+      if (shadowRoot) {
+        const screenshotButton = shadowRoot.querySelector('button[slot="ar-button"]');
+        if (screenshotButton) {
+          screenshotButton.style.display = 'none'; // oculta o botão screenshot
+        }
+      }
+    } else if (event.detail.status === 'not-presenting') {
+      // Ao sair do AR, mostra o botão novamente
+      const shadowRoot = modelViewer.shadowRoot;
+      if (shadowRoot) {
+        const screenshotButton = shadowRoot.querySelector('button[slot="ar-button"]');
+        if (screenshotButton) {
+          screenshotButton.style.display = ''; // mostra o botão novamente
+          }
+        }
+      }
+    });
+  
+  </script>
+  
+  <script>
+    function showModel10() {
+      const iframeWrapper = document.getElementById('iframeWrapper');
+      iframeWrapper.style.display = 'flex';
+      document.body.classList.add('no-scroll');
+    }
+
+    function hideIframe() {
+      const iframeWrapper = document.getElementById('iframeWrapper');
+      iframeWrapper.style.display = 'none';
+      document.body.classList.remove('no-scroll');
+    }
+  </script>
+  
 </body>
 </html>
