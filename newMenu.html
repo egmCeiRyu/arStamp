@@ -114,12 +114,13 @@
       -->
     </div>
   </div>
-  <div id="view-model-btn-box">
-      <img src="icon/selectionIcon.png" id="view-model-btn">
-  </div>
+    <div id="view-model-btn-box">
+        <img src="icon/selectionIcon.png" id="view-model-btn">
+    </div>
   <div class="bottom-stripe"></div>
 
-  <script type="module">
+<script type="module">
+    // 1. FIREBASE (MANTIDA)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
     import { firebaseConfig } from "./firebase-config.js";
@@ -132,8 +133,9 @@
 
     const thumbnails = document.querySelectorAll('.thumbnail-link');
     const viewModelBtn = document.getElementById('view-model-btn');
-    const hosokawaLink = document.querySelector('.companylogo');
+    // const hosokawaLink = document.querySelector('.companylogo'); // Variável não usada, mas mantida por segurança
 
+    // 2. LÓGICA DE SELEÇÃO DE MINIATURA (MANTIDA)
     thumbnails.forEach(thumb => {
       thumb.addEventListener('click', () => {
         thumbnails.forEach(t => t.classList.remove('selected'));
@@ -141,12 +143,13 @@
 
         selectedModelUrl = thumb.getAttribute('data-model');
         selectedModelName = thumb.getAttribute('data-name');
-        viewModelBtn.disabled = false;
-
+        // viewModelBtn.disabled = false; // Removida se não estiver no HTML
+        
         viewModelBtn.classList.add('selected');
       });
     });
 
+    // 3. LÓGICA DO BOTÃO DE VISUALIZAÇÃO (MANTIDA)
     viewModelBtn.addEventListener('click', () => {
       if (selectedModelUrl) {
         logEvent(analytics, "button_click", { button_name: selectedModelName });
@@ -154,34 +157,38 @@
       }
     });
     
+    // 4. 🎯 LÓGICA DO CARIMBO: Carregar estado salvo e atualizar miniaturas
     document.addEventListener('DOMContentLoaded', () => {
-    const modelToUpdate = localStorage.getItem('thumbnailToUpdate');
-    
-    if (modelToUpdate) {
-        const targetThumb = document.querySelector(`.thumbnail-link[data-name="${modelToUpdate}"]`);
+        // Tenta carregar a lista de modelos carimbados. Se não houver nada, usa array vazio.
+        const stampedModels = JSON.parse(localStorage.getItem('stampedModels') || '[]');
         
-        if (targetThumb) {
-            const newImgSrc = `thumbnails/${modelToUpdate}_thumb.png`;
-            const imgElement = targetThumb.querySelector('.thumbnail-img');
-            imgElement.src = newImgSrc;
+        // Se houver um modelo que acabou de ser carimbado (do script antigo),
+        // ele é adicionado à lista para compatibilidade, mas o foco é na lista 'stampedModels'.
+        const modelToUpdate = localStorage.getItem('thumbnailToUpdate');
+        
+        if (modelToUpdate && !stampedModels.includes(modelToUpdate)) {
+            // Isso não deve acontecer se model-viewer.html estiver atualizado, mas garante a migração.
+            stampedModels.push(modelToUpdate);
+            localStorage.setItem('stampedModels', JSON.stringify(stampedModels));
         }
         
-        // Limpa o armazenamento
+        thumbnails.forEach(thumb => {
+            const modelName = thumb.getAttribute('data-name'); // Ex: 'model1', 'model2'
+            const imgElement = thumb.querySelector('.thumbnail-img');
+
+            if (stampedModels.includes(modelName)) {
+                // O modelo está carimbado: mostra a imagem colorida
+                imgElement.src = `thumbnails/${modelName}_thumb.png`;
+            } else {
+                // O modelo NÃO está carimbado: garante que é a imagem branca
+                imgElement.src = 'thumbnails/white_thumb.png';
+            }
+        });
+
+        // Limpa a chave temporária (do script anterior)
         localStorage.removeItem('thumbnailToUpdate');
-        }
     });
-
-    //hosokawaLink.addEventListener("click", () => {
-    //  window.location.href = 'https://www.hosokawamicron.co.jp/jp/';
-    //});
-
-  </script>
+</script>
     
-    <!--
-    <footer class="foot">
-        
-    </footer>
-    -->
-
 </body>
 </html>
