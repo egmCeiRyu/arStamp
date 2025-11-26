@@ -202,46 +202,6 @@
         // Limpa a chave temporária (do script anterior)
         localStorage.removeItem('thumbnailToUpdate');
     });
-  
-  async function stampModelOnline(modelName) {
-    if (!currentUserUID) return;
-    const docRef = doc(db, "userStampedModels", currentUserUID);
-    await setDoc(docRef, { models: arrayUnion(modelName) }, { merge: true });
-}
-
-  async function loadStampedModels() {
-      if (!currentUserUID) return;
-      const docRef = doc(db, "userStampedModels", currentUserUID);
-      const docSnap = await getDoc(docRef);
-      let stampedModels = [];
-      if (docSnap.exists()) {
-          stampedModels = docSnap.data().models || [];
-      }
-
-      // Atualiza miniaturas
-      thumbnails.forEach(thumb => {
-          const modelName = thumb.getAttribute('data-name');
-          const imgElement = thumb.querySelector('.thumbnail-img');
-          if (stampedModels.includes(modelName)) {
-              imgElement.src = `thumbnails/${modelName}_thumb.png`;
-          } else {
-              imgElement.src = 'thumbnails/white_thumb.png';
-          }
-      });
-  }
-  
-    viewModelBtn.addEventListener('click', async () => {
-    if (selectedModelUrl) {
-      logEvent(analytics, "button_click", { button_name: selectedModelName });
-
-      // Marca modelo como carimbado online
-      await stampModelOnline(selectedModelName);
-
-      // Redireciona para model-viewer
-      window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-  });
-
-
 </script>
     
 </body>
