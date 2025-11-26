@@ -58,13 +58,13 @@
         <a href="newMenu.html">
             </a>
 
-        <a id="specButton">
-            <img class="specification" src="icon/stamp.png" alt="specification" >
+        <a id="stampButtonLink">
+            <img class="specification" src="icon/stamp.png" alt="Stamp Button" id="stampButtonImage">
         </a>
 
         <a id="controlsLink">
             </a>
-        </div>
+    </div>
 
     <div id="arOverlay" class="ar-overlay">
         <div class="loadingText">
@@ -95,7 +95,10 @@
         const arButton = document.getElementById('ar-button');
         const arOverlay = document.getElementById('arOverlay');
         const specOverlay = document.getElementById('specOverlay');
-        const specButton = document.getElementById('specButton');
+        
+        // MUDANÇA: Usaremos 'stampButtonLink' como ID principal para clareza
+        const stampButtonLink = document.getElementById('stampButtonLink');
+        
         const closeSpec = document.getElementById('closeSpec');
         const iframeWrapper = document.getElementById('iframeWrapper');
         const modelIframe = document.getElementById('modelIframe');
@@ -107,21 +110,26 @@
         // 2. Inicialização do Modelo e ModelKey
         if (modelUrl) {
             modelViewer.setAttribute('src', modelUrl);
-            // Obtém a chave do modelo (ex: 'models/model2.glb' -> 'model2')
             modelKey = modelUrl.split('/').pop().split('.')[0];
         }
 
-        // 3. Lógica do Link de Controles (sousa.html)
-        if (modelUrl) {
-            controlsLink.href = `sousa.html?model=${encodeURIComponent(modelUrl)}`;
-        } else {
-            controlsLink.href = `sousa.html`;
-        }
+        // 3. 🎯 NOVA LÓGICA: Ligar o Botão Carimbo ao Menu e Salvar a Chave
+        // O botão com a imagem stamp.png tem o ID 'stampButtonLink' (antigo specButton)
+        stampButtonLink.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede qualquer ação padrão do <a>
 
-        // 4. Lógica de Sobreposição de Especificações (Abre e Fecha)
-        specButton.addEventListener('click', () => {
-            specOverlay.style.display = 'flex';
+            // 1. Salva a chave do modelo (ex: 'model2') no Local Storage
+            if (modelKey) {
+                localStorage.setItem('thumbnailToUpdate', modelKey);
+                console.log(`Chave '${modelKey}' salva para atualização.`);
+            }
+
+            // 2. Redireciona para a página do menu
+            window.location.href = 'newMenu.html';
         });
+
+        // 4. Lógica de Sobreposição de Especificações (Abre e Fecha - Deixada inativa já que o botão foi alterado)
+        // Se você quiser reativar a funcionalidade de especificação em um botão separado, use esta lógica.
 
         closeSpec.addEventListener('click', () => {
             specOverlay.style.display = 'none';
@@ -133,52 +141,8 @@
             iframeWrapper.style.display = 'none';
             modelIframe.src = '';
         });
-        
-        // 5. Lógica de Carregamento de Especificações (via fetch)
-        // Alterei a lógica para usar o fetch ('modelSpecs.json') e o fallback para o objeto interno
-        const internalModelSpecs = {
-            // Se o modelSpecs.json falhar, ele usará este objeto.
-            model1: { title: "ACMパルベライザ", description: "Descrição 1", /* link: "..." */ },
-            // ... adicione todos os 10 modelos aqui se o arquivo JSON for opcional
-        };
-
-        function updateSpecs(specs) {
-            const spec = specs[modelKey];
-            if (modelKey && spec) {
-                specOverlay.querySelector('h2').textContent = spec.title;
-                specOverlay.querySelector('p').textContent = spec.description;
-
-                const modelLink = document.getElementById('modelLink');
-                if (spec.link) {
-                    modelLink.style.display = 'inline';
-                    modelLink.onclick = (e) => {
-                        e.preventDefault();
-                        modelIframe.src = spec.link;
-                        iframeWrapper.style.display = 'block';
-                    };
-                } else {
-                    modelLink.style.display = 'none';
-                }
-            } else {
-                specOverlay.querySelector('h2').textContent = "仕様情報がありません";
-                specOverlay.querySelector('p').textContent = "このモデルの仕様はまだ登録されていません。";
-                document.getElementById('modelLink').style.display = 'none';
-            }
-        }
-
-        // Tentativa de carregar specs do JSON. Se falhar, usa o objeto interno.
-        fetch('modelSpecs.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(updateSpecs)
-            .catch(() => {
-                console.warn("Falha ao carregar modelSpecs.json. Usando dados internos.");
-                updateSpecs(internalModelSpecs);
-            });
             
-        // 6. Lógica de Ativação do AR com Overlay
+        // 5. Lógica de Ativação do AR (mantida para funcionalidade)
         let arJustStarted = false;
         let arTimeout = null;
 
@@ -189,14 +153,18 @@
         }
 
         arButton.addEventListener('click', (event) => {
+            if (!modelViewer.canActivateAR) {
+                // Se o AR não for suportado, apenas desabilita a sobreposição imediatamente
+                console.log("AR não suportado no dispositivo/contexto.");
+                return;
+            }
+
             if (!arJustStarted) {
-                event.preventDefault(); // Impede a ação padrão imediata
+                event.preventDefault();
                 event.stopPropagation();
 
                 arOverlay.style.display = 'flex';
                 arJustStarted = true;
-
-                // Atraso de 2 segundos ANTES de iniciar o AR
                 arTimeout = setTimeout(startAR, 2000);
             }
         });
@@ -208,34 +176,30 @@
             }
         });
 
-        // 7. Eventos do Model Viewer (AR Status e Ocultar Botões)
+        // 6. Eventos do Model Viewer (AR Status e Ocultar Botões)
         modelViewer.addEventListener('ar-status', (event) => {
             const status = event.detail.status;
             
-            if (status === 'not-presenting') {
+            if (status === 'not-presenting' || status === 'failed') {
                 arOverlay.style.display = 'none';
                 arJustStarted = false;
                 clearTimeout(arTimeout);
             }
-
-            // Lógica para esconder o botão de AR nativo (screenshot) no shadow DOM
+            
+            // Lógica de ajuste de câmera e AR Shadow DOM (mantida)
             const shadowRoot = modelViewer.shadowRoot;
             if (shadowRoot) {
-                // Seleciona o botão AR que é gerado internamente
                 const internalArButton = shadowRoot.querySelector('button[slot="ar-button"]');
-                
                 if (internalArButton) {
-                    // Oculta o botão nativo apenas quando estiver em AR
                     internalArButton.style.display = (status === 'presenting') ? 'none' : '';
                 }
             }
         });
 
         modelViewer.addEventListener('load', () => {
-            // Ajuste da órbita da câmera
             const size = modelViewer.getDimensions();
             const maxDim = Math.max(size.x, size.y, size.z);
-            const suggestedDistance = maxDim * 1.5; // Ajuste o fator para um zoom mais próximo
+            const suggestedDistance = maxDim * 1.5;
             modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
         });
     </script>
