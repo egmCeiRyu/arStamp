@@ -9,139 +9,90 @@
   <title>3D Model Thumbnails</title>
   
   <style>
-        /* Pulse Animation */
+    /* Pulse Animation */
     @keyframes pulse {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 158, 0, 0.78);
-      }
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 13px rgba(204, 169, 44, 0);
-      }
-      100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
-      }
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 158, 0, 0.78); }
+      70% { transform: scale(1); box-shadow: 0 0 0 13px rgba(204, 169, 44, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(204, 169, 44, 0); }
     }
 
     #view-model-btn.selected {
       animation: pulse 1.3s infinite;
-      border-radius: 9px;
       border-radius: 93px;
       padding: 0px;
     }
   </style>
-
 </head>
 
 <body>
   <div class="title">
-    <img src=icon/arbtn.png alt="logo" class="companylogo">
-    <!--<img src=icon/tittleMenu.png alt="logo" class="hosokawalogo">-->
+    <img src="icon/arbtn.png" alt="logo" class="companylogo">
   </div>
 
   <div class="thumbnail-container" id="model-thumbnails">
-    <!-- Modelos -->
+    <!-- Miniaturas de modelos -->
     <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
-          <img src="thumbnails/model1_thumb.png" alt="Model 1" class="thumbnail-img">
-          <!--
-          <span class="label">微粉砕<br>ACMパルペライザ®<br>
-      ACM-15F</span>
-      -->
+      <img src="thumbnails/model1_thumb.png" alt="Model 1" class="thumbnail-img">
     </div>
     <div class="thumbnail-link" data-model="models/model2.glb" data-name="model2">
-        <img src="thumbnails/white_thumb.png" alt="Model 2" class="thumbnail-img">
-        <!--
-        <span class="label">微粉砕<br>ACMパルペライザ®<br>
-      ACM-30F</span>
-      -->
+      <img src="thumbnails/white_thumb.png" alt="Model 2" class="thumbnail-img">
     </div>
     <div class="thumbnail-link" data-model="models/model3.glb" data-name="model3">
-        <img src="thumbnails/white_thumb.png" alt="Model 3" class="thumbnail-img">
-        <!--
-        <span class="label">微粉砕<br>ACMパルペライザ®<br>
-      ACM-60F</span>
-      -->
+      <img src="thumbnails/white_thumb.png" alt="Model 3" class="thumbnail-img">
     </div>
     <div class="thumbnail-link" data-model="models/model4.glb" data-name="model4">
       <img src="thumbnails/white_thumb.png" alt="Model 4" class="thumbnail-img">
-      <!--
-      <span class="label">粒子設計<br> ノビルタ® NOB<br>
-      NOB-130</span>
-      -->
     </div>
     <div class="thumbnail-link" data-model="models/model5.glb" data-name="model5">
       <img src="thumbnails/white_thumb.png" alt="Model 5" class="thumbnail-img">
-      <!--
-      <span class="label" style="font-size:12px"> 分級<br>ミクロンセパレータ®MS<br>
-      MS-1H</span>
-      -->
     </div>
     <div class="thumbnail-link" data-model="models/model6.glb" data-name="model6">
       <img src="thumbnails/white_thumb.png" alt="Model 6" class="thumbnail-img">
-     <!--
-     <span class="label">混合<br>ナウタミキサ®<br>
-      DBX-1000R</span>
-      -->
     </div>
     <div class="thumbnail-link" data-model="models/model7.glb" data-name="model7">
       <img src="thumbnails/white_thumb.png" alt="Model 7" class="thumbnail-img">
-      <!--
-      <span class="label" >超微粉砕<br>カウンタジェット®<br>ミルAFG<br>
-      200AFG</span>
-      -->
     </div>
     <div class="thumbnail-link" data-model="models/model8.glb" data-name="model8">
       <img src="thumbnails/white_thumb.png" alt="Model 8" class="thumbnail-img">
-      <!--
-      <span class="label">乾燥<br>ソリッドエアー® SJS<br>
-      SJS-8-5</span>
-      -->
     </div>
     <div class="thumbnail-link" data-model="models/model9.glb" data-name="model9">
       <img src="thumbnails/white_thumb.png" alt="Model 9" class="thumbnail-img">
-      <!--
-      <span style="font-size: calc(12.5px)" class="label">集塵<br>パルスジェットコレクタ<br>
-      CP-57-8</span>
-      -->
     </div>
     <div class="thumbnail-link" data-model="models/model10.glb" data-name="model10">
       <img src="thumbnails/white_thumb.png" alt="Model 10" class="thumbnail-img">
-      <!--
-      <span class="label"><br>ACM-30F粉砕設備<br>
-      </span>
-      -->
     </div>
   </div>
-    <div id="view-model-btn-box">
-        <img src="icon/selectionIcon.png" id="view-model-btn">
-    </div>
+
+  <div id="view-model-btn-box">
+    <img src="icon/selectionIcon.png" id="view-model-btn">
+  </div>
+
   <div class="bottom-stripe"></div>
 
-<script type="module">
-    // 1. FIREBASE (MANTIDA)
+  <script type="module">
+    // --- Firebase Imports ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
     import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
     import { firebaseConfig } from "./firebase-config.js";
 
-    // Firestore e Auth
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-
+    // --- Initialize Firebase ---
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
     let currentUserUID = null;
+    let selectedModelUrl = "";
+    let selectedModelName = "";
 
-    // Login anônimo
-    signInAnonymously(auth)
-      .catch((error) => console.error("Erro login anônimo:", error));
+    const thumbnails = document.querySelectorAll('.thumbnail-link');
+    const viewModelBtn = document.getElementById('view-model-btn');
 
-    // Captura UID do usuário quando logado
-    onAuthStateChanged(auth, (user) => {
+    // --- Login Anônimo ---
+    signInAnonymously(auth).catch(err => console.error("Erro login anônimo:", err));
+    onAuthStateChanged(auth, user => {
       if (user) {
         currentUserUID = user.uid;
         console.log("Usuário anônimo logado:", currentUserUID);
@@ -149,7 +100,7 @@
       }
     });
 
-    // 2. LÓGICA DE SELEÇÃO DE MINIATURA (MANTIDA)
+    // --- Seleção de Miniatura ---
     thumbnails.forEach(thumb => {
       thumb.addEventListener('click', () => {
         thumbnails.forEach(t => t.classList.remove('selected'));
@@ -157,52 +108,50 @@
 
         selectedModelUrl = thumb.getAttribute('data-model');
         selectedModelName = thumb.getAttribute('data-name');
-        // viewModelBtn.disabled = false; // Removida se não estiver no HTML
-        
         viewModelBtn.classList.add('selected');
       });
     });
 
-    // 3. LÓGICA DO BOTÃO DE VISUALIZAÇÃO (MANTIDA)
-    viewModelBtn.addEventListener('click', () => {
-      if (selectedModelUrl) {
+    // --- Função para salvar modelo carimbado online ---
+    async function stampModelOnline(modelName) {
+      if (!currentUserUID) return;
+      const docRef = doc(db, "userStampedModels", currentUserUID);
+      await setDoc(docRef, { models: arrayUnion(modelName) }, { merge: true });
+    }
+
+    // --- Função para carregar modelos carimbados ---
+    async function loadStampedModels() {
+      if (!currentUserUID) return;
+      const docRef = doc(db, "userStampedModels", currentUserUID);
+      const docSnap = await getDoc(docRef);
+      let stampedModels = [];
+      if (docSnap.exists()) {
+        stampedModels = docSnap.data().models || [];
+      }
+
+      thumbnails.forEach(thumb => {
+        const modelName = thumb.getAttribute('data-name');
+        const imgElement = thumb.querySelector('.thumbnail-img');
+        if (stampedModels.includes(modelName)) {
+          imgElement.src = `thumbnails/${modelName}_thumb.png`;
+        } else {
+          imgElement.src = 'thumbnails/white_thumb.png';
+        }
+      });
+    }
+
+    // --- Botão de Visualização ---
+    viewModelBtn.addEventListener('click', async () => {
+      if (selectedModelUrl && currentUserUID) {
         logEvent(analytics, "button_click", { button_name: selectedModelName });
+
+        // Salva o modelo online
+        await stampModelOnline(selectedModelName);
+
+        // Redireciona para model-viewer
         window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
       }
     });
-    
-    // 4. 🎯 LÓGICA DO CARIMBO: Carregar estado salvo e atualizar miniaturas
-    document.addEventListener('DOMContentLoaded', () => {
-        // Tenta carregar a lista de modelos carimbados. Se não houver nada, usa array vazio.
-        const stampedModels = JSON.parse(localStorage.getItem('stampedModels') || '[]');
-        
-        // Se houver um modelo que acabou de ser carimbado (do script antigo),
-        // ele é adicionado à lista para compatibilidade, mas o foco é na lista 'stampedModels'.
-        const modelToUpdate = localStorage.getItem('thumbnailToUpdate');
-        
-        if (modelToUpdate && !stampedModels.includes(modelToUpdate)) {
-            // Isso não deve acontecer se model-viewer.html estiver atualizado, mas garante a migração.
-            stampedModels.push(modelToUpdate);
-            localStorage.setItem('stampedModels', JSON.stringify(stampedModels));
-        }
-        
-        thumbnails.forEach(thumb => {
-            const modelName = thumb.getAttribute('data-name'); // Ex: 'model1', 'model2'
-            const imgElement = thumb.querySelector('.thumbnail-img');
-
-            if (stampedModels.includes(modelName)) {
-                // O modelo está carimbado: mostra a imagem colorida
-                imgElement.src = `thumbnails/${modelName}_thumb.png`;
-            } else {
-                // O modelo NÃO está carimbado: garante que é a imagem branca
-                imgElement.src = 'thumbnails/white_thumb.png';
-            }
-        });
-
-        // Limpa a chave temporária (do script anterior)
-        localStorage.removeItem('thumbnailToUpdate');
-    });
-</script>
-    
+  </script>
 </body>
 </html>
