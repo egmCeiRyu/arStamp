@@ -152,7 +152,7 @@
     // 3. LÓGICA DO BOTÃO DE VISUALIZAÇÃO (MANTIDA)
     viewModelBtn.addEventListener('click', () => {
       if (selectedModelUrl) {
-        logEvent(analytics, "button_click", { button_name: selectedModelName });
+        //logEvent(analytics, "button_click", { button_name: selectedModelName });
         window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
       }
     });
