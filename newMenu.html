@@ -22,139 +22,118 @@
       padding: 0px;
     }
   </style>
-
 </head>
+
 <body>
-<div class="title">
-  <img src="icon/arbtn.png" alt="logo" class="companylogo">
-</div>
-
-<div class="thumbnail-container" id="model-thumbnails">
-  <!-- Thumbnails -->
-  <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
-        <img src="thumbnails/model1_thumb.png" alt="Model 1" class="thumbnail-img">
+  <div class="title">
+    <img src="icon/arbtn.png" alt="logo" class="companylogo">
   </div>
-  <div class="thumbnail-link" data-model="models/model2.glb" data-name="model2">
-        <img src="thumbnails/white_thumb.png" alt="Model 2" class="thumbnail-img">
+
+  <div class="thumbnail-container" id="model-thumbnails">
+    <!-- Models -->
+    <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
+      <img src="thumbnails/model1_thumb.png" alt="Model 1" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model2.glb" data-name="model2">
+      <img src="thumbnails/white_thumb.png" alt="Model 2" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model3.glb" data-name="model3">
+      <img src="thumbnails/white_thumb.png" alt="Model 3" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model4.glb" data-name="model4">
+      <img src="thumbnails/white_thumb.png" alt="Model 4" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model5.glb" data-name="model5">
+      <img src="thumbnails/white_thumb.png" alt="Model 5" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model6.glb" data-name="model6">
+      <img src="thumbnails/white_thumb.png" alt="Model 6" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model7.glb" data-name="model7">
+      <img src="thumbnails/white_thumb.png" alt="Model 7" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model8.glb" data-name="model8">
+      <img src="thumbnails/white_thumb.png" alt="Model 8" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model9.glb" data-name="model9">
+      <img src="thumbnails/white_thumb.png" alt="Model 9" class="thumbnail-img">
+    </div>
+    <div class="thumbnail-link" data-model="models/model10.glb" data-name="model10">
+      <img src="thumbnails/white_thumb.png" alt="Model 10" class="thumbnail-img">
+    </div>
   </div>
-  <div class="thumbnail-link" data-model="models/model3.glb" data-name="model3">
-        <img src="thumbnails/white_thumb.png" alt="Model 3" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model4.glb" data-name="model4">
-        <img src="thumbnails/white_thumb.png" alt="Model 4" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model5.glb" data-name="model5">
-        <img src="thumbnails/white_thumb.png" alt="Model 5" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model6.glb" data-name="model6">
-        <img src="thumbnails/white_thumb.png" alt="Model 6" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model7.glb" data-name="model7">
-        <img src="thumbnails/white_thumb.png" alt="Model 7" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model8.glb" data-name="model8">
-        <img src="thumbnails/white_thumb.png" alt="Model 8" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model9.glb" data-name="model9">
-        <img src="thumbnails/white_thumb.png" alt="Model 9" class="thumbnail-img">
-  </div>
-  <div class="thumbnail-link" data-model="models/model10.glb" data-name="model10">
-        <img src="thumbnails/white_thumb.png" alt="Model 10" class="thumbnail-img">
-  </div>
-</div>
 
-<div id="view-model-btn-box">
-    <img src="icon/selectionIcon.png" id="view-model-btn">
-</div>
-<div class="bottom-stripe"></div>
+  <div class="bottom-stripe"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
-import { firebaseConfig } from "./firebase-config.js";
+  <script type="module">
+    // --- FIREBASE ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+    import { firebaseConfig } from "./firebase-config.js";
 
-// Inicializa Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-let selectedModelUrl = "";
-let selectedModelName = "";
-let currentUserUID = null;
+    let currentUserUID = null;
 
-const thumbnails = document.querySelectorAll('.thumbnail-link');
-const viewModelBtn = document.getElementById('view-model-btn');
+    // Login anônimo
+    signInAnonymously(auth).catch(console.error);
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUserUID = user.uid;
+        loadStampedModels();
+      }
+    });
 
-// LOGIN ANÔNIMO
-signInAnonymously(auth).catch(console.error);
+    const thumbnails = document.querySelectorAll('.thumbnail-link');
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUserUID = user.uid;
-    await loadStampedModels();
-  }
-});
+    async function loadStampedModels() {
+      if (!currentUserUID) return;
 
-// --- Seleção de Miniatura ---
-thumbnails.forEach(thumb => {
-  thumb.addEventListener('click', () => {
-    thumbnails.forEach(t => t.classList.remove('selected'));
-    thumb.classList.add('selected');
+      const userDocRef = doc(db, "userStampedModels", currentUserUID);
+      const docSnap = await getDoc(userDocRef);
+      let stampedModels = [];
+      if (docSnap.exists()) stampedModels = docSnap.data().models || [];
 
-    selectedModelUrl = thumb.getAttribute('data-model');
-    selectedModelName = thumb.getAttribute('data-name');
-    viewModelBtn.classList.add('selected');
-  });
-});
-
-// --- Botão de Visualização ---
-viewModelBtn.addEventListener('click', async () => {
-  if (!selectedModelUrl || !selectedModelName || !currentUserUID) return;
-
-  logEvent(analytics, "button_click", { button_name: selectedModelName });
-
-  // Atualiza Firestore para este usuário
-  const userDocRef = doc(db, "userStampedModels", currentUserUID);
-  const docSnap = await getDoc(userDocRef);
-  if (docSnap.exists()) {
-    await updateDoc(userDocRef, { models: arrayUnion(selectedModelName) });
-  } else {
-    await setDoc(userDocRef, { models: [selectedModelName] });
-  }
-
-  // Atualiza a miniatura localmente
-  const thumb = Array.from(thumbnails).find(t => t.getAttribute('data-name') === selectedModelName);
-  if (thumb) thumb.querySelector('.thumbnail-img').src = `thumbnails/${selectedModelName}_thumb.png`;
-
-  // Abre model-viewer
-  window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-});
-
-// --- Carregar modelos carimbados ---
-async function loadStampedModels() {
-  if (!currentUserUID) return;
-
-  const docRef = doc(db, "userStampedModels", currentUserUID);
-  const docSnap = await getDoc(docRef);
-  let stampedModels = [];
-  if (docSnap.exists()) {
-    stampedModels = docSnap.data().models || [];
-  }
-
-  thumbnails.forEach(thumb => {
-    const modelName = thumb.getAttribute('data-name');
-    const imgElement = thumb.querySelector('.thumbnail-img');
-    if (stampedModels.includes(modelName)) {
-      imgElement.src = `thumbnails/${modelName}_thumb.png`;
-    } else {
-      imgElement.src = 'thumbnails/white_thumb.png';
+      thumbnails.forEach(thumb => {
+        const name = thumb.getAttribute('data-name');
+        const img = thumb.querySelector('.thumbnail-img');
+        if (stampedModels.includes(name)) {
+          img.src = `thumbnails/${name}_thumb.png`;
+        } else {
+          img.src = "thumbnails/white_thumb.png";
+        }
+      });
     }
-  });
-}
-</script>
 
+    // Clique na thumbnail abre model-viewer e salva no Firebase
+    thumbnails.forEach(thumb => {
+      thumb.addEventListener('click', async () => {
+        if (!currentUserUID) return;
+
+        const modelName = thumb.getAttribute('data-name');
+        const modelUrl = thumb.getAttribute('data-model');
+
+        // Atualiza Firestore
+        const userDocRef = doc(db, "userStampedModels", currentUserUID);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          await updateDoc(userDocRef, { models: arrayUnion(modelName) });
+        } else {
+          await setDoc(userDocRef, { models: [modelName] });
+        }
+
+        // Atualiza a miniatura local
+        thumb.querySelector('.thumbnail-img').src = `thumbnails/${modelName}_thumb.png`;
+
+        // Vai para model-viewer
+        window.location.href = `model-viewer.html?model=${encodeURIComponent(modelUrl)}`;
+      });
+    });
+  </script>
 </body>
 </html>
