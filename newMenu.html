@@ -189,42 +189,41 @@
     });
   
   // 5. 🎉 BOTÃO FINAL QUANDO TODOS OS CARIMBOS FOREM CONQUISTADOS
+// 5. 🎉 BOTÃO FINAL COM IMAGEM QUANDO TODOS OS CARIMBOS FOREM CONQUISTADOS
     function checkAllStamps() {
         const stampedModels = JSON.parse(localStorage.getItem("stampedModels") || "[]");
 
-        const totalModels = thumbnails.length;  
+        const totalModels = thumbnails.length;
         const allComplete = stampedModels.length === totalModels;
 
-        // Se todos os carimbos não estiverem completos → não cria nada
+        // Se não completou tudo → não cria o botão
         if (!allComplete) return;
 
-        // Evita duplicar o botão se recarregar a página
+        // Evita duplicação
         if (document.getElementById("final-reward-btn")) return;
 
-        // 👉 Criar um botão no header
         const header = document.querySelector(".title");
 
-        const rewardBtn = document.createElement("button");
-        rewardBtn.id = "final-reward-btn";
-        rewardBtn.textContent = "スペシャルギフト";
-        rewardBtn.style.marginLeft = "10px";
-        rewardBtn.style.padding = "4px 2px";
-        rewardBtn.style.fontSize = "15px";
-        rewardBtn.style.borderRadius = "10px";
-        rewardBtn.style.background = "rgba(247, 110, 36, 0.87)";
-        rewardBtn.style.cursor = "pointer";
-        rewardBtn.style.border = "none";
+        // 👉 Criar o botão-imagem
+        const imgBtn = document.createElement("img");
+        imgBtn.id = "final-reward-btn";
+        imgBtn.src = "icon/dim_off.png";   // 🔵 ALTERE AQUI PARA SUA IMAGEM
+        imgBtn.style.cursor = "pointer";
+        imgBtn.style.marginLeft = "50px";
+        imgBtn.style.height = "auto";
+        imgBtn.style.width = "150px";
+        imgBtn.style.objectFit = "contain"; 
 
         // Ação ao clicar
-        rewardBtn.addEventListener("click", () => {
-            window.location.href = "secret.html"; // 🟡 altere para sua página especial
+        imgBtn.addEventListener("click", () => {
+            window.location.href = "secret.html"; // 🟡 altere para sua página
         });
 
-        header.appendChild(rewardBtn);
+        header.appendChild(imgBtn);
     }
 
-    // Chama a função depois de carregar tudo
     document.addEventListener("DOMContentLoaded", checkAllStamps);
+
 </script>
     
 </body>
