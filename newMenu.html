@@ -132,18 +132,34 @@
 
     const thumbnails = document.querySelectorAll('.thumbnail-link');
     const viewModelBtn = document.getElementById('view-model-btn');
-    // const hosokawaLink = document.querySelector('.companylogo'); // Variável não usada, mas mantida por segurança
 
-    // 2. LÓGICA DE SELEÇÃO DE MINIATURA (MANTIDA)
+    // 2. LÓGICA DE SELEÇÃO DE MINIATURA (CORRIGIDA)
     thumbnails.forEach(thumb => {
-      thumb.addEventListener('click', () => {
+      thumb.addEventListener('click', (event) => {
+
+        // 🛑 NOVO CÓDIGO DE VERIFICAÇÃO 🛑
+        const imgElement = thumb.querySelector('.thumbnail-img');
+        // Verifica se a imagem é a 'white_thumb.png' (não carimbada)
+        if (imgElement.src.includes('white_thumb.png')) {
+          event.preventDefault(); // Impede a ação padrão
+
+          // Opcional: Adicionar feedback visual ou alerta
+          console.log('Modelo não carimbado, seleção bloqueada.');
+          // Opcional: Desselecionar qualquer botão selecionado, se houver.
+          thumbnails.forEach(t => t.classList.remove('selected'));
+          viewModelBtn.classList.remove('selected');
+
+          return; // Sai da função de clique
+        }
+        // 🛑 FIM DO NOVO CÓDIGO 🛑
+
+        // Se a execução chegou aqui, o modelo está carimbado e é clicável.
         thumbnails.forEach(t => t.classList.remove('selected'));
         thumb.classList.add('selected');
 
         selectedModelUrl = thumb.getAttribute('data-model');
         selectedModelName = thumb.getAttribute('data-name');
-        // viewModelBtn.disabled = false; // Removida se não estiver no HTML
-        
+
         viewModelBtn.classList.add('selected');
       });
     });
