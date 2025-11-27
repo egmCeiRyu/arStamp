@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <!--<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">-->
   <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
   <link rel="stylesheet" href="newmenu_style.css">
   <title>3D Model Thumbnails</title>
@@ -120,13 +120,13 @@
   <div class="bottom-stripe"></div>
 
 <script type="module">
-     1. FIREBASE (MANTIDA)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-    import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
-    import { firebaseConfig } from "./firebase-config.js";
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+     //1. FIREBASE (MANTIDA)
+    //import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+    //import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-analytics.js";
+    //import { firebaseConfig } from "./firebase-config.js";
+//
+    //const app = initializeApp(firebaseConfig);
+    //const analytics = getAnalytics(app);
 
     let selectedModelUrl = "";
     let selectedModelName = "";
@@ -152,7 +152,7 @@
     // 3. LÓGICA DO BOTÃO DE VISUALIZAÇÃO (MANTIDA)
     viewModelBtn.addEventListener('click', () => {
       if (selectedModelUrl) {
-        logEvent(analytics, "button_click", { button_name: selectedModelName });
+        //logEvent(analytics, "button_click", { button_name: selectedModelName });
         window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
       }
     });
