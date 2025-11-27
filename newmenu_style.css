@@ -6,7 +6,6 @@
       touch-action: pan-y; 
     }
 
-
     .companylogo{
       height: 86px;
       padding-left: 11px;
@@ -19,7 +18,7 @@
       margin-top: 7px;
       display: inline-block;
       width:139px;
-      font-size: 13px;
+      font-size: 18px;
       font-weight: 400;
     }
 
@@ -27,8 +26,7 @@
       position: sticky;
       top: 0;
       display: flex;
-      background: #0068D4;
-      background: linear-gradient(0deg,rgba(0, 104, 212, 1) 0%, rgba(0, 118, 216, 1) 100%);
+      background: #FFF5E1;
       flex-wrap: wrap;
       font-family: "novecento-sans", sans-serif;
       color: #e0e0e0;
@@ -42,7 +40,7 @@
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* always 2 columns */
         justify-items: center;
-        background-color: white;
+        background-color: rgb(247, 246, 240);
         width: 100%;
         margin: auto;
         box-sizing: border-box;
@@ -59,6 +57,7 @@
         object-fit: cover;
         display: block;
         margin: 0 auto;
+        border-radius: -7px;
     }
 
         
@@ -68,9 +67,10 @@
       text-align: center;
       /*transition: border 0.2s, box-shadow 0.2s;*/
       /* set the border of the choose button*/
-      padding: 9px;
-      margin: 12px;
-      background-color:#2957aa;
+      padding: 5px;
+      margin: 10px;
+      background-color:#ffdbdb;
+      border-radius: 103px;
     }
     
     .thumbnail-link.selected  {
@@ -79,18 +79,18 @@
 
     }
     
-    .hosokawalogo{
-      padding-top: 27px;
-      padding-bottom: 26px;
-      height: 35px;
+    .titlebook{
+      padding-top: -4px;
+      padding-bottom: -3px;
+      height: 144px;
       margin: auto;
     }
 
       
     .bottom-stripe{
-      background-color: rgba(0, 30, 193, 1);
+      background-color: #FFF5E1;
       display: block;
-      height : 71px;
+      height : 80px;
       position: fixed;
       bottom: 0;
       left:0;

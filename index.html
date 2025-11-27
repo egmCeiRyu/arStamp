@@ -1,120 +1,31 @@
 <!doctype html>
 <html lang="jp">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>3D Model Thumbnails</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"  />
-    <link rel="stylesheet" href="mainpageStyle.css" >
-    
-    <style>
-
-    </style>
-  </head>
-
-<body>
-  <div class="page-wrapper">
-      <!-- QR container OR main content -->
-    <!--
-    <div id="qr-container" style="display: none;">
-      <p>このQRコードをスキャンしてモバイルでご覧ください：</p>
-      <div id="qrcode">
-        <img class="qrcode2" src="qrcode/amazonweblink.png" alt="QR Code" />
-      </div>
-    </div>
-    -->
-
-    <div class="bubbles" id="bubbles"></div>
-
-    <div id="main-content">
-      <div class="mainpage-container">
-        <div class="mainpage-title">
-          <div class="logo">
-            <div id="qr">
-              <img  src="qrcode/amazonweblink.png">
-            </div>
-            <!--
-            <div class="catalog">
-              <img src="icon/ARMainLogo.png" >
-            </div>
-            -->
-            <!--
-            <div class="armenu-mainpage">
-              <a href="newMenu.html" target="_self">
-                <img src="icon/tapbtn.png" alt="Go to Menu" style="cursor:pointer; border:none;">
-              </a>
-            </div>
-            -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-    <script>
-      const bubbleContainer = document.getElementById("bubbles");
-
-      function createBubble() {
-        const bubble = document.createElement("span");
-        bubble.classList.add("bubble");
-
-        // Random size between 10px and 30px
-        const size = Math.random() * 20 + 10;
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-
-        // Random horizontal position
-        bubble.style.left = `${Math.random() * 100}%`;
-
-        // Random animation duration between 10s and 20s
-        bubble.style.animationDuration = `${10 + Math.random() * 10}s`;
-
-        // Random animation delay
-        bubble.style.animationDelay = `${Math.random() * 0.5}s`;
-
-        bubbleContainer.appendChild(bubble);
-
-        // Remove the bubble after animation ends
-        setTimeout(() => bubble.remove(), 20000);
-      }
-
-      // Generate new bubbles periodically
-      setInterval(createBubble, 300);
-
-      function isMobileDevice() {
-        const userAgent = navigator.userAgent;
-
-        // 1. Check for traditional mobile keywords (Android, iPhone, old iPad, etc.)
-        const mobileRegex = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
-        if (mobileRegex.test(userAgent)) {
-          return true;
-        }
-
-        // 2. Check for modern iPad (iPadOS)
-        // iPadOS masks as a desktop Mac ('MacIntel' platform) but has touch support
-        // Note: The navigator.platform property is deprecated, but widely used for this check.
-        if (navigator.platform.includes('MacIntel') && typeof navigator.maxTouchPoints !== 'undefined' && navigator.maxTouchPoints > 1) {
-          return true;
-        }
-
-      const qrContainer = document.getElementById("qr-container");
-      const mainContent = document.getElementById("main-content");
-
-      if (!isMobileDevice()) {
-       // Hide the main site on PC
-        mainContent.style.display = "none";
-
-        // Show QR code for mobile access
-        qrContainer.style.display = "block";
-
-         //Generate QR code with current URL
-        new QRCode(document.getElementById("qrcode"), {
-          text: window.location.href,
-          width: 200,
-          height: 200
-        });
-      }
-    </script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
+  <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
+  <link rel="stylesheet" href="/style.css">
+  <title>Firebase Auth Example</title>
+</head>
   
-  </body>
+<body>
+    <div class="auth-container">
+        <h1>Welcome Back</h1>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        
+        <div class="button-group">
+            <button onclick="signUp()">Sign Up</button>
+            <button onclick="signIn()">Sign In</button>
+        </div>
+        
+        <button onclick="signOutUser()" style="width: 100%; margin-top: 15px;">Sign Out</button>
+
+        <p id="auth-status">Current User: Loading...</p>
+    </div>
+      <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    
+      <script src="app.js"></script>
+    </body>
 </html>
