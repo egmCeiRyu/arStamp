@@ -113,18 +113,18 @@
   
 <body>
     <div class="auth-container">
-        <h1>Welcome Back</h1>
-        <input type="email" id="email" placeholder="Email Address">
-        <input type="password" id="password" placeholder="Password">
+        <h1>ログイン</h1>
+        <input type="email" id="email" placeholder="メールアドレス">
+        <input type="password" id="password" placeholder="パスワード">
         
         <div class="button-group">
-            <button onclick="signUp()">Sign Up</button>
-            <button onclick="signIn()">Sign In</button>
+            <button onclick="signUp()">サインアップ</button>
+            <button onclick="signIn()">サインイン</button>
         </div>
         
-        <button onclick="signOutUser()" style="width: 100%; margin-top: 15px;">Sign Out</button>
+        <button onclick="signOutUser()" style="width: 100%; margin-top: 15px;">サインアウト</button>
 
-        <p id="auth-status">Current User: Loading...</p>
+        <p id="auth-status">現在のユーザー: ロード中...</p>
     </div>
       <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
       <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>

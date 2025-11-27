@@ -187,6 +187,44 @@
         // Limpa a chave temporária (do script anterior)
         localStorage.removeItem('thumbnailToUpdate');
     });
+  
+  // 5. 🎉 BOTÃO FINAL QUANDO TODOS OS CARIMBOS FOREM CONQUISTADOS
+    function checkAllStamps() {
+        const stampedModels = JSON.parse(localStorage.getItem("stampedModels") || "[]");
+
+        const totalModels = thumbnails.length;  
+        const allComplete = stampedModels.length === totalModels;
+
+        // Se todos os carimbos não estiverem completos → não cria nada
+        if (!allComplete) return;
+
+        // Evita duplicar o botão se recarregar a página
+        if (document.getElementById("final-reward-btn")) return;
+
+        // 👉 Criar um botão no header
+        const header = document.querySelector(".title");
+
+        const rewardBtn = document.createElement("button");
+        rewardBtn.id = "final-reward-btn";
+        rewardBtn.textContent = "スペシャルギフト";
+        rewardBtn.style.marginLeft = "10px";
+        rewardBtn.style.padding = "4px 2px";
+        rewardBtn.style.fontSize = "15px";
+        rewardBtn.style.borderRadius = "10px";
+        rewardBtn.style.background = "rgba(247, 110, 36, 0.87)";
+        rewardBtn.style.cursor = "pointer";
+        rewardBtn.style.border = "none";
+
+        // Ação ao clicar
+        rewardBtn.addEventListener("click", () => {
+            window.location.href = "secret.html"; // 🟡 altere para sua página especial
+        });
+
+        header.appendChild(rewardBtn);
+    }
+
+    // Chama a função depois de carregar tudo
+    document.addEventListener("DOMContentLoaded", checkAllStamps);
 </script>
     
 </body>
