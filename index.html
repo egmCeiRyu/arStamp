@@ -9,7 +9,21 @@
   <style>/* 1. Reset and Body Styling */
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f7f6; /* Light gray background */
+
+        /* ------------------------------------------- */
+        /* 🎨 NEW BACKGROUND IMAGE STYLES */
+        /* ------------------------------------------- */
+        background-image: url(icon/Japanese%20Pattern_Japan%20Pattern%2002.png); /* ⬅️ REPLACE THIS PATH */
+        background-size: cover; /* Ensures the image covers the entire viewport */
+        background-position: center center; /* Centers the image */
+        background-repeat: repeat; /* Prevents the image from tiling */
+        background-attachment: fixed; /* Keeps the background image fixed when scrolling */
+        background-size: 200px 200px;
+
+        /* Old background-color is removed or commented out */
+        /* background-color: #f4f7f6; */ 
+
+        /* Positioning and Height (Kept from original) */
         display: flex;
         justify-content: center; /* Center horizontally */
         align-items: center; /* Center vertically */
@@ -112,6 +126,7 @@
 </head>
   
 <body>
+  
     <div class="auth-container">
         <h1>ログイン</h1>
         <input type="email" id="email" placeholder="メールアドレス">
