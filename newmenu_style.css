@@ -74,7 +74,7 @@
     }
     
     .thumbnail-link.selected  {
-      border: 6px solid rgb(239, 120, 0);
+      border: 6px solid rgba(252, 221, 91, 0.87);
       padding: 5px;
 
     }
