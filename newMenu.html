@@ -178,15 +178,12 @@
 
   <div class="bottom-stripe"></div>
   
-  <div id="particleContainer" style="
-      position: fixed;
-      top:0; left:0;
-      width:100vw; height:100vh;
-      pointer-events:none;
-      overflow:hidden;
-      z-index:9999;
-      display:none;
-  "></div>
+<div id="particleContainer" style="
+    position: absolute;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 9999;
+"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -301,41 +298,48 @@ viewModelBtn.addEventListener('click', () => {
   }
 });
   
-  function launchParticleExplosion() {
-    const container = document.getElementById('particleContainer');
-    container.style.display = 'block';
+  function launchParticleExplosionOverButton(button) {
+      const container = document.getElementById('particleContainer');
+      container.style.display = 'block';
 
-    const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
+      // Posiciona container sobre o botão
+      const rect = button.getBoundingClientRect();
+      container.style.left = rect.left + rect.width/2 + 'px';
+      container.style.top = rect.top + rect.height/2 + 'px';
+      container.style.width = rect.width + 'px';
+      container.style.height = rect.height + 'px';
 
-    for(let i=0;i<100;i++){
-        const particle = document.createElement('div');
-        particle.style.position = 'absolute';
-        particle.style.width = particle.style.height = Math.random()*8 + 4 + 'px';
-        particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-        particle.style.borderRadius = '50%';
-        particle.style.top = '50%';
-        particle.style.left = '50%';
-        particle.style.opacity = 1;
-        particle.style.pointerEvents = 'none';
-        container.appendChild(particle);
+      const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
+      const numParticles = 200; // mais partículas
 
-        const angle = Math.random()*2*Math.PI;
-        const distance = Math.random()*400 + 100;
-        const x = Math.cos(angle)*distance;
-        const y = Math.sin(angle)*distance;
-        const duration = Math.random()*1 + 1; // 1-2s
+      for(let i=0;i<numParticles;i++){
+          const particle = document.createElement('div');
+          const size = Math.random()*10 + 4;
+          particle.style.width = particle.style.height = size + 'px';
+          particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+          particle.style.position = 'absolute';
+          particle.style.borderRadius = '50%';
+          particle.style.left = '0px';
+          particle.style.top = '0px';
+          particle.style.pointerEvents = 'none';
+          container.appendChild(particle);
 
-        particle.animate([
-            { transform: 'translate(0,0) scale(1)', opacity:1 },
-            { transform: `translate(${x}px, ${y}px) scale(0.5)`, opacity:0 }
-        ], { duration: duration*1000, easing:'ease-out', fill:'forwards'});
+          const angle = Math.random()*2*Math.PI;
+          const distance = Math.random()*300 + 100;
+          const x = Math.cos(angle)*distance;
+          const y = Math.sin(angle)*distance;
+          const duration = Math.random()*1 + 1.5; // 1.5-2.5s
 
-        setTimeout(()=>particle.remove(), duration*1000);
-    }
+          particle.animate([
+              { transform: 'translate(0,0) scale(1)', opacity:1 },
+              { transform: `translate(${x}px, ${y}px) scale(0.3)`, opacity:0 }
+          ], { duration: duration*1000, easing:'ease-out', fill:'forwards' });
 
-    // Fecha o container após 3s
-    setTimeout(()=>container.style.display='none', 3000);
-}
+          setTimeout(()=>particle.remove(), duration*1000);
+      }
+
+      setTimeout(()=>container.style.display='none', 3000);
+  }
 
 // Checa todas as estampas
 function checkAllStamps(stampedModels) {
