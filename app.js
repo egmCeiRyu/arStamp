@@ -1,97 +1,119 @@
 // app.js
 
 // ------------------------------------------------------------------
-// ⚠️ 1. YOUR FIREBASE CONFIGURATION (REQUIRED)
-// YOU MUST REPLACE ALL "YOUR_..." PLACEHOLDERS WITH YOUR PROJECT'S CONFIGURATION!
+// ⚠️ 1. SUA CONFIGURAÇÃO FIREBASE
+// As chaves são necessárias aqui, pois este script é carregado separadamente.
 // ------------------------------------------------------------------
 const firebaseConfig = {
-      apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
-      authDomain: "stamp-edfc5.firebaseapp.com",
-      projectId: "stamp-edfc5",
-      storageBucket: "stamp-edfc5.firebasestorage.app",
-      messagingSenderId: "522739532414",
-      appId: "1:522739532414:web:047e4168251b5542ce8e2f",
-      measurementId: "G-2EVLH3GZNS"
+    // Estas são as chaves que você forneceu anteriormente
+    apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+    authDomain: "stamp-edfc5.firebaseapp.com",
+    projectId: "stamp-edfc5",
+    storageBucket: "stamp-edfc5.firebasestorage.app",
+    messagingSenderId: "522739532414",
+    appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+    measurementId: "G-2EVLH3GZNS"
 };
 
-// Initialize Firebase
+// Inicializa o Firebase (versão compat)
+// Como você está usando os scripts compat (firebase-app-compat.js e firebase-auth-compat.js),
+// a inicialização é feita via firebase.initializeApp.
 const app = firebase.initializeApp(firebaseConfig);
-const auth = app.auth();
-
-// Get UI elements
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const statusDisplay = document.getElementById('auth-status');
+const auth = app.auth(); // Obtém o serviço de autenticação
+const statusDisplay = document.getElementById('auth-status'); // Elemento de status
 
 // ------------------------------------------------------------------
-// 2. AUTHENTICATION FUNCTIONS
+// 2. FUNÇÕES DE AUTENTICAÇÃO (chamadas pelos botões no index.html)
 // ------------------------------------------------------------------
 
-// Sign Up Function (Called by the 'Sign Up' button)
+// Sign Up Function
 function signUp() {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+        alert('Por favor, insira email e senha.');
+        return;
+    }
 
     auth.createUserWithEmailAndPassword(email, password)
         .then(() => {
-            alert('Sign Up Successful! You are now logged in.');
+            // O onAuthStateChanged tratará o redirecionamento
+            alert('Registro bem-sucedido! Redirecionando...');
         })
         .catch((error) => {
-            // Display error message (e.g., 'auth/weak-password', 'auth/email-already-in-use')
-            alert(`Sign Up Failed: ${error.message}`);
+            alert(`Falha no Registro: ${error.message}`);
         });
 }
 
-// Sign In Function (Called by the 'Sign In' button)
+// Sign In Function
 function signIn() {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+        alert('Por favor, insira email e senha.');
+        return;
+    }
 
     auth.signInWithEmailAndPassword(email, password)
         .then(() => {
-            // SUCCESS: Redirect the user!
-            window.location.href = 'newMenu.html'; 
+            // O onAuthStateChanged tratará o redirecionamento
+            console.log('Login bem-sucedido. Redirecionando...');
         })
         .catch((error) => {
-            // Handle Errors
-            alert(`Sign In Failed: ${error.message}`);
+            // Trata Erros (ex: usuário não encontrado, senha errada)
+            alert(`Falha no Login: ${error.message}`);
         });
 }
 
-// Sign Out Function (Called by the 'Sign Out' button)
+// Sign Out Function (Se você decidir reativar o botão de Sign Out)
 function signOutUser() {
     auth.signOut().then(() => {
-        alert('Signed Out Successfully!');
+        alert('Saiu com sucesso!');
+        // Se estiver em newMenu.html, redireciona de volta para index.html
+        if (window.location.pathname.endsWith('newMenu.html')) {
+             window.location.href = 'index.html';
+        }
     }).catch((error) => {
-        console.error('Sign Out Error:', error);
-        alert('Sign Out Failed.');
+        console.error('Erro ao sair:', error);
+        alert('Falha ao sair.');
     });
 }
 
-// ------------------------------------------------------------------
-// 3. AUTH STATE LISTENER
-// This runs whenever the user's logged-in status changes (on page load, sign-in, sign-out)
-// ------------------------------------------------------------------
-// app.js
+// Torna as funções globais para que o HTML (onclick) possa chamá-las
+window.signUp = signUp;
+window.signIn = signIn;
+window.signOutUser = signOutUser; 
 
-// AUTH STATE LISTENER
+// ------------------------------------------------------------------
+// 3. OUVINTE DE ESTADO DE AUTENTICAÇÃO (AUTH STATE LISTENER)
+// Esta é a lógica de redirecionamento principal.
+// ------------------------------------------------------------------
 auth.onAuthStateChanged((user) => {
-    if (user) {
-        // User is signed in
-        statusDisplay.textContent = `Current User: ${user.email} (UID: ${user.uid})`;
+    // Verifica se o elemento statusDisplay existe
+    if (statusDisplay) {
+        if (user) {
+            // Usuário está logado
+            statusDisplay.textContent = `Current User: ${user.email} (UID: ${user.uid})`;
 
-        // IMPORTANT: Check if the user is on the login page (index.html) before redirecting
-        // This prevents an infinite loop if this code is also on newMenu.html
-        if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
-            window.location.href = 'newMenu.html'; 
+            // Redireciona APENAS se estiver na página de login (index.html)
+            const currentPage = window.location.pathname.split('/').pop();
+            if (currentPage === 'index.html' || currentPage === '') {
+                window.location.href = 'newMenu.html'; 
+            }
+
+        } else {
+            // Usuário está deslogado
+            statusDisplay.textContent = 'Current User: None (Please Sign In)';
+            
+            // Se o usuário deslogou e está na página do menu, redireciona para o login
+            if (window.location.pathname.endsWith('newMenu.html')) {
+                 window.location.href = 'index.html';
+            }
         }
-
     } else {
-        // User is signed out
-        statusDisplay.textContent = 'Current User: None (Please Sign In)';
-        // Optional: If they are on newMenu.html and sign out, redirect them back to index.html
-        // if (window.location.pathname.endsWith('newMenu.html')) {
-        //     window.location.href = 'index.html'; 
-        // }
+        // Se o script for usado em outras páginas sem #auth-status, apenas loga
+        console.log(user ? `User logged in: ${user.uid}` : 'User logged out');
     }
 });

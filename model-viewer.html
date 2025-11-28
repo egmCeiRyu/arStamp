@@ -89,18 +89,78 @@
         <br><br>
     </div>
 
-    <script type="module">
-        // 1. Variáveis e Seletores
+   <script type="module">
+        // =========================================================================
+        // 1. 🌟 IMPORTS E CONFIGURAÇÃO FIREBASE
+        // =========================================================================
+        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 🔑 SUA CONFIGURAÇÃO FIREBASE (DEVE SER IDÊNTICA AOS OUTROS SCRIPTS)
+        const firebaseConfig = {
+             apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+             authDomain: "stamp-edfc5.firebaseapp.com",
+             projectId: "stamp-edfc5",
+             storageBucket: "stamp-edfc5.firebasestorage.app",
+             messagingSenderId: "522739532414",
+             appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+             measurementId: "G-2EVLH3GZNS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app); 
+
+        // -------------------------------------------------------------------------
+        // 2. 💾 FUNÇÃO DE BANCO DE DADOS (ESCRITA): Adiciona o carimbo
+        // -------------------------------------------------------------------------
+
+        async function addStampToFirebase(uid, modelName) {
+            if (!uid) {
+                console.error("UID não disponível. Não foi possível salvar o carimbo.");
+                return;
+            }
+            
+            try {
+                const docRef = doc(db, "users", uid);
+                const docSnap = await getDoc(docRef);
+                let currentStamps = [];
+
+                if (docSnap.exists()) {
+                    currentStamps = docSnap.data().stamps || [];
+                }
+
+                // Adiciona o novo carimbo se ele ainda não estiver na lista
+                if (!currentStamps.includes(modelName)) {
+                    currentStamps.push(modelName);
+                    // Usa updateDoc para adicionar o novo array ao documento do usuário
+                    await updateDoc(docRef, {
+                        stamps: currentStamps
+                    });
+                    console.log(`Carimbo '${modelName}' salvo no Firebase para o usuário ${uid}.`);
+                } else {
+                    console.log(`Carimbo '${modelName}' já existe no Firebase.`);
+                }
+
+            } catch (error) {
+                console.error("Erro ao salvar carimbo no Firebase:", error);
+            }
+        }
+
+        // =========================================================================
+        // 3. VARIÁVEIS, INICIALIZAÇÃO E LÓGICA EXISTENTE
+        // =========================================================================
+        
+        // 3.1. Variáveis e Seletores
         const urlParams = new URLSearchParams(window.location.search);
         const modelUrl = urlParams.get('model');
         const modelViewer = document.getElementById('modelViewer');
         const arButton = document.getElementById('ar-button');
         const arOverlay = document.getElementById('arOverlay');
         const specOverlay = document.getElementById('specOverlay');
-        
-        // MUDANÇA: Usaremos 'stampButtonLink' como ID principal para clareza
         const stampButtonLink = document.getElementById('stampButtonLink');
-        
         const closeSpec = document.getElementById('closeSpec');
         const iframeWrapper = document.getElementById('iframeWrapper');
         const modelIframe = document.getElementById('modelIframe');
@@ -109,30 +169,47 @@
 
         let modelKey = "";
         
-        // 2. Inicialização do Modelo e ModelKey
+        // 3.2. Inicialização do Modelo e ModelKey
         if (modelUrl) {
             modelViewer.setAttribute('src', modelUrl);
-            modelKey = modelUrl.split('/').pop().split('.')[0];
+            // Extrai a chave do modelo (ex: 'model1')
+            modelKey = modelUrl.split('/').pop().split('.')[0]; 
         }
 
-        // 3. 🎯 NOVA LÓGICA: Ligar o Botão Carimbo ao Menu e Salvar a Chave
-        // O botão com a imagem stamp.png tem o ID 'stampButtonLink' (antigo specButton)
-        stampButtonLink.addEventListener('click', (event) => {
-            event.preventDefault(); // Impede qualquer ação padrão do <a>
+        // -------------------------------------------------------------------------
+        // 4. 🎯 LÓGICA DE CONQUISTA DO CARIMBO (IMPLEMENTAÇÃO FIREBASE)
+        // -------------------------------------------------------------------------
+        
+        // O botão com a imagem stamp.png tem o ID 'stampButtonLink'
+        stampButtonLink.addEventListener('click', async (event) => {
+            event.preventDefault(); // Impede a ação padrão
 
-            // 1. Salva a chave do modelo (ex: 'model2') no Local Storage
-            if (modelKey) {
-                localStorage.setItem('thumbnailToUpdate', modelKey);
-                console.log(`Chave '${modelKey}' salva para atualização.`);
+            if (!modelKey) {
+                 console.error("Chave do modelo (modelKey) não definida. Não é possível salvar.");
+                 return;
             }
 
-            // 2. Redireciona para a página do menu
+            const user = auth.currentUser; // Obtém o usuário logado
+
+            if (user) {
+                // USUÁRIO LOGADO: Salva o carimbo no Firebase
+                await addStampToFirebase(user.uid, modelKey); 
+                console.log(`Carimbo salvo no Firestore para o modelo: ${modelKey}`);
+                
+            } else {
+                // USUÁRIO DESLOGADO: Deve ser redirecionado (lógica tratada em app.js se o listener estiver aqui)
+                // Se o usuário chegou aqui sem login, ele deve ser redirecionado para index.html pelo app.js
+                alert("Você precisa estar logado para coletar carimbos. Redirecionando para o menu.");
+            }
+
+            // Sempre redireciona para a página do menu (newMenu.html) após tentar salvar
             window.location.href = 'newMenu.html';
         });
 
-        // 4. Lógica de Sobreposição de Especificações (Abre e Fecha - Deixada inativa já que o botão foi alterado)
-        // Se você quiser reativar a funcionalidade de especificação em um botão separado, use esta lógica.
-
+        // -------------------------------------------------------------------------
+        // 5. LÓGICA DE SOBREPOSIÇÃO DE ESPECIFICAÇÕES (MANTIDA)
+        // -------------------------------------------------------------------------
+        
         closeSpec.addEventListener('click', () => {
             specOverlay.style.display = 'none';
             iframeWrapper.style.display = 'none';
@@ -143,8 +220,11 @@
             iframeWrapper.style.display = 'none';
             modelIframe.src = '';
         });
-            
-        // 5. Lógica de Ativação do AR (mantida para funcionalidade)
+        
+        // -------------------------------------------------------------------------
+        // 6. LÓGICA DE ATIVAÇÃO DO AR E EVENTOS (MANTIDA)
+        // -------------------------------------------------------------------------
+
         let arJustStarted = false;
         let arTimeout = null;
 
@@ -156,7 +236,6 @@
 
         arButton.addEventListener('click', (event) => {
             if (!modelViewer.canActivateAR) {
-                // Se o AR não for suportado, apenas desabilita a sobreposição imediatamente
                 console.log("AR não suportado no dispositivo/contexto.");
                 return;
             }
@@ -178,11 +257,9 @@
             }
         });
 
-        // 6. Eventos do Model Viewer (AR Status e Ocultar Botões)
         modelViewer.addEventListener('ar-status', (event) => {
             const status = event.detail.status;
             if (status === 'presenting') {
-        // Tenta reproduzir a animação com o nome definido
                 modelViewer.play({ animationName: 'action' });
                 console.log("Forçando animação 'action' no modo AR.");
             }
@@ -208,7 +285,7 @@
             const suggestedDistance = maxDim * 1.5;
             modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
         });
-             
+                
     </script>
     
     <script>
