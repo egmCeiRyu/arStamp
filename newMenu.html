@@ -275,46 +275,38 @@
 
     // Função principal que carrega do Firebase e atualiza o HTML
     async function loadAndRenderStamps() {
-        if (!currentUserId) return; 
+        if (!currentUserId) return;
 
-        // 🎯 CHAMA A FUNÇÃO FIREBASE PARA OBTER OS CARIMBOS
         const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
-        
-        // --- LÓGICA DE RENDERIZAÇÃO DAS MINIATURAS ---
+
         thumbnails.forEach(thumb => {
             const modelName = thumb.getAttribute('data-name');
             const imgElement = thumb.querySelector('.thumbnail-img');
 
             if (stampedModels.includes(modelName)) {
-                // O modelo está carimbado: mostra a imagem colorida
+                // Miniatura colorida
                 imgElement.src = `thumbnails/${modelName}_thumb.png`;
+
+                // --- ANIMAÇÃO SOMENTE PARA NOVA CONQUISTA ---
+                const justUnlocked = !imgElement.classList.contains('stamped');
+                if (justUnlocked) {
+                    imgElement.classList.add('stamp-unlock');
+
+                    // Remove a classe após a animação
+                    imgElement.addEventListener('animationend', () => {
+                        imgElement.classList.remove('stamp-unlock');
+                    }, { once: true });
+                }
+
+                imgElement.classList.add('stamped'); // Marca como conquistada
             } else {
-                // O modelo NÃO está carimbado: garante que é a imagem branca
+                // Miniatura branca
                 imgElement.src = 'thumbnails/white_thumb.png';
             }
         });
-      if (stampedModels.includes(modelName)) {
-    imgElement.src = `thumbnails/${modelName}_thumb.png`;
 
-      // Adiciona animação somente se for nova conquista
-      const justUnlocked = !imgElement.classList.contains('stamped'); 
-      if (justUnlocked) {
-          imgElement.classList.add('stamp-unlock');
-
-          // Remove a classe depois da animação para poder reaplicar no futuro
-          imgElement.addEventListener('animationend', () => {
-              imgElement.classList.remove('stamp-unlock');
-          }, { once: true });
-      }
-
-      imgElement.classList.add('stamped'); // Marca como conquistada
-  }
-
-        // Limpa a chave temporária do localStorage (para migração)
         localStorage.removeItem('thumbnailToUpdate');
-        
-        // 5. VERIFICA A RECOMPENSA FINAL
-        checkAllStamps(stampedModels); 
+        checkAllStamps(stampedModels);
     }
     
     // ----------------------------------------------------
