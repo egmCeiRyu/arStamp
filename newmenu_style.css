@@ -41,7 +41,7 @@
       grid-template-columns: repeat(2, 1fr); /* always 2 columns */
       justify-items: center;
       background-color: rgb(247, 246, 240);
-      width: 50%;
+      width: 25%;
       margin: auto;
       box-sizing: border-box;
       padding-top: -5px;
