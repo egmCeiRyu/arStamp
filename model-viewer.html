@@ -89,140 +89,205 @@
         <br><br>
     </div>
 
-    <script type="module">
-        // 1. Obter o usuário logado
-        const user = auth.currentUser;
-        if (user) {
-            // 2. Salvar no Firebase
-            await addStampToFirebase(user.uid, modelName); 
+ <script type="module">
+    // =========================================================================
+    // 1. 🌟 IMPORTS E CONFIGURAÇÃO FIREBASE
+    // =========================================================================
+    
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-            // 3. Redirecionar
-            window.location.href = 'newMenu.html'; 
-        } else {
-            // Usuário não logado, erro
-            console.error("Erro: Usuário não autenticado para salvar carimbo.");
+    // 🔑 SUA CONFIGURAÇÃO FIREBASE (DEVE SER IDÊNTICA AO newMenu.html)
+    const firebaseConfig = {
+         apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+         authDomain: "stamp-edfc5.firebaseapp.com",
+         projectId: "stamp-edfc5",
+         storageBucket: "stamp-edfc5.firebasestorage.app",
+         messagingSenderId: "522739532414",
+         appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+         measurementId: "G-2EVLH3GZNS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app); 
+
+    // -------------------------------------------------------------------------
+    // 2. 💾 FUNÇÃO DE BANCO DE DADOS (ESCRITA)
+    // -------------------------------------------------------------------------
+
+    async function addStampToFirebase(uid, modelName) {
+        if (!uid) {
+            console.error("UID não disponível. Não foi possível salvar o carimbo.");
+            return;
         }
         
-        // 1. Variáveis e Seletores
-        const urlParams = new URLSearchParams(window.location.search);
-        const modelUrl = urlParams.get('model');
-        const modelViewer = document.getElementById('modelViewer');
-        const arButton = document.getElementById('ar-button');
-        const arOverlay = document.getElementById('arOverlay');
-        const specOverlay = document.getElementById('specOverlay');
-        
-        // MUDANÇA: Usaremos 'stampButtonLink' como ID principal para clareza
-        const stampButtonLink = document.getElementById('stampButtonLink');
-        
-        const closeSpec = document.getElementById('closeSpec');
-        const iframeWrapper = document.getElementById('iframeWrapper');
-        const modelIframe = document.getElementById('modelIframe');
-        const closeIframeBtn = document.getElementById('closeIframeBtn');
-        const controlsLink = document.getElementById('controlsLink');
+        try {
+            const docRef = doc(db, "users", uid);
+            const docSnap = await getDoc(docRef);
+            let currentStamps = [];
 
-        let modelKey = "";
-        
-        // 2. Inicialização do Modelo e ModelKey
-        if (modelUrl) {
-            modelViewer.setAttribute('src', modelUrl);
-            modelKey = modelUrl.split('/').pop().split('.')[0];
-        }
-
-        // 3. 🎯 NOVA LÓGICA: Ligar o Botão Carimbo ao Menu e Salvar a Chave
-        // O botão com a imagem stamp.png tem o ID 'stampButtonLink' (antigo specButton)
-        stampButtonLink.addEventListener('click', (event) => {
-            event.preventDefault(); // Impede qualquer ação padrão do <a>
-
-            // 1. Salva a chave do modelo (ex: 'model2') no Local Storage
-            if (modelKey) {
-                localStorage.setItem('thumbnailToUpdate', modelKey);
-                console.log(`Chave '${modelKey}' salva para atualização.`);
+            if (docSnap.exists()) {
+                currentStamps = docSnap.data().stamps || [];
             }
 
-            // 2. Redireciona para a página do menu
-            window.location.href = 'newMenu.html';
-        });
+            // Adiciona o novo carimbo se ele ainda não estiver na lista
+            if (!currentStamps.includes(modelName)) {
+                currentStamps.push(modelName);
+                await updateDoc(docRef, {
+                    stamps: currentStamps
+                });
+                console.log(`Carimbo '${modelName}' salvo no Firebase para o usuário ${uid}.`);
+            } else {
+                console.log(`Carimbo '${modelName}' já existe no Firebase.`);
+            }
 
-        // 4. Lógica de Sobreposição de Especificações (Abre e Fecha - Deixada inativa já que o botão foi alterado)
-        // Se você quiser reativar a funcionalidade de especificação em um botão separado, use esta lógica.
+        } catch (error) {
+            console.error("Erro ao salvar carimbo no Firebase:", error);
+        }
+    }
 
-        closeSpec.addEventListener('click', () => {
-            specOverlay.style.display = 'none';
-            iframeWrapper.style.display = 'none';
-            modelIframe.src = "";
-        });
+    // =========================================================================
+    // 3. VARIÁVEIS, INICIALIZAÇÃO E LÓGICA EXISTENTE
+    // =========================================================================
+    
+    // 3.1. Variáveis e Seletores
+    const urlParams = new URLSearchParams(window.location.search);
+    const modelUrl = urlParams.get('model');
+    const modelViewer = document.getElementById('modelViewer');
+    const arButton = document.getElementById('ar-button');
+    const arOverlay = document.getElementById('arOverlay');
+    const specOverlay = document.getElementById('specOverlay');
+    const stampButtonLink = document.getElementById('stampButtonLink');
+    const closeSpec = document.getElementById('closeSpec');
+    const iframeWrapper = document.getElementById('iframeWrapper');
+    const modelIframe = document.getElementById('modelIframe');
+    const closeIframeBtn = document.getElementById('closeIframeBtn');
+    const controlsLink = document.getElementById('controlsLink');
 
-        closeIframeBtn.addEventListener('click', () => {
-            iframeWrapper.style.display = 'none';
-            modelIframe.src = '';
-        });
+    let modelKey = "";
+    
+    // 3.2. Inicialização do Modelo e ModelKey
+    if (modelUrl) {
+        modelViewer.setAttribute('src', modelUrl);
+        // Exemplo: 'models/model1.glb' -> 'model1'
+        modelKey = modelUrl.split('/').pop().split('.')[0]; 
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. 🎯 LÓGICA DE CONQUISTA DO CARIMBO (NOVA IMPLEMENTAÇÃO FIREBASE)
+    // -------------------------------------------------------------------------
+    
+    // O botão com a imagem stamp.png tem o ID 'stampButtonLink'
+    stampButtonLink.addEventListener('click', async (event) => {
+        event.preventDefault(); // Impede a ação padrão
+
+        if (!modelKey) {
+             console.error("Chave do modelo (modelKey) não definida.");
+             return;
+        }
+
+        const user = auth.currentUser;
+
+        if (user) {
+            // USUÁRIO LOGADO: Salva o carimbo no Firebase
+            await addStampToFirebase(user.uid, modelKey); 
+            console.log(`Carimbo salvo para o modelo: ${modelKey}`);
             
-        // 5. Lógica de Ativação do AR (mantida para funcionalidade)
-        let arJustStarted = false;
-        let arTimeout = null;
+        } else {
+            // USUÁRIO DESLOGADO: Mantém a lógica antiga (opcional) ou avisa
+            // A melhor prática seria redirecionar para a página de login (index.html)
+            console.warn("Usuário não logado. O carimbo não será salvo permanentemente. Redirecionando para o menu.");
+            // Lógica antiga (apenas para fallback, mas o Firebase é o alvo)
+            // localStorage.setItem('thumbnailToUpdate', modelKey); 
+        }
 
-        function startAR() {
+        // Redireciona para a página do menu (newMenu.html)
+        window.location.href = 'newMenu.html';
+    });
+
+    // -------------------------------------------------------------------------
+    // 5. LÓGICA DE SOBREPOSIÇÃO DE ESPECIFICAÇÕES (MANTIDA)
+    // -------------------------------------------------------------------------
+    
+    closeSpec.addEventListener('click', () => {
+        specOverlay.style.display = 'none';
+        iframeWrapper.style.display = 'none';
+        modelIframe.src = "";
+    });
+
+    closeIframeBtn.addEventListener('click', () => {
+        iframeWrapper.style.display = 'none';
+        modelIframe.src = '';
+    });
+    
+    // -------------------------------------------------------------------------
+    // 6. LÓGICA DE ATIVAÇÃO DO AR E EVENTOS (MANTIDA)
+    // -------------------------------------------------------------------------
+
+    let arJustStarted = false;
+    let arTimeout = null;
+
+    function startAR() {
+        arOverlay.style.display = 'none';
+        arJustStarted = false;
+        modelViewer.activateAR();
+    }
+
+    arButton.addEventListener('click', (event) => {
+        if (!modelViewer.canActivateAR) {
+            console.log("AR não suportado no dispositivo/contexto.");
+            return;
+        }
+
+        if (!arJustStarted) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            arOverlay.style.display = 'flex';
+            arJustStarted = true;
+            arTimeout = setTimeout(startAR, 2000);
+        }
+    });
+
+    arOverlay.addEventListener('click', () => {
+        if (arJustStarted) {
+            clearTimeout(arTimeout);
+            startAR();
+        }
+    });
+
+    modelViewer.addEventListener('ar-status', (event) => {
+        const status = event.detail.status;
+        if (status === 'presenting') {
+            modelViewer.play({ animationName: 'action' });
+            console.log("Forçando animação 'action' no modo AR.");
+        }
+        if (status === 'not-presenting' || status === 'failed') {
             arOverlay.style.display = 'none';
             arJustStarted = false;
-            modelViewer.activateAR();
+            clearTimeout(arTimeout);
         }
-
-        arButton.addEventListener('click', (event) => {
-            if (!modelViewer.canActivateAR) {
-                // Se o AR não for suportado, apenas desabilita a sobreposição imediatamente
-                console.log("AR não suportado no dispositivo/contexto.");
-                return;
+        
+        // Lógica de ajuste de câmera e AR Shadow DOM (mantida)
+        const shadowRoot = modelViewer.shadowRoot;
+        if (shadowRoot) {
+            const internalArButton = shadowRoot.querySelector('button[slot="ar-button"]');
+            if (internalArButton) {
+                internalArButton.style.display = (status === 'presenting') ? 'none' : '';
             }
+        }
+    });
 
-            if (!arJustStarted) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                arOverlay.style.display = 'flex';
-                arJustStarted = true;
-                arTimeout = setTimeout(startAR, 2000);
-            }
-        });
-
-        arOverlay.addEventListener('click', () => {
-            if (arJustStarted) {
-                clearTimeout(arTimeout);
-                startAR();
-            }
-        });
-
-        // 6. Eventos do Model Viewer (AR Status e Ocultar Botões)
-        modelViewer.addEventListener('ar-status', (event) => {
-            const status = event.detail.status;
-            if (status === 'presenting') {
-        // Tenta reproduzir a animação com o nome definido
-                modelViewer.play({ animationName: 'action' });
-                console.log("Forçando animação 'action' no modo AR.");
-            }
-            if (status === 'not-presenting' || status === 'failed') {
-                arOverlay.style.display = 'none';
-                arJustStarted = false;
-                clearTimeout(arTimeout);
-            }
+    modelViewer.addEventListener('load', () => {
+        const size = modelViewer.getDimensions();
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const suggestedDistance = maxDim * 1.5;
+        modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
+    });
             
-            // Lógica de ajuste de câmera e AR Shadow DOM (mantida)
-            const shadowRoot = modelViewer.shadowRoot;
-            if (shadowRoot) {
-                const internalArButton = shadowRoot.querySelector('button[slot="ar-button"]');
-                if (internalArButton) {
-                    internalArButton.style.display = (status === 'presenting') ? 'none' : '';
-                }
-            }
-        });
-
-        modelViewer.addEventListener('load', () => {
-            const size = modelViewer.getDimensions();
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const suggestedDistance = maxDim * 1.5;
-            modelViewer.cameraOrbit = `0deg 75deg ${suggestedDistance}m`;
-        });
-             
-    </script>
+</script>
     
     <script>
         // Funções para controle de scroll e iframe (não modulares)
