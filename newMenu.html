@@ -177,6 +177,16 @@
   </div>
 
   <div class="bottom-stripe"></div>
+  
+  <div id="particleContainer" style="
+      position: fixed;
+      top:0; left:0;
+      width:100vw; height:100vh;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:9999;
+      display:none;
+  "></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -290,6 +300,42 @@ viewModelBtn.addEventListener('click', () => {
     window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
   }
 });
+  
+  function launchParticleExplosion() {
+    const container = document.getElementById('particleContainer');
+    container.style.display = 'block';
+
+    const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
+
+    for(let i=0;i<100;i++){
+        const particle = document.createElement('div');
+        particle.style.position = 'absolute';
+        particle.style.width = particle.style.height = Math.random()*8 + 4 + 'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        particle.style.borderRadius = '50%';
+        particle.style.top = '50%';
+        particle.style.left = '50%';
+        particle.style.opacity = 1;
+        particle.style.pointerEvents = 'none';
+        container.appendChild(particle);
+
+        const angle = Math.random()*2*Math.PI;
+        const distance = Math.random()*400 + 100;
+        const x = Math.cos(angle)*distance;
+        const y = Math.sin(angle)*distance;
+        const duration = Math.random()*1 + 1; // 1-2s
+
+        particle.animate([
+            { transform: 'translate(0,0) scale(1)', opacity:1 },
+            { transform: `translate(${x}px, ${y}px) scale(0.5)`, opacity:0 }
+        ], { duration: duration*1000, easing:'ease-out', fill:'forwards'});
+
+        setTimeout(()=>particle.remove(), duration*1000);
+    }
+
+    // Fecha o container após 3s
+    setTimeout(()=>container.style.display='none', 3000);
+}
 
 // Checa todas as estampas
 function checkAllStamps(stampedModels) {
@@ -310,6 +356,8 @@ function checkAllStamps(stampedModels) {
       window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
   });
   header.appendChild(imgBtn);
+  
+  launchParticleExplosion();
 }
 </script>
 </body>
