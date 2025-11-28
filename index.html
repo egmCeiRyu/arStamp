@@ -2,30 +2,29 @@
 <html lang="jp">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
-  <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
-  <title>Firebase Auth Example</title>
-  
-  <style>/* 1. Reset and Body Styling */
+  <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
+  <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
+  <title>Firebase Auth</title>
+
+  <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         display: flex;
-        justify-content: center; /* Center horizontally */
-        align-items: center; /* Center vertically */
-        min-height: 100vh; /* Full viewport height */
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
         margin: 0;
         padding: 20px;
         background-color: #f4f7f6;
     }
 
-    /* 2. Main Container/Card */
     .auth-container {
-        background-color: #ffffff; /* White card background */
+        background-color: #ffffff;
         padding: 40px;
         border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         width: 100%;
-        max-width: 400px; /* Max width for the form */
+        max-width: 400px;
         text-align: center;
     }
 
@@ -36,100 +35,74 @@
         font-weight: 600;
     }
 
-    /* 3. Input Styling */
-    input[type="email"],
+    input[type="email"], 
     input[type="password"] {
-        width: calc(100% - 20px); /* Full width minus padding */
+        width: calc(100% - 20px);
         padding: 12px 10px;
         margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 6px;
-        box-sizing: border-box; /* Include padding/border in element's total width */
+        box-sizing: border-box;
         font-size: 1em;
     }
 
-    /* Focus state for inputs */
     input:focus {
-        border-color: #007bff; /* Primary blue color */
+        border-color: #007bff;
         outline: none;
         box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
     }
 
-    /* 4. Button Group Styling */
-    .button-group {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-    }
-
     button {
-        flex-grow: 1; /* Make buttons expand evenly */
+        width: 100%;
         padding: 12px 15px;
-        margin: 0 5px; /* Spacing between buttons */
+        margin-top: 20px;
         border: none;
         border-radius: 6px;
-        font-size: 0.8em;
+        background-color: #007bff;
+        color: white;
+        font-size: 1em;
         cursor: pointer;
+        font-weight: 600;
         transition: background-color 0.3s ease, transform 0.1s ease;
     }
 
-    /* Primary Button (Sign Up/Sign In) */
-    button:nth-child(1), 
-    button:nth-child(2) {
-        background-color: #007bff; /* Primary blue */
-        color: white;
-        font-weight: 600;
-    }
-
-    /* Secondary Button (Sign Out) */
-    button:nth-child(3) {
-        background-color: #6c757d; /* Gray */
-        color: white;
-    }
-
-    /* Hover effects */
     button:hover {
         opacity: 0.9;
         transform: translateY(-1px);
     }
 
-    /* 5. Status Display */
     #auth-status {
         margin-top: 30px;
         padding: 15px;
-        background-color: #e9ecef; /* Light background for status */
+        background-color: #e9ecef;
         border-radius: 6px;
         color: #495057;
         font-size: 0.9em;
     }
 
-    /* Ensure the status text is centered within its own element */
     #auth-status:empty {
-        display: none; /* Hide if no text is present */
+        display: none;
     }
-
-</style>
+  </style>
 </head>
-  
+
 <body>
-  
+
     <div class="auth-container">
         <h1>ログイン</h1>
+        
         <input type="email" id="email" placeholder="メールアドレス">
         <input type="password" id="password" placeholder="パスワード">
-        
-        <div class="button-group">
-            <button onclick="signUp()">サインアップ</button>
-            <button onclick="signIn()">サインイン</button>
-        </div>
-        
-        <!--<button onclick="signOutUser()" style="width: 100%; margin-top: 15px;">サインアウト</button>-->
+
+        <!-- BOTÃO ÚNICO → LOGIN + SIGNUP AUTOMÁTICO -->
+        <button onclick="loginOrSignup()">ログイン / 新規登録</button>
 
         <p id="auth-status">現在のユーザー: ロード中...</p>
     </div>
-      <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    
-      <script src="app.js"></script>
-    </body>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+    <script src="app.js"></script>
+</body>
 </html>

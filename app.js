@@ -1,10 +1,7 @@
-// app.js
-
 // ------------------------------------------------------------------
-// ⚠️ 1. SUA CONFIGURAÇÃO FIREBASE
+// 1. CONFIGURAÇÃO FIREBASE
 // ------------------------------------------------------------------
 const firebaseConfig = {
-    // Estas são as chaves que você forneceu anteriormente
     apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
     authDomain: "stamp-edfc5.firebaseapp.com",
     projectId: "stamp-edfc5",
@@ -14,113 +11,103 @@ const firebaseConfig = {
     measurementId: "G-2EVLH3GZNS"
 };
 
-// Inicializa o Firebase (versão compat)
+// Inicializa o Firebase (Compat)
 const app = firebase.initializeApp(firebaseConfig);
-const auth = app.auth(); // Obtém o serviço de autenticação
-const statusDisplay = document.getElementById('auth-status'); // Elemento de status
+const auth = app.auth();
+const statusDisplay = document.getElementById('auth-status');
+
 
 // ------------------------------------------------------------------
-// 2. FUNÇÕES DE AUTENTICAÇÃO (chamadas pelos botões no index.html)
+// 2. FUNÇÃO ÚNICA: LOGIN → ou → SIGNUP AUTOMÁTICO
 // ------------------------------------------------------------------
-
-// Sign Up Function
-function signUp() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+function loginOrSignup() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
 
     if (!email || !password) {
-        alert('メールアドレスとパスワードを入力してください。');
+        alert("メールアドレスとパスワードを入力してください。");
         return;
     }
 
-    auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-            // O onAuthStateChanged tratará o redirecionamento
-            alert('登録完了！リダイレクト中...');
-        })
-        .catch((error) => {
-            alert(`Falha no Registro: ${error.message}`);
-        });
-}
-
-// Sign In Function
-function signIn() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if (!email || !password) {
-        alert('メールアドレスとパスワードを入力してください。');
-        return;
-    }
-
+    // 1️⃣ Tenta LOGIN primeiro
     auth.signInWithEmailAndPassword(email, password)
         .then(() => {
-            // O onAuthStateChanged tratará o redirecionamento
-            console.log('ログインに成功しました。リダイレクト中...');
+            console.log("ログイン成功");
         })
         .catch((error) => {
-            // Trata Erros (ex: usuário não encontrado, senha errada)
-            alert(`Falha no Login: ${error.message}`);
+
+            // Se o usuário NÃO EXISTE → cria conta automaticamente
+            if (error.code === "auth/user-not-found") {
+
+                console.log("ユーザーが存在しません → 新規登録します");
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        alert("新規登録完了！ログインしました。");
+                    })
+                    .catch((signupError) => {
+                        alert(`登録エラー: ${signupError.message}`);
+                    });
+
+            } else {
+                // Qualquer outro erro (senha errada, email inválido etc.)
+                alert(`ログインエラー: ${error.message}`);
+            }
         });
 }
 
-// Sign Out Function (Se você decidir reativar o botão de Sign Out)
-function signOutUser() {
-    auth.signOut().then(() => {
-        alert('成功終了');
-        // Redireciona de volta para index.html se estiver no menu
-        if (window.location.pathname.endsWith('newMenu.html')) {
-             window.location.href = 'index.html';
-        }
-    }).catch((error) => {
-        console.error('終了時のエラー:', error);
-        alert('終了に失敗しました。');
-    });
-}
+// Disponibiliza para o HTML
+window.loginOrSignup = loginOrSignup;
 
-// Torna as funções globais para que o HTML (onclick) possa chamá-las
-window.signUp = signUp;
-window.signIn = signIn;
-window.signOutUser = signOutUser; 
 
 // ------------------------------------------------------------------
-// 3. OUVINTE DE ESTADO DE AUTENTICAÇÃO (AUTH STATE LISTENER)
-// Lógica de redirecionamento CORRIGIDA para usar 'redirectAfterLogin'.
+// 3. LISTENER DE AUTENTICAÇÃO (REDIRECIONAMENTO)
 // ------------------------------------------------------------------
 auth.onAuthStateChanged((user) => {
-    // Verifica se o elemento statusDisplay existe
+
     if (statusDisplay) {
         if (user) {
-            // Usuário está logado
             statusDisplay.textContent = `Current User: ${user.email} (UID: ${user.uid})`;
 
-            // 🚨 CORREÇÃO PRINCIPAL: Verifica se há uma URL salva para redirecionar.
             const redirectUrl = localStorage.getItem('redirectAfterLogin');
             const currentPage = window.location.pathname.split('/').pop();
-            
-            // 1. Prioriza o redirecionamento para a URL salva (modelo 3D)
-            if (redirectUrl) {
-                localStorage.removeItem('redirectAfterLogin'); // Limpa a chave após o uso
-                window.location.href = redirectUrl; // Redireciona para o modelo
-                console.log(`Redirecionando para URL salva (modelo): ${redirectUrl}`);
 
-            // 2. Se não houver URL salva, mas estiver na página de login, redireciona para o menu principal
+            // 1️⃣ Se havia uma URL salva (modelo 3D) → Vai pra lá
+            if (redirectUrl) {
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
+                console.log(`保存されたURLへのリダイレクト： ${redirectUrl}`);
+
+            // 2️⃣ Se está no login → vai para o menu
             } else if (currentPage === 'index.html' || currentPage === '') {
-                window.location.href = 'newMenu.html'; 
-                console.log('メインメニュー（newMenu.html）にリダイレクトします。');
+                window.location.href = 'newMenu.html';
+                console.log("メインメニューにリダイレクト中...");
             }
 
         } else {
-            // Usuário está deslogado
-            statusDisplay.textContent = '現在のユーザー: なし (サインインしてください)';
+            // Quando está deslogado
+            statusDisplay.textContent = "現在のユーザー: なし (サインインしてください)";
 
-            // Se o usuário deslogou e está na página do menu, redireciona para o login
+            // Se está no menu sem login → voltar para login
             if (window.location.pathname.endsWith('newMenu.html')) {
-                 window.location.href = 'index.html'; 
+                window.location.href = 'index.html';
             }
         }
     } else {
-        // Se o script for usado em outras páginas sem #auth-status, apenas loga
-        console.log(user ? `User logged in: ${user.uid}` : 'User logged out');
+        console.log(user ? `User logged in: ${user.uid}` : "User logged out");
     }
 });
+
+
+// ------------------------------------------------------------------
+// 4. OPÇÃO (se você quiser reativar futuramente)
+// ------------------------------------------------------------------
+function signOutUser() {
+    auth.signOut().then(() => {
+        alert("成功終了");
+        if (window.location.pathname.endsWith('newMenu.html')) {
+            window.location.href = 'index.html';
+        }
+    });
+}
+window.signOutUser = signOutUser;
