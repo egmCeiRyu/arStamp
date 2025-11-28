@@ -35,13 +35,15 @@
     /* --- Container para manter o layout do tamanho do smartphone --- */
     #app-container {
         width: 100%;
-        max-width: 420px;   /* TAMANHO DO SMARTPHONE */
-        margin: 0 auto;     /* centraliza no desktop */
-        background: #FFF5E1; 
+        max-width: 420px;   /* tamanho máximo para desktop */
+        min-width: 320px;   /* largura mínima para celulares menores */
+        margin: 0 auto;     /* centraliza horizontalmente */
+        background: #FFF5E1;
         min-height: 100vh;
-        position: relative;
+        box-sizing: border-box;
         overflow-x: hidden;
-      
+        padding-left: 10px; /* opcional: evita que encoste na borda */
+        padding-right: 10px;
     }
 
   </style>
