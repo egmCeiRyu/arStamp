@@ -220,9 +220,17 @@ async function loadStampedModelsFromFirebase(uid) {
 }
 
 // Renderiza estampas e anima apenas a nova
-async function loadAndRenderStamps(newStamp=null) {
+async function loadAndRenderStamps() {
   if (!currentUserId) return;
+
+  // Carimbaos atuais no Firebase
   const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
+
+  // Carimbos antigos salvos no localStorage (ou vazio)
+  const oldStamps = JSON.parse(localStorage.getItem('stampedModels') || '[]');
+
+  // Detecta a nova estampa
+  const newStamp = stampedModels.find(name => !oldStamps.includes(name)) || null;
 
   thumbnails.forEach(thumb => {
     const modelName = thumb.getAttribute('data-name');
@@ -245,7 +253,9 @@ async function loadAndRenderStamps(newStamp=null) {
     }
   });
 
-  localStorage.removeItem('thumbnailToUpdate');
+  // Atualiza localStorage com os carimbos atuais
+  localStorage.setItem('stampedModels', JSON.stringify(stampedModels));
+
   checkAllStamps(stampedModels);
 }
 
