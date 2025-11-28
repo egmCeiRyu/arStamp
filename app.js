@@ -29,14 +29,14 @@ function signUp() {
     const password = document.getElementById('password').value;
 
     if (!email || !password) {
-        alert('Por favor, insira email e senha.');
+        alert('メールアドレスとパスワードを入力してください。');
         return;
     }
 
     auth.createUserWithEmailAndPassword(email, password)
         .then(() => {
             // O onAuthStateChanged tratará o redirecionamento
-            alert('Registro bem-sucedido! Redirecionando...');
+            alert('登録完了！リダイレクト中...');
         })
         .catch((error) => {
             alert(`Falha no Registro: ${error.message}`);
@@ -49,14 +49,14 @@ function signIn() {
     const password = document.getElementById('password').value;
 
     if (!email || !password) {
-        alert('Por favor, insira email e senha.');
+        alert('メールアドレスとパスワードを入力してください。');
         return;
     }
 
     auth.signInWithEmailAndPassword(email, password)
         .then(() => {
             // O onAuthStateChanged tratará o redirecionamento
-            console.log('Login bem-sucedido. Redirecionando...');
+            console.log('ログインに成功しました。リダイレクト中...');
         })
         .catch((error) => {
             // Trata Erros (ex: usuário não encontrado, senha errada)
@@ -67,14 +67,14 @@ function signIn() {
 // Sign Out Function (Se você decidir reativar o botão de Sign Out)
 function signOutUser() {
     auth.signOut().then(() => {
-        alert('Saiu com sucesso!');
+        alert('成功終了');
         // Redireciona de volta para index.html se estiver no menu
         if (window.location.pathname.endsWith('newMenu.html')) {
              window.location.href = 'index.html';
         }
     }).catch((error) => {
-        console.error('Erro ao sair:', error);
-        alert('Falha ao sair.');
+        console.error('終了時のエラー:', error);
+        alert('終了に失敗しました。');
     });
 }
 
@@ -107,12 +107,12 @@ auth.onAuthStateChanged((user) => {
             // 2. Se não houver URL salva, mas estiver na página de login, redireciona para o menu principal
             } else if (currentPage === 'index.html' || currentPage === '') {
                 window.location.href = 'newMenu.html'; 
-                console.log('Redirecionando para o menu principal (newMenu.html).');
+                console.log('メインメニュー（newMenu.html）にリダイレクトします。');
             }
 
         } else {
             // Usuário está deslogado
-            statusDisplay.textContent = 'Current User: None (Please Sign In)';
+            statusDisplay.textContent = '現在のユーザー: なし (サインインしてください)';
 
             // Se o usuário deslogou e está na página do menu, redireciona para o login
             if (window.location.pathname.endsWith('newMenu.html')) {
