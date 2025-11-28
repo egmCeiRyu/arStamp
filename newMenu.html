@@ -9,7 +9,7 @@
   <title>3D Model Thumbnails</title>
   
   <style>
-    
+    /* Animação de conquista de estampa */
     @keyframes stampUnlock {
       0% {
         transform: scale(0);
@@ -36,53 +36,31 @@
     .stamp-unlock {
       animation: stampUnlock 0.8s ease-out forwards;
     }
-    
-    #view-model-btn.selected {
-      animation: shadowPulse 1.3s infinite;
-    }
 
-    @keyframes shadowPulse {
-      0% {
-        filter: drop-shadow(0 0 0 rgba(252, 221, 91, 0.87));
-      }
-      50% {
-        filter: drop-shadow(0 0 15px rgba(252, 221, 91, 0.87));
-      }
-      100% {
-        filter: drop-shadow(0 0 0 rgba(252, 221, 91, 0.87));
-      }
-    }
-    
-    /* Animação de escala do botão */
-    @keyframes scalePulse {
-      0% {
-        transform: scale(0.8);
-      }
-      50% {
-        transform: scale(1.15); /* aumenta 15% no meio da animação */
-      }
-      100% {
-        transform: scale(0.8);
-      }
-    }
-
+    /* Botão de visualização */
     #view-model-btn.selected {
       animation: scalePulse 1s infinite ease-in-out;
-    
-    /* --- Container para manter o layout do tamanho do smartphone --- */
-    #app-container {
-        width: 100%;
-        max-width: 420px;   /* tamanho máximo para desktop */
-        min-width: 320px;   /* largura mínima para celulares menores */
-        margin: 0 auto;     /* centraliza horizontalmente */
-        background: #FFF5E1;
-        min-height: 100vh;
-        box-sizing: border-box;
-        overflow-x: hidden;
-        padding-left: 10px; /* opcional: evita que encoste na borda */
-        padding-right: 10px;
     }
 
+    @keyframes scalePulse {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(0.8); }
+    }
+
+    /* Container principal */
+    #app-container {
+      width: 100%;
+      max-width: 420px;
+      min-width: 320px;
+      margin: 0 auto;
+      background: #FFF5E1;
+      min-height: 100vh;
+      box-sizing: border-box;
+      overflow-x: hidden;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
   </style>
 
 </head>
@@ -193,208 +171,141 @@
       -->
     </div>
   </div>
-    <div id="view-model-btn-box">
-        <img src="icon/selectionIcon.png" id="view-model-btn">
-    </div>
+
+  <div id="view-model-btn-box">
+      <img src="icon/selectionIcon.png" id="view-model-btn">
+  </div>
+
   <div class="bottom-stripe"></div>
 
 <script type="module">
-    // 1. 🌟 IMPORTS DO FIREBASE (App, Auth e Firestore)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 2. 🔑 CONFIGURAÇÃO DO FIREBASE (Suas Chaves)
-    const firebaseConfig = {
-         apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
-         authDomain: "stamp-edfc5.firebaseapp.com",
-         projectId: "stamp-edfc5",
-         storageBucket: "stamp-edfc5.firebasestorage.app",
-         messagingSenderId: "522739532414",
-         appId: "1:522739532414:web:047e4168251b5542ce8e2f",
-         measurementId: "G-2EVLH3GZNS"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+  authDomain: "stamp-edfc5.firebaseapp.com",
+  projectId: "stamp-edfc5",
+  storageBucket: "stamp-edfc5.firebasestorage.app",
+  messagingSenderId: "522739532414",
+  appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+  measurementId: "G-2EVLH3GZNS"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app); // Usado para obter o UID
-    // ----------------------------------------------------
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
+let selectedModelUrl = "";
+let selectedModelName = "";
+let currentUserId = null;
 
-    let selectedModelUrl = "";
-    let selectedModelName = "";
-    let currentUserId = null; // Armazena o ID do usuário logado
+const thumbnails = document.querySelectorAll('.thumbnail-link');
+const viewModelBtn = document.getElementById('view-model-btn');
 
-    const thumbnails = document.querySelectorAll('.thumbnail-link');
-    const viewModelBtn = document.getElementById('view-model-btn');
-    
-    // ----------------------------------------------------
-    // 3. 💾 FUNÇÕES DE BANCO DE DADOS (LEITURA)
-    // ----------------------------------------------------
-
-    async function loadStampedModelsFromFirebase(uid) {
-        if (!uid) return [];
-
-        try {
-            const docRef = doc(db, "users", uid); // users/UID_DO_USUARIO
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                return docSnap.data().stamps || [];
-            } else {
-                console.log("Documento de carimbos não encontrado. Inicializando.");
-                await setDoc(docRef, { stamps: [] }); // Cria o documento inicial
-                return [];
-            }
-        } catch (error) {
-            console.error("Erro ao carregar carimbos:", error);
-            return [];
-        }
+// Carrega estampas do Firebase
+async function loadStampedModelsFromFirebase(uid) {
+  if (!uid) return [];
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data().stamps || [];
+    } else {
+      await setDoc(docRef, { stamps: [] });
+      return [];
     }
+  } catch(e) { console.error(e); return []; }
+}
 
-    // ----------------------------------------------------
-    // 4. 🔗 LÓGICA DE AUTENTICAÇÃO E CARREGAMENTO
-    // ----------------------------------------------------
+// Renderiza estampas e anima apenas a nova
+async function loadAndRenderStamps(newStamp=null) {
+  if (!currentUserId) return;
+  const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
 
-    // Monitora o estado da autenticação para obter o UID
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUserId = user.uid; // Define o UID
-            console.log(`Usuário logado. UID: ${currentUserId}`);
-            // Quando o usuário loga, carrega e renderiza os carimbos
-            loadAndRenderStamps(); 
-        } else {
-            currentUserId = null;
-            // Se o usuário deslogar, você pode querer limpar ou redirecionar
-            console.log("Usuário deslogado.");
-            // Opcional: window.location.href = 'index.html'; 
-        }
-    });
+  thumbnails.forEach(thumb => {
+    const modelName = thumb.getAttribute('data-name');
+    const imgElement = thumb.querySelector('.thumbnail-img');
 
-    // Função principal que carrega do Firebase e atualiza o HTML
-    async function loadAndRenderStamps(newStamp=null) {
-      if (!currentUserId) return;
-      const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
+    if (stampedModels.includes(modelName)) {
+      imgElement.src = `thumbnails/${modelName}_thumb.png`;
 
-      thumbnails.forEach(thumb => {
-        const modelName = thumb.getAttribute('data-name');
-        const imgElement = thumb.querySelector('.thumbnail-img');
-
-        if (stampedModels.includes(modelName)) {
-          imgElement.src = `thumbnails/${modelName}_thumb.png`;
-
-          // Anima apenas a nova conquista
-          if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
-            imgElement.classList.add('stamp-unlock');
-            imgElement.addEventListener('animationend', () => {
-              imgElement.classList.remove('stamp-unlock');
-            }, { once: true });
-          }
-
-          imgElement.classList.add('stamped');
-        } else {
-          imgElement.src = 'thumbnails/white_thumb.png';
-        }
-      });
-
-        localStorage.removeItem('thumbnailToUpdate');
-        checkAllStamps(stampedModels);
-    }
-  
-      // Monitor de autenticação
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUserId = user.uid;
-        loadAndRenderStamps();
-      } else {
-        currentUserId = null;
+      // Anima apenas a nova conquista
+      if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
+        imgElement.classList.add('stamp-unlock');
+        imgElement.addEventListener('animationend', () => {
+          imgElement.classList.remove('stamp-unlock');
+        }, { once: true });
       }
-    });
-    
-    // ----------------------------------------------------
-    // 6. LÓGICA DE SELEÇÃO DE MINIATURA (AGORA SÓ DEPOIS DE CARREGADO)
-    // ----------------------------------------------------
 
-    thumbnails.forEach(thumb => {
-        thumb.addEventListener('click', (event) => {
-            // Obter a miniatura atual
-            const modelName = thumb.getAttribute('data-name');
-            const imgElement = thumb.querySelector('.thumbnail-img');
-
-            // Verifica se o modelo está usando a imagem padrão (não carimbado)
-            // Isso bloqueia o clique para miniaturas não carimbadas.
-            if (imgElement.src.endsWith('white_thumb.png')) { 
-                event.preventDefault(); // Impede qualquer navegação padrão
-
-                console.log('Modelo não carimbado, seleção bloqueada.');
-
-                // Opcional: Adicionar feedback visual de bloqueio/desseleção
-                thumbnails.forEach(t => t.classList.remove('selected'));
-                viewModelBtn.classList.remove('selected');
-                selectedModelUrl = ""; // Garante que o botão de visualização não faça nada
-
-                return; // Sai da função, impedindo a seleção
-            }
-
-            // Se a execução chegou aqui, o modelo está carimbado e é clicável.
-
-            // Remove a classe 'selected' de todas as miniaturas
-            thumbnails.forEach(t => t.classList.remove('selected'));
-            // Adiciona a classe 'selected' à miniatura clicada
-            thumb.classList.add('selected');
-
-            selectedModelUrl = thumb.getAttribute('data-model');
-            selectedModelName = thumb.getAttribute('data-name');
-
-            // Ativa o botão de visualização com o efeito de pulso
-            viewModelBtn.classList.add('selected');
-        });
-    });
-
-    // 7. LÓGICA DO BOTÃO DE VISUALIZAÇÃO (MANTIDA)
-    viewModelBtn.addEventListener('click', () => {
-      if (selectedModelUrl) {
-        // Você pode adicionar um log de evento do Firebase Analytics se desejar:
-        // logEvent(analytics, "button_click", { button_name: selectedModelName });
-        window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-      }
-    });
-    
-    // 8. 🎉 BOTÃO FINAL QUANDO TODOS OS CARIMBOS FOREM CONQUISTADOS
-    function checkAllStamps(stampedModels) {
-      const totalModels = thumbnails.length;
-      const allComplete = stampedModels.length === totalModels;
-
-      // Se não completou tudo → não cria o botão
-      if (!allComplete) return;
-
-      // Evita duplicação
-      if (document.getElementById("final-reward-btn")) return;
-
-      const header = document.querySelector(".title");
-
-      // 👉 Criar o botão-imagem
-      const imgBtn = document.createElement("img");
-      imgBtn.id = "final-reward-btn";
-      imgBtn.src = "icon/giftBTN.png";   
-      imgBtn.style.cursor = "pointer";
-      imgBtn.style.marginLeft = "50px";
-      imgBtn.style.height = "auto";
-      imgBtn.style.width = "150px";
-      imgBtn.style.objectFit = "contain"; 
-
-      // Ação ao clicar
-      imgBtn.addEventListener("click", () => {
-          window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html"; // 🟡 altere para sua página
-      });
-
-      header.appendChild(imgBtn);
+      imgElement.classList.add('stamped');
+    } else {
+      imgElement.src = 'thumbnails/white_thumb.png';
     }
-    
-    // OBS: O evento DOMContentLoaded foi substituído pela chamada 'loadAndRenderStamps'
-    // dentro do onAuthStateChanged, garantindo que o UID esteja disponível.
+  });
 
+  localStorage.removeItem('thumbnailToUpdate');
+  checkAllStamps(stampedModels);
+}
+
+// Monitor de autenticação
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUserId = user.uid;
+    loadAndRenderStamps();
+  } else {
+    currentUserId = null;
+  }
+});
+
+// Lógica de seleção de miniaturas
+thumbnails.forEach(thumb => {
+  thumb.addEventListener('click', (event) => {
+    const modelName = thumb.getAttribute('data-name');
+    const imgElement = thumb.querySelector('.thumbnail-img');
+    if (imgElement.src.endsWith('white_thumb.png')) {
+      event.preventDefault();
+      thumbnails.forEach(t => t.classList.remove('selected'));
+      viewModelBtn.classList.remove('selected');
+      selectedModelUrl = "";
+      return;
+    }
+    thumbnails.forEach(t => t.classList.remove('selected'));
+    thumb.classList.add('selected');
+    selectedModelUrl = thumb.getAttribute('data-model');
+    selectedModelName = thumb.getAttribute('data-name');
+    viewModelBtn.classList.add('selected');
+  });
+});
+
+// Botão de visualização
+viewModelBtn.addEventListener('click', () => {
+  if (selectedModelUrl) {
+    window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
+  }
+});
+
+// Checa todas as estampas
+function checkAllStamps(stampedModels) {
+  const totalModels = thumbnails.length;
+  if (stampedModels.length !== totalModels) return;
+  if (document.getElementById("final-reward-btn")) return;
+
+  const header = document.querySelector(".title");
+  const imgBtn = document.createElement("img");
+  imgBtn.id = "final-reward-btn";
+  imgBtn.src = "icon/giftBTN.png";   
+  imgBtn.style.cursor = "pointer";
+  imgBtn.style.marginLeft = "50px";
+  imgBtn.style.height = "auto";
+  imgBtn.style.width = "150px";
+  imgBtn.style.objectFit = "contain"; 
+  imgBtn.addEventListener("click", () => {
+      window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
+  });
+  header.appendChild(imgBtn);
+}
 </script>
-    
 </body>
 </html>
