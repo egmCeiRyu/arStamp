@@ -16,6 +16,9 @@ const app = firebase.initializeApp(firebaseConfig);
 const auth = app.auth();
 const statusDisplay = document.getElementById('auth-status');
 
+// Define a persistência como LOCAL para salvar o login
+// Isso é crucial para que o usuário não precise logar novamente
+const persistence = firebase.auth.Auth.Persistence.LOCAL;
 
 // ------------------------------------------------------------------
 // 2. FUNÇÃO ÚNICA: LOGIN → ou → SIGNUP AUTOMÁTICO
@@ -29,30 +32,40 @@ function loginOrSignup() {
         return;
     }
 
-    // 1️⃣ Tenta LOGIN primeiro
-    auth.signInWithEmailAndPassword(email, password)
+    // A. CONFIGURA a persistência antes de tentar autenticar
+    auth.setPersistence(persistence)
+        .then(() => {
+            // B. Tenta LOGIN primeiro
+            return auth.signInWithEmailAndPassword(email, password);
+        })
         .then(() => {
             console.log("ログイン成功");
+            // O onAuthStateChanged (Seção 3) cuidará do redirecionamento
         })
         .catch((error) => {
-
-            // Se o usuário NÃO EXISTE → cria conta automaticamente
+            
+            // C. Se o usuário NÃO EXISTE → cria conta automaticamente (SIGNUP)
             if (error.code === "auth/user-not-found") {
-
                 console.log("ユーザーが存在しません → 新規登録します");
 
-                auth.createUserWithEmailAndPassword(email, password)
+                // Note: a persistência já está configurada do passo A
+                return auth.createUserWithEmailAndPassword(email, password)
                     .then(() => {
                         alert("新規登録完了！ログインしました。");
-                    })
-                    .catch((signupError) => {
-                        alert(`登録エラー: ${signupError.message}`);
                     });
 
             } else {
-                // Qualquer outro erro (senha errada, email inválido etc.)
+                // Qualquer outro erro (senha errada, email inválido, etc.)
                 alert(`ログインエラー: ${error.message}`);
             }
+        })
+        .catch((finalError) => {
+             // Captura erros de sign-up, setPersistence ou outros erros que não são "user-not-found"
+             // Garante que o usuário veja a mensagem de erro.
+             if (finalError) {
+                 alert(`認証エラー: ${finalError.message}`);
+                 console.error("Erro final de autenticação:", finalError);
+             }
         });
 }
 
@@ -64,6 +77,8 @@ window.loginOrSignup = loginOrSignup;
 // 3. LISTENER DE AUTENTICAÇÃO (REDIRECIONAMENTO)
 // ------------------------------------------------------------------
 auth.onAuthStateChanged((user) => {
+    // Melhoria: Garante que a lógica de redirecionamento só aconteça 
+    // após o primeiro carregamento, e não em cada autenticação do firebase.
 
     if (statusDisplay) {
         if (user) {
@@ -78,7 +93,7 @@ auth.onAuthStateChanged((user) => {
                 window.location.href = redirectUrl;
                 console.log(`保存されたURLへのリダイレクト： ${redirectUrl}`);
 
-            // 2️⃣ Se está no login → vai para o menu
+            // 2️⃣ Se está na página de login → vai para o menu
             } else if (currentPage === 'index.html' || currentPage === '') {
                 window.location.href = 'newMenu.html';
                 console.log("メインメニューにリダイレクト中...");
@@ -100,52 +115,58 @@ auth.onAuthStateChanged((user) => {
 
 
 // ------------------------------------------------------------------
-// 4. OPÇÃO (se você quiser reativar futuramente)
+// 4. REDEFINIÇÃO DE SENHA (Forgot Password)
 // ------------------------------------------------------------------
-function signOutUser() {
-    auth.signOut().then(() => {
-        alert("成功終了");
-        if (window.location.pathname.endsWith('newMenu.html')) {
-            window.location.href = 'index.html';
-        }
-    });
-}
-window.signOutUser = signOutUser;
-
-
 function handlePasswordReset(event) {
     // 1. Previne o comportamento padrão do link
     event.preventDefault(); 
     
-    const email = document.getElementById('email').value;
+    // Pega o e-mail do campo de input.
+    const email = document.getElementById('email').value.trim();
     const authStatus = document.getElementById('auth-status');
 
     // 2. Verifica se o campo de e-mail está preenchido
     if (!email) {
         authStatus.textContent = "上記のメールアドレスを入力してパスワードを再設定してください。";
-        authStatus.style.backgroundColor = '#ffcdd2'; // Fundo vermelho claro
+        authStatus.style.backgroundColor = '#ffcdd2'; 
         return;
     }
 
     // 3. Chama o método do Firebase
-    // Certifique-se de que o firebase-auth-compat.js foi carregado no HTML.
-    firebase.auth().sendPasswordResetEmail(email)
+    auth.sendPasswordResetEmail(email)
         .then(() => {
-            // E-mail de redefinição enviado!
-            authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
-            authStatus.style.backgroundColor = '#c8e6c9'; // Fundo verde claro
+            // Mensagem de segurança: sucesso genérico para não vazar se o e-mail existe.
+            authStatus.textContent = `メールアドレスが登録されている場合、再設定リンクを ${email} に送信しました。`;
+            authStatus.style.backgroundColor = '#c8e6c9'; 
             console.log("再設定メールが正常に送信されました！");
         })
         .catch((error) => {
-            // Lidar com erros específicos ou manter a mensagem de segurança
+            // Se o erro for 'user-not-found' ou 'invalid-email', mantém a mensagem de sucesso 
             if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-                 authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
+                 authStatus.textContent = `メールアドレスが登録されている場合、再設定リンクを ${email} に送信しました。`;
                  authStatus.style.backgroundColor = '#c8e6c9'; 
-                 console.warn("パスワードのリセットをリクエストしましたが、メールアドレスが見つかりません。");
+                 console.warn("Segurança: Reset solicitado, mas e-mail não encontrado/inválido.");
             } else {
-                authStatus.textContent = `Erro inesperado: ${error.message}`;
+                authStatus.textContent = `予期せぬエラー: ${error.message}`;
                 authStatus.style.backgroundColor = '#ffcdd2';
                 console.error("パスワードリセットエラー：", error);
             }
         });
 }
+window.handlePasswordReset = handlePasswordReset;
+
+
+// ------------------------------------------------------------------
+// 5. LOGOUT (se você quiser reativar futuramente)
+// ------------------------------------------------------------------
+function signOutUser() {
+    auth.signOut().then(() => {
+        alert("ログアウト成功");
+        if (window.location.pathname.endsWith('newMenu.html')) {
+            window.location.href = 'index.html';
+        }
+    }).catch(error => {
+        console.error("Erro ao sair:", error);
+    });
+}
+window.signOutUser = signOutUser;
