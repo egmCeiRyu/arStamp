@@ -37,17 +37,17 @@
     }
 
     .thumbnail-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* always 2 columns */
-        justify-items: center;
-        background-color: rgb(247, 246, 240);
-        width: 100%;
-        margin: auto;
-        box-sizing: border-box;
-        padding-top: -5px;
-        padding-bottom: 93px;
-        overflow-y: hidden;
-        box-shadow: 10px 5px 5px red;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+      justify-items: center;
+      background-color: rgb(247, 246, 240);
+      width: 100%;
+      margin: auto;
+      box-sizing: border-box;
+      padding-top: -5px;
+      padding-bottom: 93px;
+      overflow-y: hidden;
+
     }
     
     /* === Thumbnail Image === */
