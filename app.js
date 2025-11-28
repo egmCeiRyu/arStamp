@@ -112,21 +112,23 @@ function signOutUser() {
 }
 window.signOutUser = signOutUser;
 
+
 function handlePasswordReset(event) {
-    // Para evitar que a âncora recarregue a página
+    // 1. Previne o comportamento padrão do link
     event.preventDefault(); 
     
     const email = document.getElementById('email').value;
     const authStatus = document.getElementById('auth-status');
 
+    // 2. Verifica se o campo de e-mail está preenchido
     if (!email) {
         authStatus.textContent = "Por favor, insira seu e-mail acima para redefinir a senha.";
         authStatus.style.backgroundColor = '#ffcdd2'; // Fundo vermelho claro
         return;
     }
 
-    // 
-
+    // 3. Chama o método do Firebase
+    // Certifique-se de que o firebase-auth-compat.js foi carregado no HTML.
     firebase.auth().sendPasswordResetEmail(email)
         .then(() => {
             // E-mail de redefinição enviado!
@@ -135,19 +137,13 @@ function handlePasswordReset(event) {
             console.log("E-mail de redefinição enviado com sucesso!");
         })
         .catch((error) => {
-            // O Firebase gerencia o erro de "e-mail não encontrado" de forma segura,
-            // então a mensagem de sucesso é mostrada mesmo que o e-mail não exista,
-            // para evitar vazar informações sobre quais e-mails estão cadastrados.
-            // Aqui, apenas lidamos com erros técnicos, mas mantemos a mensagem 
-            // de sucesso na UI para a maioria dos casos.
-            if (error.code === 'auth/user-not-found') {
-                // A Firebase recomenda dar uma resposta genérica de sucesso para segurança.
-                authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
-                authStatus.style.backgroundColor = '#c8e6c9'; 
-                console.warn("Usuário não encontrado, mas a mensagem de sucesso é exibida por segurança.");
+            // Lidar com erros específicos ou manter a mensagem de segurança
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                 authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
+                 authStatus.style.backgroundColor = '#c8e6c9'; 
+                 console.warn("Reset de senha solicitado, mas e-mail não encontrado/inválido.");
             } else {
-                // Outros erros (e.g., e-mail mal formatado)
-                authStatus.textContent = `Erro ao enviar o e-mail de redefinição: ${error.message}`;
+                authStatus.textContent = `Erro inesperado: ${error.message}`;
                 authStatus.style.backgroundColor = '#ffcdd2';
                 console.error("Erro no reset de senha:", error);
             }
