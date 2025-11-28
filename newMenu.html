@@ -198,192 +198,332 @@
 <script src="app.js"></script>
 
 <script type="module">
+// Este bloco SUBSTITUI INTEIRAMENTE o seu <script type="module">
+// Ele contém a lógica do menu, autenticação modular e o QR Code.
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// --- CONFIGURAÇÃO FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
-  authDomain: "stamp-edfc5.firebaseapp.com",
-  projectId: "stamp-edfc5",
-  storageBucket: "stamp-edfc5.firebasestorage.app",
-  messagingSenderId: "522739532414",
-  appId: "1:522739532414:web:047e4168251b5542ce8e2f",
-  measurementId: "G-2EVLH3GZNS"
+    apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+    authDomain: "stamp-edfc5.firebaseapp.com",
+    projectId: "stamp-edfc5",
+    storageBucket: "stamp-edfc5.firebasestorage.app",
+    messagingSenderId: "522739532414",
+    appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+    measurementId: "G-2EVLH3GZNS"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
+const auth = getAuth(app); 
 
 let selectedModelUrl = "";
 let selectedModelName = "";
 let currentUserId = null;
 
+// Instancia o leitor QR Code, pois a biblioteca já foi carregada no HTML
+const html5QrCode = new Html5Qrcode("reader"); 
+
 const thumbnails = document.querySelectorAll('.thumbnail-link');
 const viewModelBtn = document.getElementById('view-model-btn');
 
+
+// ------------------------------------------------------------------
+// 1. FUNÇÕES DO QR CODE (NOVO)
+// ------------------------------------------------------------------
+
+/**
+ * Inicia o scanner de QR Code na div 'reader'.
+ */
+window.startQrCodeScanner = function() {
+    // Garante que o leitor esteja visível
+    const readerDiv = document.getElementById('reader');
+    readerDiv.style.display = 'block'; 
+    readerDiv.style.width = '100%'; // Ajuste o estilo se necessário
+    readerDiv.style.height = '300px'; 
+    
+    // Oculta o botão 'qrcode' enquanto escaneia (melhora a UX)
+    document.querySelector('#stamp-section button').style.display = 'none';
+
+    const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+        console.log(`QR Code lido: ${decodedText}`);
+        
+        // PARE o scanner após a leitura
+        html5QrCode.stop().then(() => {
+            console.log("Leitor parado com sucesso.");
+            document.getElementById('reader').style.display = 'none';
+            document.querySelector('#stamp-section button').style.display = 'block'; // Mostra o botão
+            
+            // 🔑 PROCESSA o código lido
+            processQrCodeData(decodedText); 
+        }).catch(err => {
+            console.error("Erro ao parar o leitor:", err);
+            // Continua o processamento mesmo se houver erro ao parar o vídeo
+            processQrCodeData(decodedText); 
+        });
+    };
+
+    const config = { 
+        fps: 10, 
+        qrbox: { width: 250, height: 250 } 
+    };
+
+    html5QrCode.start(
+        { facingMode: "environment" }, 
+        config, 
+        qrCodeSuccessCallback,
+        (errorMessage) => {
+            // console.log(`Erro de leitura contínua: ${errorMessage}`);
+        }
+    ).catch((err) => {
+        document.getElementById('reader').style.display = 'none';
+        document.querySelector('#stamp-section button').style.display = 'block';
+        alert("Erro ao iniciar a câmera. Verifique as permissões. Detalhe: " + err.message);
+        console.error("Erro ao iniciar o leitor:", err);
+    });
+};
+
+/**
+ * Processa o nome do modelo lido, salva a estampa e redireciona.
+ * @param {string} modelName Nome do modelo (ex: 'model1').
+ */
+async function processQrCodeData(modelName) {
+    
+    const validModels = Array.from(thumbnails).map(t => t.getAttribute('data-name'));
+    if (!validModels.includes(modelName)) {
+        alert("QR Code inválido. Por favor, escaneie um QR Code de modelo válido.");
+        return;
+    }
+    
+    if (!currentUserId) {
+        alert("Você precisa estar logado para coletar estampas. Redirecionando para login.");
+        // Salva a URL atual para voltar após o login
+        localStorage.setItem('redirectAfterLogin', window.location.href); 
+        window.location.href = 'index.html'; 
+        return;
+    }
+
+    const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
+
+    if (stampedModels.includes(modelName)) {
+        alert("Esta estampa já foi coletada!");
+        return;
+    }
+    
+    // Salva a nova estampa no Firebase usando arrayUnion
+    try {
+        const docRef = doc(db, "users", currentUserId);
+        
+        // arrayUnion é a forma segura de adicionar um item a um array no Firestore
+        await updateDoc(docRef, { 
+            stamps: arrayUnion(modelName) 
+        });
+        
+        console.log(`Estampa '${modelName}' coletada e salva.`);
+        
+        // Redireciona para recarregar o menu com a animação
+        window.location.href = `newMenu.html?newStamp=${modelName}`;
+
+    } catch(e) {
+        console.error("Erro ao salvar estampa:", e);
+        alert("Erro ao coletar estampa. Tente novamente ou verifique sua conexão.");
+    }
+}
+
+
+// ------------------------------------------------------------------
+// 2. FUNÇÕES DE SUPORTE (EXISTENTES)
+// ------------------------------------------------------------------
+
 // Carrega estampas do Firebase
 async function loadStampedModelsFromFirebase(uid) {
-  if (!uid) return [];
-  try {
-    const docRef = doc(db, "users", uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data().stamps || [];
-    } else {
-      await setDoc(docRef, { stamps: [] });
-      return [];
-    }
-  } catch(e) { console.error(e); return []; }
+    if (!uid) return [];
+    try {
+        const docRef = doc(db, "users", uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data().stamps || [];
+        } else {
+            // Cria o documento se não existir
+            await setDoc(docRef, { stamps: [] });
+            return [];
+        }
+    } catch(e) { console.error("Erro ao carregar estampas:", e); return []; }
+}
+
+// Obtém o parâmetro de consulta para a estampa recém-desbloqueada
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
 }
 
 // Renderiza estampas e anima apenas a nova
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
+async function loadAndRenderStamps() {
+    if (!currentUserId) return;
+    const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
 
-    async function loadAndRenderStamps() {
-      if (!currentUserId) return;
-      const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
+    const newStamp = getQueryParam('newStamp'); 
 
-      const newStamp = getQueryParam('newStamp'); // 🔑 modelo recém desbloqueado
-
-      thumbnails.forEach(thumb => {
+    thumbnails.forEach(thumb => {
         const modelName = thumb.getAttribute('data-name');
         const imgElement = thumb.querySelector('.thumbnail-img');
 
         if (stampedModels.includes(modelName)) {
-          imgElement.src = `thumbnails/${modelName}_thumb.png`;
+            imgElement.src = `thumbnails/${modelName}_thumb.png`;
+            imgElement.classList.add('stamped'); // Adicionei esta classe para consistência
 
-          if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
-            imgElement.classList.add('stamp-unlock');
-            imgElement.addEventListener('animationend', () => {
-              imgElement.classList.remove('stamp-unlock');
-            }, { once: true });
-          }
+            if (modelName === newStamp && !imgElement.classList.contains('animated-once')) {
+                 // Remove o parâmetro 'newStamp' após a renderização para evitar re-animação
+                const url = new URL(window.location);
+                url.searchParams.delete('newStamp');
+                window.history.replaceState({}, document.title, url.pathname);
+                
+                imgElement.classList.add('stamp-unlock', 'animated-once');
+                imgElement.addEventListener('animationend', () => {
+                    imgElement.classList.remove('stamp-unlock');
+                }, { once: true });
+            }
 
-          imgElement.classList.add('stamped');
         } else {
-          imgElement.src = 'thumbnails/white_thumb.png';
+            imgElement.src = 'thumbnails/white_thumb.png';
+            imgElement.classList.remove('stamped'); 
         }
-      });
+    });
 
-      checkAllStamps(stampedModels);
-    }
+    checkAllStamps(stampedModels);
+}
+
+
+// ------------------------------------------------------------------
+// 3. LISTENERS E LÓGICA DE INTERAÇÃO (EXISTENTES)
+// ------------------------------------------------------------------
 
 // Monitor de autenticação
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUserId = user.uid;
-    loadAndRenderStamps();
-  } else {
-    currentUserId = null;
-  }
+    if (user) {
+        currentUserId = user.uid;
+        loadAndRenderStamps();
+    } else {
+        currentUserId = null;
+        // Redireciona para 'index.html' se estiver deslogado e na página 'newMenu.html'
+        if (window.location.pathname.endsWith('newMenu.html')) {
+            window.location.href = 'index.html'; 
+        }
+    }
 });
 
 // Lógica de seleção de miniaturas
 thumbnails.forEach(thumb => {
-  thumb.addEventListener('click', (event) => {
-    const modelName = thumb.getAttribute('data-name');
-    const imgElement = thumb.querySelector('.thumbnail-img');
-    if (imgElement.src.endsWith('white_thumb.png')) {
-      event.preventDefault();
-      thumbnails.forEach(t => t.classList.remove('selected'));
-      viewModelBtn.classList.remove('selected');
-      selectedModelUrl = "";
-      return;
-    }
-    thumbnails.forEach(t => t.classList.remove('selected'));
-    thumb.classList.add('selected');
-    selectedModelUrl = thumb.getAttribute('data-model');
-    selectedModelName = thumb.getAttribute('data-name');
-    viewModelBtn.classList.add('selected');
-  });
+    thumb.addEventListener('click', (event) => {
+        const imgElement = thumb.querySelector('.thumbnail-img');
+        
+        // Bloqueia clique se o modelo não foi estampado
+        if (!imgElement.classList.contains('stamped')) { 
+            event.preventDefault();
+            alert("Modelo indisponível. Escaneie o QR Code correspondente para desbloquear.");
+            thumbnails.forEach(t => t.classList.remove('selected'));
+            viewModelBtn.classList.remove('selected');
+            selectedModelUrl = "";
+            return;
+        }
+        
+        thumbnails.forEach(t => t.classList.remove('selected'));
+        thumb.classList.add('selected');
+        selectedModelUrl = thumb.getAttribute('data-model');
+        selectedModelName = thumb.getAttribute('data-name');
+        viewModelBtn.classList.add('selected');
+    });
 });
 
 // Botão de visualização
 viewModelBtn.addEventListener('click', () => {
-  if (selectedModelUrl) {
-    window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-  }
+    if (selectedModelUrl) {
+        window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
+    } else {
+        alert("Por favor, selecione um modelo desbloqueado para visualizar.");
+    }
 });
-  
-    function launchParticleExplosionOverButton(button) {
-        const container = document.getElementById('particleContainer');
-        container.style.display = 'block';
 
-        // Posiciona o container no centro do botão
-        const rect = button.getBoundingClientRect();
-        container.style.position = 'fixed'; // importante para acompanhar o viewport
-        container.style.left = rect.left + rect.width / 2 + 'px';
-        container.style.top = rect.top + rect.height / 2 + 'px';
-        container.style.width = '0px';
-        container.style.height = '0px';
-        container.style.pointerEvents = 'none';
-        container.style.transform = 'translate(-50%, -50%)';
 
-        const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
-        const numParticles = 200;
+// ------------------------------------------------------------------
+// 4. FUNÇÕES ADICIONAIS (PARTÍCULAS E RECOMPENSA FINAL) (EXISTENTES)
+// ------------------------------------------------------------------
 
-        for (let i = 0; i < numParticles; i++) {
-            const particle = document.createElement('div');
-            const size = Math.random() * 10 + 4;
-            particle.style.width = particle.style.height = size + 'px';
-            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.position = 'absolute';
-            particle.style.borderRadius = '50%';
-            particle.style.left = '0px';
-            particle.style.top = '0px';
-            particle.style.pointerEvents = 'none';
-            container.appendChild(particle);
+function launchParticleExplosionOverButton(button) {
+    const container = document.getElementById('particleContainer');
+    container.style.display = 'block';
+    // ... (restante do código launchParticleExplosionOverButton)
+    const rect = button.getBoundingClientRect();
+    container.style.position = 'fixed'; 
+    container.style.left = rect.left + rect.width / 2 + 'px';
+    container.style.top = rect.top + rect.height / 2 + 'px';
+    container.style.width = '0px';
+    container.style.height = '0px';
+    container.style.pointerEvents = 'none';
+    container.style.transform = 'translate(-50%, -50%)';
 
-            const angle = Math.random() * 2 * Math.PI;
-            const distance = Math.random() * 300 + 100;
-            const x = Math.cos(angle) * distance;
-            const y = Math.sin(angle) * distance;
-            const duration = Math.random() * 1 + 1.5;
+    const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
+    const numParticles = 200;
 
-            particle.animate([
-                { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                { transform: `translate(${x}px, ${y}px) scale(0.3)`, opacity: 0 }
-            ], {
-                duration: duration * 1000,
-                easing: 'ease-out',
-                fill: 'forwards'
-            });
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        const size = Math.random() * 10 + 4;
+        particle.style.width = particle.style.height = size + 'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.position = 'absolute';
+        particle.style.borderRadius = '50%';
+        particle.style.left = '0px';
+        particle.style.top = '0px';
+        particle.style.pointerEvents = 'none';
+        container.appendChild(particle);
 
-            setTimeout(() => particle.remove(), duration * 1000);
-        }
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * 300 + 100;
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        const duration = Math.random() * 1 + 1.5;
+
+        particle.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1 },
+            { transform: `translate(${x}px, ${y}px) scale(0.3)`, opacity: 0 }
+        ], {
+            duration: duration * 1000,
+            easing: 'ease-out',
+            fill: 'forwards'
+        });
+
+        setTimeout(() => particle.remove(), duration * 1000);
+    }
 
     setTimeout(() => container.style.display = 'none', 3000);
 }
-// Checa todas as estampas
-    function checkAllStamps(stampedModels) {
-        const totalModels = thumbnails.length;
-        if (stampedModels.length !== totalModels) return;
-        if (document.getElementById("final-reward-btn")) return;
 
-        const header = document.querySelector(".title");
-        const imgBtn = document.createElement("img");
-        imgBtn.id = "final-reward-btn";
-        imgBtn.src = "icon/giftBTN.png";   
-        imgBtn.style.cursor = "pointer";
-        imgBtn.style.marginLeft = "50px";
-        imgBtn.style.height = "auto";
-        imgBtn.style.width = "150px";
-        imgBtn.style.objectFit = "contain"; 
-        imgBtn.addEventListener("click", () => {
-            window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
-        });
-        header.appendChild(imgBtn);
+function checkAllStamps(stampedModels) {
+    const totalModels = thumbnails.length;
+    if (stampedModels.length !== totalModels) return;
+    if (document.getElementById("final-reward-btn")) return;
 
-        // 🔹 Delay antes de lançar as partículas
-        setTimeout(() => {
-            launchParticleExplosionOverButton(imgBtn);
-        }, 1000); // espera 1 segundo, você pode ajustar (ex: 1500ms)
-    }
+    const header = document.querySelector(".title");
+    const imgBtn = document.createElement("img");
+    imgBtn.id = "final-reward-btn";
+    imgBtn.src = "icon/giftBTN.png";    
+    imgBtn.style.cursor = "pointer";
+    imgBtn.style.marginLeft = "50px";
+    imgBtn.style.height = "auto";
+    imgBtn.style.width = "150px";
+    imgBtn.style.objectFit = "contain"; 
+    imgBtn.addEventListener("click", () => {
+        window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
+    });
+    header.appendChild(imgBtn);
+
+    setTimeout(() => {
+        launchParticleExplosionOverButton(imgBtn);
+    }, 1000); 
+}
 </script>
 </body>
 </html>
