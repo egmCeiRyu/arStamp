@@ -89,13 +89,13 @@
         <br><br>
     </div>
 
-   <script type="module">
+<script type="module">
         // =========================================================================
         // 1. 🌟 IMPORTS E CONFIGURAÇÃO FIREBASE
         // =========================================================================
         
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"; // Importa onAuthStateChanged
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // 🔑 SUA CONFIGURAÇÃO FIREBASE (DEVE SER IDÊNTICA AOS OUTROS SCRIPTS)
@@ -176,6 +176,30 @@
             modelKey = modelUrl.split('/').pop().split('.')[0]; 
         }
 
+        // ----------------------------------------------------
+        // 🚨 CORREÇÃO 1: OUVINTE DE ESTADO DE AUTENTICAÇÃO E SEGURANÇA
+        // Garante que se o usuário não estiver logado, ele é enviado para index.html (login)
+        // e a URL do modelo é salva para retorno.
+        // ----------------------------------------------------
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Usuário NÃO está logado.
+                console.log("Usuário deslogado. Salvo o destino e redirecionando para login.");
+                
+                // Salva a URL completa do modelo para redirecionar após o login.
+                localStorage.setItem('redirectAfterLogin', window.location.href);
+
+                // Redireciona para o Index (Login)
+                window.location.href = 'index.html'; 
+            } else {
+                // Usuário está logado. Remove o item de redirecionamento (caso exista) 
+                // para que o app.js não tente redirecionar após o próximo login.
+                localStorage.removeItem('redirectAfterLogin'); 
+            }
+        });
+
+
         // -------------------------------------------------------------------------
         // 4. 🎯 LÓGICA DE CONQUISTA DO CARIMBO (IMPLEMENTAÇÃO FIREBASE)
         // -------------------------------------------------------------------------
@@ -197,9 +221,11 @@
                 console.log(`Carimbo salvo no Firestore para o modelo: ${modelKey}`);
                 
             } else {
-                // USUÁRIO DESLOGADO: Deve ser redirecionado (lógica tratada em app.js se o listener estiver aqui)
-                // Se o usuário chegou aqui sem login, ele deve ser redirecionado para index.html pelo app.js
-                alert("Você precisa estar logado para coletar carimbos. Redirecionando para o menu.");
+                // Caso o status Auth mude entre a carga da página e o clique do botão
+                alert("Você precisa estar logado para coletar carimbos. Redirecionando para login.");
+                localStorage.setItem('redirectAfterLogin', window.location.href);
+                window.location.href = 'index.html';
+                return;
             }
 
             // Sempre redireciona para a página do menu (newMenu.html) após tentar salvar

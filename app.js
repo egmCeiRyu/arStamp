@@ -2,7 +2,6 @@
 
 // ------------------------------------------------------------------
 // ⚠️ 1. SUA CONFIGURAÇÃO FIREBASE
-// As chaves são necessárias aqui, pois este script é carregado separadamente.
 // ------------------------------------------------------------------
 const firebaseConfig = {
     // Estas são as chaves que você forneceu anteriormente
@@ -16,8 +15,6 @@ const firebaseConfig = {
 };
 
 // Inicializa o Firebase (versão compat)
-// Como você está usando os scripts compat (firebase-app-compat.js e firebase-auth-compat.js),
-// a inicialização é feita via firebase.initializeApp.
 const app = firebase.initializeApp(firebaseConfig);
 const auth = app.auth(); // Obtém o serviço de autenticação
 const statusDisplay = document.getElementById('auth-status'); // Elemento de status
@@ -71,7 +68,7 @@ function signIn() {
 function signOutUser() {
     auth.signOut().then(() => {
         alert('Saiu com sucesso!');
-        // Se estiver em newMenu.html, redireciona de volta para index.html
+        // Redireciona de volta para index.html se estiver no menu
         if (window.location.pathname.endsWith('newMenu.html')) {
              window.location.href = 'index.html';
         }
@@ -88,7 +85,7 @@ window.signOutUser = signOutUser;
 
 // ------------------------------------------------------------------
 // 3. OUVINTE DE ESTADO DE AUTENTICAÇÃO (AUTH STATE LISTENER)
-// Esta é a lógica de redirecionamento principal.
+// Lógica de redirecionamento CORRIGIDA para usar 'redirectAfterLogin'.
 // ------------------------------------------------------------------
 auth.onAuthStateChanged((user) => {
     // Verifica se o elemento statusDisplay existe
@@ -97,19 +94,29 @@ auth.onAuthStateChanged((user) => {
             // Usuário está logado
             statusDisplay.textContent = `Current User: ${user.email} (UID: ${user.uid})`;
 
-            // Redireciona APENAS se estiver na página de login (index.html)
+            // 🚨 CORREÇÃO PRINCIPAL: Verifica se há uma URL salva para redirecionar.
+            const redirectUrl = localStorage.getItem('redirectAfterLogin');
             const currentPage = window.location.pathname.split('/').pop();
-            if (currentPage === 'index.html' || currentPage === '') {
-                window.location.href = 'newMenu.html'; 
+            
+            // 1. Prioriza o redirecionamento para a URL salva (modelo 3D)
+            if (redirectUrl) {
+                localStorage.removeItem('redirectAfterLogin'); // Limpa a chave após o uso
+                window.location.href = redirectUrl; // Redireciona para o modelo
+                console.log(`Redirecionando para URL salva (modelo): ${redirectUrl}`);
+
+            // 2. Se não houver URL salva, mas estiver na página de login, redireciona para o menu principal
+            } else if (currentPage === 'index.html' || currentPage === '') {
+                window.location.href = 'newMenu.html'; 
+                console.log('Redirecionando para o menu principal (newMenu.html).');
             }
 
         } else {
             // Usuário está deslogado
             statusDisplay.textContent = 'Current User: None (Please Sign In)';
-            
+
             // Se o usuário deslogou e está na página do menu, redireciona para o login
             if (window.location.pathname.endsWith('newMenu.html')) {
-                 window.location.href = 'index.html';
+                 window.location.href = 'index.html'; 
             }
         }
     } else {
