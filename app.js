@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------
-// 1. CONFIGURAÇÃO FIREBASE (COMPAT SDK)
+// 1. CONFIGURAÇÃO FIREBASE
 // ------------------------------------------------------------------
 const firebaseConfig = {
     apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
@@ -16,11 +16,8 @@ const app = firebase.initializeApp(firebaseConfig);
 const auth = app.auth();
 const statusDisplay = document.getElementById('auth-status');
 
-// 💡 NOVO: Inicializa o Firestore (SDK Compat) para usar na função de carimbo
-// Você DEVE incluir a tag <script src="...firebase-firestore-compat.js"></script> no seu HTML!
-const db = app.firestore(); 
-
 // Define a persistência como LOCAL para salvar o login
+// Isso é crucial para que o usuário não precise logar novamente
 const persistence = firebase.auth.Auth.Persistence.LOCAL;
 
 // ------------------------------------------------------------------
@@ -43,6 +40,7 @@ function loginOrSignup() {
         })
         .then(() => {
             console.log("ログイン成功");
+            // O onAuthStateChanged (Seção 3) cuidará do redirecionamento
         })
         .catch((error) => {
             
@@ -50,23 +48,28 @@ function loginOrSignup() {
             if (error.code === "auth/user-not-found") {
                 console.log("ユーザーが存在しません → 新規登録します");
 
+                // Note: a persistência já está configurada do passo A
                 return auth.createUserWithEmailAndPassword(email, password)
                     .then(() => {
                         alert("新規登録完了！ログインしました。");
                     });
 
             } else {
+                // Qualquer outro erro (senha errada, email inválido, etc.)
                 alert(`ログインエラー: ${error.message}`);
             }
         })
         .catch((finalError) => {
-            if (finalError) {
-                alert(`認証エラー: ${finalError.message}`);
-                console.error("Erro final de autenticação:", finalError);
-            }
+             // Captura erros de sign-up, setPersistence ou outros erros que não são "user-not-found"
+             // Garante que o usuário veja a mensagem de erro.
+             if (finalError) {
+                 alert(`認証エラー: ${finalError.message}`);
+                 console.error("Erro final de autenticação:", finalError);
+             }
         });
 }
 
+// Disponibiliza para o HTML
 window.loginOrSignup = loginOrSignup;
 
 
@@ -74,6 +77,9 @@ window.loginOrSignup = loginOrSignup;
 // 3. LISTENER DE AUTENTICAÇÃO (REDIRECIONAMENTO)
 // ------------------------------------------------------------------
 auth.onAuthStateChanged((user) => {
+    // Melhoria: Garante que a lógica de redirecionamento só aconteça 
+    // após o primeiro carregamento, e não em cada autenticação do firebase.
+
     if (statusDisplay) {
         if (user) {
             statusDisplay.textContent = `Current User: ${user.email} (UID: ${user.uid})`;
@@ -81,19 +87,20 @@ auth.onAuthStateChanged((user) => {
             const redirectUrl = localStorage.getItem('redirectAfterLogin');
             const currentPage = window.location.pathname.split('/').pop();
 
-            // 1️⃣ Redirecionamento para a URL salva (após login)
+            // 1️⃣ Se havia uma URL salva (modelo 3D) → Vai pra lá
             if (redirectUrl) {
                 localStorage.removeItem('redirectAfterLogin');
                 window.location.href = redirectUrl;
                 console.log(`保存されたURLへのリダイレクト： ${redirectUrl}`);
 
-            // 2️⃣ Redirecionamento da página de login para o menu
+            // 2️⃣ Se está na página de login → vai para o menu
             } else if (currentPage === 'index.html' || currentPage === '') {
                 window.location.href = 'newMenu.html';
                 console.log("メインメニューにリダイレクト中...");
             }
 
         } else {
+            // Quando está deslogado
             statusDisplay.textContent = "現在のユーザー: なし (サインインしてください)";
 
             // Se está no menu sem login → voltar para login
@@ -111,23 +118,30 @@ auth.onAuthStateChanged((user) => {
 // 4. REDEFINIÇÃO DE SENHA (Forgot Password)
 // ------------------------------------------------------------------
 function handlePasswordReset(event) {
+    // 1. Previne o comportamento padrão do link
     event.preventDefault(); 
+    
+    // Pega o e-mail do campo de input.
     const email = document.getElementById('email').value.trim();
     const authStatus = document.getElementById('auth-status');
 
+    // 2. Verifica se o campo de e-mail está preenchido
     if (!email) {
         authStatus.textContent = "上記のメールアドレスを入力してパスワードを再設定してください。";
         authStatus.style.backgroundColor = '#ffcdd2'; 
         return;
     }
 
+    // 3. Chama o método do Firebase
     auth.sendPasswordResetEmail(email)
         .then(() => {
+            // Mensagem de segurança: sucesso genérico para não vazar se o e-mail existe.
             authStatus.textContent = `メールアドレスが登録されている場合、再設定リンクを ${email} に送信しました。`;
             authStatus.style.backgroundColor = '#c8e6c9'; 
             console.log("再設定メールが正常に送信されました！");
         })
         .catch((error) => {
+            // Se o erro for 'user-not-found' ou 'invalid-email', mantém a mensagem de sucesso 
             if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
                  authStatus.textContent = `メールアドレスが登録されている場合、再設定リンクを ${email} に送信しました。`;
                  authStatus.style.backgroundColor = '#c8e6c9'; 
@@ -143,7 +157,7 @@ window.handlePasswordReset = handlePasswordReset;
 
 
 // ------------------------------------------------------------------
-// 5. LOGOUT
+// 5. LOGOUT (se você quiser reativar futuramente)
 // ------------------------------------------------------------------
 function signOutUser() {
     auth.signOut().then(() => {
@@ -157,136 +171,3 @@ function signOutUser() {
 }
 window.signOutUser = signOutUser;
 
-
-// ------------------------------------------------------------------
-// 6. LÓGICA DO SCANNER DE QR CODE E REGISTRO DE CARIMBO
-// ------------------------------------------------------------------
-
-// Variável global para o scanner (se estiver usando uma biblioteca como html5-qrcode)
-let html5QrCode = null;
-const qrCodeRegionId = "reader";
-const expectedStampPrefix = "STAMP_MODEL_"; // O dado esperado no QR Code (ex: STAMP_MODEL_model1)
-
-/**
- * Função chamada após escanear com sucesso um QR Code.
- * @param {string} qrCodeMessage - O dado lido do QR Code.
- */
-async function onScanSuccess(qrCodeMessage) {
-    if (html5QrCode) {
-        // Para o scanner após uma leitura bem-sucedida para evitar leituras repetidas
-        html5QrCode.stop().then(() => {
-            console.log("Scanner parado após leitura.");
-        }).catch(err => {
-            console.error("Erro ao parar o scanner:", err);
-        });
-        html5QrCode = null; // Reseta a variável do scanner
-        document.querySelector('#stamp-section button').textContent = "qrcode";
-    }
-
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        alert("Erro de Autenticação: Usuário não logado.");
-        return;
-    }
-
-    // Processa a mensagem do QR Code (remove o prefixo para obter o nome do modelo)
-    const modelName = qrCodeMessage.replace(expectedStampPrefix, '');
-    
-    // Simples validação de formato (verifica se o prefixo está correto)
-    if (!qrCodeMessage.startsWith(expectedStampPrefix) || !modelName) {
-        alert("QRコードが無効です。Prefix: STAMP_MODEL_");
-        return;
-    }
-
-    // Registra o carimbo no Firebase
-    await handleStampRegistration(modelName, user.uid);
-}
-
-
-/**
- * Função para iniciar/parar o scanner de QR Code (chamada pelo botão no HTML).
- */
-window.startQrCodeScanner = function() {
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        alert("Por favor, faça login primeiro.");
-        return;
-    }
-    
-    // Se o scanner já estiver ativo, pare-o
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            html5QrCode = null;
-            document.getElementById(qrCodeRegionId).innerHTML = '';
-            document.querySelector('#stamp-section button').textContent = "qrcode";
-        }).catch(err => {
-            console.error("Erro ao parar o scanner:", err);
-        });
-        return;
-    }
-
-    // Inicializa e inicia o scanner (NOVO)
-    // **NOTA:** Você DEVE incluir o link para a biblioteca html5-qrcode no seu HTML!
-    if (typeof Html5Qrcode === 'undefined') {
-         alert("Erro: Biblioteca 'html5-qrcode' não carregada no HTML.");
-         return;
-    }
-    
-    html5QrCode = new Html5Qrcode(qrCodeRegionId);
-    
-    const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        // Use 'environment' para a câmera traseira em dispositivos móveis
-        facingMode: "environment" 
-    };
-    
-    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-    .then(() => {
-         document.querySelector('#stamp-section button').textContent = "Parar Scanner";
-         console.log("Scanner iniciado.");
-    })
-    .catch(err => {
-        document.getElementById(qrCodeRegionId).innerHTML = `Erro ao iniciar a câmera: ${err}`;
-        console.error("Erro ao iniciar scanner:", err);
-        html5QrCode = null;
-    });
-};
-
-
-/**
- * Função para registrar o carimbo no Firestore.
- * @param {string} modelName - O nome do carimbo/modelo (ex: 'model1').
- * @param {string} uid - O ID do usuário logado.
- */
-async function handleStampRegistration(modelName, uid) {
-    try {
-        // Acessa a coleção 'users' e o documento com o UID do usuário
-        const userDocRef = db.collection("users").doc(uid); 
-        
-        // 1. Pega os dados atuais
-        const docSnap = await userDocRef.get();
-        const currentStamps = docSnap.exists ? docSnap.data().stamps || [] : [];
-
-        // 2. Checa se já tem o carimbo
-        if (currentStamps.includes(modelName)) {
-            alert(`Você já tem este carimbo: ${modelName}!`);
-            // Redireciona apenas para limpar a URL de 'newStamp' (se houver)
-            window.location.href = window.location.pathname; 
-            return;
-        }
-
-        // 3. Adiciona o novo carimbo
-        const newStamps = [...currentStamps, modelName];
-        await userDocRef.set({ stamps: newStamps }, { merge: true });
-
-        alert(`Carimbo ${modelName} desbloqueado com sucesso!`);
-        
-        // Redireciona para a mesma página, com o parâmetro 'newStamp' para acionar a animação
-        window.location.href = `${window.location.pathname}?newStamp=${modelName}`;
-
-    } catch (e) {
-        console.error("Erro ao registrar o carimbo:", e);
-        alert("Erro ao salvar carimbo. Tente novamente.");
-    }
-}
