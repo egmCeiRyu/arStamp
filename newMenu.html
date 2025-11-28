@@ -226,7 +226,16 @@
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (event) => {
             // Obter a miniatura atual
+            const modelName = thumb.getAttribute('data-name');
             const imgElement = thumb.querySelector('.thumbnail-img');
+          if (stampedModels.includes(modelName)) {
+          // O modelo está carimbado: mostra a imagem colorida
+            imgElement.src = `thumbnails/${modelName}_thumb.png`;
+          } else {
+          // O modelo NÃO está carimbado: garante que é a imagem branca
+            imgElement.src = 'thumbnails/white_thumb.png';
+          }
+          
 
             // Verifica se o modelo está usando a imagem padrão (não carimbado)
             // Isso bloqueia o clique para miniaturas não carimbadas.
