@@ -10,7 +10,6 @@
   
   <style>
     
-        /* Animação de conquista de estampa */
     @keyframes stampUnlock {
       0% {
         transform: scale(0);
@@ -37,7 +36,6 @@
     .stamp-unlock {
       animation: stampUnlock 0.8s ease-out forwards;
     }
-
     
     #view-model-btn.selected {
       animation: shadowPulse 1.3s infinite;
@@ -274,40 +272,44 @@
     });
 
     // Função principal que carrega do Firebase e atualiza o HTML
-    async function loadAndRenderStamps() {
-        if (!currentUserId) return;
+    async function loadAndRenderStamps(newStamp=null) {
+      if (!currentUserId) return;
+      const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
 
-        const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
+      thumbnails.forEach(thumb => {
+        const modelName = thumb.getAttribute('data-name');
+        const imgElement = thumb.querySelector('.thumbnail-img');
 
-        thumbnails.forEach(thumb => {
-            const modelName = thumb.getAttribute('data-name');
-            const imgElement = thumb.querySelector('.thumbnail-img');
+        if (stampedModels.includes(modelName)) {
+          imgElement.src = `thumbnails/${modelName}_thumb.png`;
 
-            if (stampedModels.includes(modelName)) {
-                // Miniatura colorida
-                imgElement.src = `thumbnails/${modelName}_thumb.png`;
+          // Anima apenas a nova conquista
+          if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
+            imgElement.classList.add('stamp-unlock');
+            imgElement.addEventListener('animationend', () => {
+              imgElement.classList.remove('stamp-unlock');
+            }, { once: true });
+          }
 
-                // --- ANIMAÇÃO SOMENTE PARA NOVA CONQUISTA ---
-                const justUnlocked = !imgElement.classList.contains('stamped');
-                if (justUnlocked) {
-                    imgElement.classList.add('stamp-unlock');
-
-                    // Remove a classe após a animação
-                    imgElement.addEventListener('animationend', () => {
-                        imgElement.classList.remove('stamp-unlock');
-                    }, { once: true });
-                }
-
-                imgElement.classList.add('stamped'); // Marca como conquistada
-            } else {
-                // Miniatura branca
-                imgElement.src = 'thumbnails/white_thumb.png';
-            }
-        });
+          imgElement.classList.add('stamped');
+        } else {
+          imgElement.src = 'thumbnails/white_thumb.png';
+        }
+      });
 
         localStorage.removeItem('thumbnailToUpdate');
         checkAllStamps(stampedModels);
     }
+  
+      // Monitor de autenticação
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        loadAndRenderStamps();
+      } else {
+        currentUserId = null;
+      }
+    });
     
     // ----------------------------------------------------
     // 6. LÓGICA DE SELEÇÃO DE MINIATURA (AGORA SÓ DEPOIS DE CARREGADO)
