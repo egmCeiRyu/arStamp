@@ -122,7 +122,7 @@ function handlePasswordReset(event) {
 
     // 2. Verifica se o campo de e-mail está preenchido
     if (!email) {
-        authStatus.textContent = "Por favor, insira seu e-mail acima para redefinir a senha.";
+        authStatus.textContent = "上記のメールアドレスを入力してパスワードを再設定してください。";
         authStatus.style.backgroundColor = '#ffcdd2'; // Fundo vermelho claro
         return;
     }
@@ -134,18 +134,18 @@ function handlePasswordReset(event) {
             // E-mail de redefinição enviado!
             authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
             authStatus.style.backgroundColor = '#c8e6c9'; // Fundo verde claro
-            console.log("E-mail de redefinição enviado com sucesso!");
+            console.log("再設定メールが正常に送信されました！");
         })
         .catch((error) => {
             // Lidar com erros específicos ou manter a mensagem de segurança
             if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
                  authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
                  authStatus.style.backgroundColor = '#c8e6c9'; 
-                 console.warn("Reset de senha solicitado, mas e-mail não encontrado/inválido.");
+                 console.warn("パスワードのリセットをリクエストしましたが、メールアドレスが見つかりません。");
             } else {
                 authStatus.textContent = `Erro inesperado: ${error.message}`;
                 authStatus.style.backgroundColor = '#ffcdd2';
-                console.error("Erro no reset de senha:", error);
+                console.error("パスワードリセットエラー：", error);
             }
         });
 }
