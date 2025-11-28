@@ -90,6 +90,19 @@
     </div>
 
     <script type="module">
+        // 1. Obter o usuário logado
+        const user = auth.currentUser;
+        if (user) {
+            // 2. Salvar no Firebase
+            await addStampToFirebase(user.uid, modelName); 
+
+            // 3. Redirecionar
+            window.location.href = 'newMenu.html'; 
+        } else {
+            // Usuário não logado, erro
+            console.error("Erro: Usuário não autenticado para salvar carimbo.");
+        }
+        
         // 1. Variáveis e Seletores
         const urlParams = new URLSearchParams(window.location.search);
         const modelUrl = urlParams.get('model');
