@@ -119,7 +119,7 @@
 
         async function addStampToFirebase(uid, modelName) {
             if (!uid) {
-                console.error("UID não disponível. Não foi possível salvar o carimbo.");
+                console.error("UIDが利用できません。タイムスタンプを保存できませんでした。");
                 return;
             }
             
@@ -145,7 +145,7 @@
                 }
 
             } catch (error) {
-                console.error("Erro ao salvar carimbo no Firebase:", error);
+                console.error("Firebase にスタンプを保存する際にエラーが発生しました:", error);
             }
         }
 
@@ -185,7 +185,7 @@
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 // Usuário NÃO está logado.
-                console.log("Usuário deslogado. Salvo o destino e redirecionando para login.");
+                console.log("ユーザーがログアウトしました。保存先を保存し、ログイン画面にリダイレクトします。");
                 
                 // Salva a URL completa do modelo para redirecionar após o login.
                 localStorage.setItem('redirectAfterLogin', window.location.href);
@@ -209,7 +209,7 @@
             event.preventDefault(); // Impede a ação padrão
 
             if (!modelKey) {
-                 console.error("Chave do modelo (modelKey) não definida. Não é possível salvar.");
+                 console.error("モデルキー（modelKey）が定義されていません。保存できません。");
                  return;
             }
 
@@ -222,7 +222,7 @@
                 
             } else {
                 // Caso o status Auth mude entre a carga da página e o clique do botão
-                alert("Você precisa estar logado para coletar carimbos. Redirecionando para login.");
+                alert("スタンプを集めるにはログインが必要です。ログイン画面にリダイレクトします。");
                 localStorage.setItem('redirectAfterLogin', window.location.href);
                 window.location.href = 'index.html';
                 return;
@@ -262,7 +262,7 @@
 
         arButton.addEventListener('click', (event) => {
             if (!modelViewer.canActivateAR) {
-                console.log("AR não suportado no dispositivo/contexto.");
+                console.log("デバイス/コンテキストで AR がサポートされていません。");
                 return;
             }
 
