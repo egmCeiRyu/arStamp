@@ -223,18 +223,39 @@
     // 6. LÓGICA DE SELEÇÃO DE MINIATURA (AGORA SÓ DEPOIS DE CARREGADO)
     // ----------------------------------------------------
 
-    // --- LÓGICA DE RENDERIZAÇÃO DAS MINIATURAS ---
     thumbnails.forEach(thumb => {
-        const modelName = thumb.getAttribute('data-name');
-        const imgElement = thumb.querySelector('.thumbnail-img');
+        thumb.addEventListener('click', (event) => {
+            // Obter a miniatura atual
+            const imgElement = thumb.querySelector('.thumbnail-img');
 
-        if (stampedModels.includes(modelName)) {
-            // O modelo está carimbado: mostra a imagem colorida
-            imgElement.src = `thumbnails/${modelName}_thumb.png`;
-        } else {
-            // O modelo NÃO está carimbado: garante que é a imagem branca
-            imgElement.src = 'thumbnails/white_thumb.png';
-        }
+            // Verifica se o modelo está usando a imagem padrão (não carimbado)
+            // Isso bloqueia o clique para miniaturas não carimbadas.
+            if (imgElement.src.endsWith('white_thumb.png')) { 
+                event.preventDefault(); // Impede qualquer navegação padrão
+
+                console.log('Modelo não carimbado, seleção bloqueada.');
+
+                // Opcional: Adicionar feedback visual de bloqueio/desseleção
+                thumbnails.forEach(t => t.classList.remove('selected'));
+                viewModelBtn.classList.remove('selected');
+                selectedModelUrl = ""; // Garante que o botão de visualização não faça nada
+
+                return; // Sai da função, impedindo a seleção
+            }
+
+            // Se a execução chegou aqui, o modelo está carimbado e é clicável.
+
+            // Remove a classe 'selected' de todas as miniaturas
+            thumbnails.forEach(t => t.classList.remove('selected'));
+            // Adiciona a classe 'selected' à miniatura clicada
+            thumb.classList.add('selected');
+
+            selectedModelUrl = thumb.getAttribute('data-model');
+            selectedModelName = thumb.getAttribute('data-name');
+
+            // Ativa o botão de visualização com o efeito de pulso
+            viewModelBtn.classList.add('selected');
+        });
     });
 
     // 7. LÓGICA DO BOTÃO DE VISUALIZAÇÃO (MANTIDA)
