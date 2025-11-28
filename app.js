@@ -170,3 +170,59 @@ function signOutUser() {
     });
 }
 window.signOutUser = signOutUser;
+
+// A função assume que o usuário está logado (graças ao onAuthStateChanged)
+function startQrCodeScanner() {
+    // 1. O leitor de QR Code é inicializado (usando a biblioteca)
+    // Exemplo: new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess);
+    
+    // 2. O Firebase User está acessível globalmente
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        alert("エラー：ログインしているユーザーがいません。ログイン画面に戻ってください。");
+        return;
+    }
+
+    console.log(`ユーザー向けスキャナー起動： ${user.uid}`);
+
+    // ... (Código da sua biblioteca de QR Code aqui) ...
+
+    // Função de callback da sua biblioteca (o que acontece quando um QR Code é lido):
+    // function onScanSuccess(qrCodeMessage) {
+    //     handleStampRegistration(qrCodeMessage, user.uid);
+    // }
+}
+
+
+// AÇÃO PRINCIPAL APÓS A LEITURA DO QR CODE
+function handleStampRegistration(qrCodeData, userId) {
+    // 1. (Opcional) Validação da informação lida
+    if (!qrCodeData || !qrCodeData.startsWith('STAMP_')) {
+        alert("QRコードが無効です。");
+        return;
+    }
+
+    // 2. Enviar os dados do QR Code e o UID do usuário para o Firebase Firestore/Database
+    // (Apenas um exemplo. Você deve substituir pela sua lógica de banco de dados real)
+    
+    // Supondo que você usa Firestore (o código abaixo é só um conceito):
+    /*
+    const db = firebase.firestore(); 
+    db.collection("stamps").add({
+        qrData: qrCodeData,
+        userId: userId,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        alert("Carimbo registrado com sucesso!");
+    })
+    .catch((error) => {
+        console.error("Erro ao registrar carimbo: ", error);
+        alert("Erro ao registrar carimbo. Tente novamente.");
+    });
+    */
+    
+    alert(`Carimbo Registrado! Dados: ${qrCodeData} pelo Usuário: ${userId}`);
+    // Interromper o scanner
+}

@@ -68,6 +68,11 @@
 </head>
 
 <body>
+  
+    <div id="stamp-section">
+      <div id="reader" style="width: 300px;"></div>
+      <button onclick="startQrCodeScanner()">qrcode</button>
+    </div>
   <div class="title">
     <img src=thumbnails/titleStampBook.png alt="logo" class="titlebook">
   </div>
@@ -186,6 +191,11 @@
     overflow: visible;
     z-index: 9999;
 "></div>
+  
+
+
+<script src="path/para/sua/biblioteca-qrcode.js"></script>
+<script src="app.js"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
