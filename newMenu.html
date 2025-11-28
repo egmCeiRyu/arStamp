@@ -63,6 +63,57 @@
       padding-left: 10px;
       padding-right: 10px;
     }
+    
+        /* Container de Ações na parte de baixo */
+    #bottom-actions {
+        position: fixed; /* Fixa o container na tela */
+        bottom: 20px; /* Distância da parte inferior da tela */
+        left: 28%;
+        transform: translateX(-50%); /* Centraliza horizontalmente */
+        width: 100%;
+        max-width: 400px; /* Limita a largura para ficar dentro do #app-container */
+        padding: 0 10px;
+        box-sizing: border-box;
+        display: flex; /* Habilita o Flexbox */
+        justify-content: space-between; /* Espaça os elementos para ficarem nos cantos */
+        align-items: flex-end;
+        z-index: 1000;
+    }
+
+    /* Estilo para o botão de visualização (manter o tamanho original) */
+    #view-model-btn-box {
+        width: 120px; /* Tamanho do seu ícone de visualização */
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 0; /* Alinha à direita do container #bottom-actions */
+    }
+
+    /* Estilo para o botão QR Code */
+    #qr-code-btn-box {
+        /* Define o estilo da caixa do botão QR */
+        display: flex;
+        align-items: flex-end; /* Alinha o botão ao canto inferior */
+        margin-left: 0; /* Alinha à esquerda do container #bottom-actions */
+    }
+
+    #qr-scanner-btn {
+        /* Estilos do botão QR */
+        background-color: #f7a73a; /* Exemplo: uma cor diferente */
+        color: white;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s;
+    }
+
+    #qr-scanner-btn:hover {
+        background-color: #e09634;
+    }
   </style>
 
 </head>
@@ -178,9 +229,6 @@
     </div>
   </div>
 
-  <div id="view-model-btn-box">
-      <img src="icon/selectionIcon.png" id="view-model-btn">
-  </div>
 
   <div class="bottom-stripe"></div>
   
@@ -190,6 +238,18 @@
     overflow: visible;
     z-index: 9999;
 "></div>
+  
+  <div id="bottom-actions">
+            <div id="qr-code-btn-box">
+        <button id="qr-scanner-btn" onclick="window.startQrCodeScanner()">qrcode</button>
+      </div>
+
+            <div id="view-model-btn-box">
+        <img src="icon/selectionIcon.png" id="view-model-btn">
+      </div>
+  </div>
+
+  <div class="bottom-stripe"></div>
   
 
 
