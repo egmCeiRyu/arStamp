@@ -111,3 +111,45 @@ function signOutUser() {
     });
 }
 window.signOutUser = signOutUser;
+
+function handlePasswordReset(event) {
+    // Para evitar que a âncora recarregue a página
+    event.preventDefault(); 
+    
+    const email = document.getElementById('email').value;
+    const authStatus = document.getElementById('auth-status');
+
+    if (!email) {
+        authStatus.textContent = "Por favor, insira seu e-mail acima para redefinir a senha.";
+        authStatus.style.backgroundColor = '#ffcdd2'; // Fundo vermelho claro
+        return;
+    }
+
+    // 
+
+    firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+            // E-mail de redefinição enviado!
+            authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
+            authStatus.style.backgroundColor = '#c8e6c9'; // Fundo verde claro
+            console.log("E-mail de redefinição enviado com sucesso!");
+        })
+        .catch((error) => {
+            // O Firebase gerencia o erro de "e-mail não encontrado" de forma segura,
+            // então a mensagem de sucesso é mostrada mesmo que o e-mail não exista,
+            // para evitar vazar informações sobre quais e-mails estão cadastrados.
+            // Aqui, apenas lidamos com erros técnicos, mas mantemos a mensagem 
+            // de sucesso na UI para a maioria dos casos.
+            if (error.code === 'auth/user-not-found') {
+                // A Firebase recomenda dar uma resposta genérica de sucesso para segurança.
+                authStatus.textContent = `Se o e-mail estiver registrado, um link de redefinição foi enviado para ${email}.`;
+                authStatus.style.backgroundColor = '#c8e6c9'; 
+                console.warn("Usuário não encontrado, mas a mensagem de sucesso é exibida por segurança.");
+            } else {
+                // Outros erros (e.g., e-mail mal formatado)
+                authStatus.textContent = `Erro ao enviar o e-mail de redefinição: ${error.message}`;
+                authStatus.style.backgroundColor = '#ffcdd2';
+                console.error("Erro no reset de senha:", error);
+            }
+        });
+}
