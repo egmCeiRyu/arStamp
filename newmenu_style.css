@@ -169,7 +169,7 @@
       .thumbnail-container {
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* always 2 columns */
-        width: 64%;
+        width: 25%;
       }
       
       .thumbnail-link img{
