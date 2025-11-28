@@ -9,28 +9,22 @@
   <title>3D Model Thumbnails</title>
   
   <style>
-        /* Pulse Animation */
-    @keyframes pulse {
+    
+    /* Animação de escala do botão */
+    @keyframes scalePulse {
       0% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(252, 221, 91, 0.87);
       }
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 13px rgba(204, 169, 44, 0);
+      50% {
+        transform: scale(1.15); /* aumenta 15% no meio da animação */
       }
       100% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
       }
     }
 
     #view-model-btn.selected {
-      animation: pulse 1.3s infinite;
-      border-radius: 9px;
-      border-radius: 93px;
-      padding: 0px;
-    }
+      animation: scalePulse 1s infinite ease-in-out;
     
     /* --- Container para manter o layout do tamanho do smartphone --- */
     #app-container {
