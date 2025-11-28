@@ -233,7 +233,7 @@
             }
 
             // Sempre redireciona para a página do menu (newMenu.html) após tentar salvar
-            window.location.href = 'newMenu.html';
+            window.location.href = `newMenu.html?newStamp=${encodeURIComponent(modelKey)}`;
         });
 
         // -------------------------------------------------------------------------

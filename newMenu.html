@@ -220,44 +220,39 @@ async function loadStampedModelsFromFirebase(uid) {
 }
 
 // Renderiza estampas e anima apenas a nova
-async function loadAndRenderStamps() {
-  if (!currentUserId) return;
-
-  // Carimbaos atuais no Firebase
-  const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
-
-  // Carimbos antigos salvos no localStorage (ou vazio)
-  const oldStamps = JSON.parse(localStorage.getItem('stampedModels') || '[]');
-
-  // Detecta a nova estampa
-  const newStamp = stampedModels.find(name => !oldStamps.includes(name)) || null;
-
-  thumbnails.forEach(thumb => {
-    const modelName = thumb.getAttribute('data-name');
-    const imgElement = thumb.querySelector('.thumbnail-img');
-
-    if (stampedModels.includes(modelName)) {
-      imgElement.src = `thumbnails/${modelName}_thumb.png`;
-
-      // Anima apenas a nova conquista
-      if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
-        imgElement.classList.add('stamp-unlock');
-        imgElement.addEventListener('animationend', () => {
-          imgElement.classList.remove('stamp-unlock');
-        }, { once: true });
-      }
-
-      imgElement.classList.add('stamped');
-    } else {
-      imgElement.src = 'thumbnails/white_thumb.png';
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
     }
-  });
 
-  // Atualiza localStorage com os carimbos atuais
-  localStorage.setItem('stampedModels', JSON.stringify(stampedModels));
+    async function loadAndRenderStamps() {
+      if (!currentUserId) return;
+      const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
 
-  checkAllStamps(stampedModels);
-}
+      const newStamp = getQueryParam('newStamp'); // 🔑 modelo recém desbloqueado
+
+      thumbnails.forEach(thumb => {
+        const modelName = thumb.getAttribute('data-name');
+        const imgElement = thumb.querySelector('.thumbnail-img');
+
+        if (stampedModels.includes(modelName)) {
+          imgElement.src = `thumbnails/${modelName}_thumb.png`;
+
+          if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
+            imgElement.classList.add('stamp-unlock');
+            imgElement.addEventListener('animationend', () => {
+              imgElement.classList.remove('stamp-unlock');
+            }, { once: true });
+          }
+
+          imgElement.classList.add('stamped');
+        } else {
+          imgElement.src = 'thumbnails/white_thumb.png';
+        }
+      });
+
+      checkAllStamps(stampedModels);
+    }
 
 // Monitor de autenticação
 onAuthStateChanged(auth, (user) => {
