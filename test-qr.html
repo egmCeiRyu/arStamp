@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Scanner Oculto</title>
+  <title>QR Scanner Automático</title>
   <style>
     body {
       font-family: sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      justify-content: center;
+      height: 100vh;
       background-color: #FFF5E1;
+      margin: 0;
     }
 
     #scan-btn {
@@ -23,46 +25,53 @@
       cursor: pointer;
     }
 
-    /* Vídeo invisível */
-    #video {
-      display: none;
+    video {
+      width: 300px;
+      height: 300px;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      display: none; /* inicia oculto */
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-<h2>Scanner de QR</h2>
-<button id="scan-btn">📸 Abrir Câmera</button>
-<video id="video"></video>
+  <h2>Scanner de QR</h2>
+  <button id="scan-btn">📸 Abrir Câmera</button>
+  <video id="video"></video>
 
-<script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
-<script>
-const scanBtn = document.getElementById('scan-btn');
-const video = document.getElementById('video');
-let qrScanner;
+  <!-- Biblioteca QR Scanner -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+  <script>
+    const scanBtn = document.getElementById('scan-btn');
+    const video = document.getElementById('video');
+    let qrScanner;
 
-scanBtn.addEventListener('click', async () => {
-    scanBtn.disabled = true; // evita cliques repetidos
+    scanBtn.addEventListener('click', async () => {
+      scanBtn.style.display = 'none';
+      video.style.display = 'block';
 
-    qrScanner = new QrScanner(video, result => {
-        // Quando detecta, abre o link na mesma aba
+      qrScanner = new QrScanner(video, result => {
+        // Redireciona automaticamente na mesma aba
         window.location.href = result;
         qrScanner.stop();
-    }, {
+      }, {
         onDecodeError: error => {
-            console.log('Ainda não detectado...');
+          // Só loga enquanto não detecta
+          console.log('Não detectado ainda...');
         },
         maxScansPerSecond: 5
-    });
+      });
 
-    try {
+      try {
         await qrScanner.start();
-        console.log('Scanner iniciado em modo invisível');
-    } catch(e) {
+      } catch (e) {
         alert('Erro ao acessar a câmera: ' + e);
-        scanBtn.disabled = false;
-    }
-});
-</script>
+        scanBtn.style.display = 'block';
+        video.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
