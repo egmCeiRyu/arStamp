@@ -43,35 +43,34 @@
 
   <!-- Biblioteca QR Scanner -->
   <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
-  <script>
-    const scanBtn = document.getElementById('scan-btn');
-    const video = document.getElementById('video');
-    let qrScanner;
+    <script>
+      const scanBtn = document.getElementById('scan-btn');
+      const video = document.getElementById('video');
+      let qrScanner;
 
-    scanBtn.addEventListener('click', async () => {
-      scanBtn.style.display = 'none';
-      video.style.display = 'block';
+      scanBtn.addEventListener('click', async () => {
+        scanBtn.style.display = 'none';
+        video.style.display = 'block';
 
-      qrScanner = new QrScanner(video, result => {
-        // Redireciona automaticamente na mesma aba
-        window.location.href = result;
-        qrScanner.stop();
-      }, {
-        onDecodeError: error => {
-          // Só loga enquanto não detecta
-          console.log('Não detectado ainda...');
-        },
-        maxScansPerSecond: 5
+        qrScanner = new QrScanner(video, result => {
+          const qrText = result?.data || result; // pega o texto correto
+          if (qrText) {
+            window.location.href = qrText; // abre na mesma aba
+            qrScanner.stop();
+          }
+        }, {
+          onDecodeError: error => console.log('Não detectado ainda...'),
+          maxScansPerSecond: 5
+        });
+
+        try {
+          await qrScanner.start();
+        } catch(e) {
+          alert('Erro ao acessar a câmera: ' + e);
+          scanBtn.style.display = 'block';
+          video.style.display = 'none';
+        }
       });
-
-      try {
-        await qrScanner.start();
-      } catch (e) {
-        alert('Erro ao acessar a câmera: ' + e);
-        scanBtn.style.display = 'block';
-        video.style.display = 'none';
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
