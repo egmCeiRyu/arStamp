@@ -346,11 +346,22 @@
             display: none !important; /* Esconda para telas grandes */
         }
         #stamp-section{
-            padding-top: 70px;
+            padding-top: 123px;
         }
-      .thumbnail-container{
-        max-width: 1280px;
-      }
+        .thumbnail-container{
+          max-width: 1796px;
+          max-height: 1000px;
+          display: grid;
+          grid-template-columns: repeat(7, 1fr); /* always 2 columns */
+          justify-items: center;
+          align-content: center;
+          row-gap: 398px;
+          padding-top: 74px;
+        }
+        .thumbnail-link img{
+          height: 215px;
+          width: 220px;
+        }
         
     }
     
