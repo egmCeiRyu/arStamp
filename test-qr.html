@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
   
   <!-- HTML5 QR Code CDN FUNCIONAL -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
+  
 
   <style>
     body {
@@ -166,140 +166,35 @@
 </head>
 
 <body>
-
-  <div class="title">
-    <img src="thumbnails/titleStampBook.png" alt="logo" class="titlebook">
-  </div>
-
-  <div id="stamp-section">
-    <div class="thumbnail-container" id="model-thumbnails">
-      <!-- suas thumbnails aqui... -->
-      <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
-        <img src="thumbnails/white_thumb.png" alt="Model 1" class="thumbnail-img">
-      </div>
-      <div class="thumbnail-link" data-model="models/model2.glb" data-name="model2">
-        <img src="thumbnails/white_thumb.png" alt="Model 2" class="thumbnail-img">
-      </div>
-      <!-- continue com as demais thumbnails -->
-    </div>
-  </div>
-  
-  <div class="bottom-stripe">
-    <div id="particleContainer" style="position:absolute;pointer-events:none;overflow:visible;z-index:9999;"></div>
-
-    <div id="bottom-actions">
-      <div id="qr-code-btn-box">
-        <button id="qr-scanner-btn" onclick="window.startQrCodeScanner()">qrcode</button>
-      </div>
-
-      <div id="view-model-btn-box">
-        <img src="icon/selectionIcon.png" id="view-model-btn">
-      </div>
-    </div>
-  </div>
+  <script src="https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
+  <button onclick="startQrCodeScanner()">Abrir QR Scanner</button>
 
   <div id="qr-code-reader">
-      <div id="qr-reader" style="width:300px"></div>
+    <div id="qr-reader" style="width:300px"></div>
   </div>
 
-  <!-- Firebase e lógica do seu app continuam intactas -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <!-- Biblioteca primeiro -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
 
-    const firebaseConfig = {
-      apiKey: "...",
-      authDomain: "...",
-      projectId: "...",
-      storageBucket: "...",
-      messagingSenderId: "...",
-      appId: "...",
-      measurementId: "..."
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let selectedModelUrl = "";
-    let selectedModelName = "";
-    let currentUserId = null;
-
-    const thumbnails = document.querySelectorAll('.thumbnail-link');
-    const viewModelBtn = document.getElementById('view-model-btn');
-
-    // Monitor de autenticação
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUserId = user.uid;
-      } else {
-        currentUserId = null;
-      }
-    });
-
-    // Seleção de thumbnails
-    thumbnails.forEach(thumb => {
-      thumb.addEventListener('click', (event) => {
-        const modelName = thumb.getAttribute('data-name');
-        const imgElement = thumb.querySelector('.thumbnail-img');
-        if (imgElement.src.endsWith('white_thumb.png')) {
-          event.preventDefault();
-          thumbnails.forEach(t => t.classList.remove('selected'));
-          viewModelBtn.classList.remove('selected');
-          selectedModelUrl = "";
-          return;
-        }
-        thumbnails.forEach(t => t.classList.remove('selected'));
-        thumb.classList.add('selected');
-        selectedModelUrl = thumb.getAttribute('data-model');
-        selectedModelName = thumb.getAttribute('data-name');
-        viewModelBtn.classList.add('selected');
-      });
-    });
-
-    // Botão de visualização
-    viewModelBtn.addEventListener('click', () => {
-      if (selectedModelUrl) {
-        window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-      }
-    });
-
-    // Função QR Code Scanner
-    window.startQrCodeScanner = function () {
+  <!-- Seu código depois -->
+  <script>
+  function startQrCodeScanner() {
       const container = document.getElementById("qr-code-reader");
       container.style.display = "flex";
 
       const html5QrCode = new Html5Qrcode("qr-reader");
 
       html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        async (decodedText) => {
-          // Lógica de sucesso: salvar estampa
-          if (currentUserId && decodedText) {
-            const docRef = doc(db, "users", currentUserId);
-            const docSnap = await getDoc(docRef);
-            let stamps = [];
-            if (docSnap.exists()) stamps = docSnap.data().stamps || [];
-            if (!stamps.includes(decodedText)) {
-              stamps.push(decodedText);
-              await setDoc(docRef, { stamps: stamps }, { merge: true });
-            }
-          }
-
-          html5QrCode.stop();
-          container.style.display = "none";
-          alert("QR Code detectado: " + decodedText);
-          window.location.reload(); // recarrega para atualizar estampas
-        },
-        (errorMessage) => {}
-      ).catch(err => {
-        console.error("Erro ao iniciar QR scanner:", err);
-        alert("Não foi possível acessar a câmera. Verifique permissões e HTTPS.");
-      });
-    };
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 250 },
+          qrCodeMessage => {
+              alert("QR detected: " + qrCodeMessage);
+              html5QrCode.stop();
+              container.style.display = "none";
+          },
+          errorMessage => {}
+      );
+  }
   </script>
-
 </body>
 </html>
