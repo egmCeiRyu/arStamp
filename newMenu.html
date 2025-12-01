@@ -606,7 +606,37 @@ async function loadStampedModelsFromFirebase(uid) {
 
       checkAllStamps(stampedModels);
     }
+async function saveNewStampAndReload(modelName) {
+    if (!currentUserId || !modelName) {
+        // Se a estampa já está desbloqueada, apenas recarrega para fechar o scanner.
+        window.location.reload(); 
+        return;
+    }
 
+    const docRef = doc(db, "users", currentUserId);
+    const docSnap = await getDoc(docRef);
+    let stampedModels = [];
+
+    if (docSnap.exists()) {
+        stampedModels = docSnap.data().stamps || [];
+    }
+
+    if (!stampedModels.includes(modelName)) {
+        stampedModels.push(modelName);
+        await setDoc(docRef, { stamps: stampedModels }, { merge: true });
+
+        // Redireciona na MESMA ABA, adicionando o parâmetro 'newStamp'
+        window.location.href = window.location.pathname + `?newStamp=${modelName}`;
+    } else {
+        alert(`A estampa ${modelName} já foi desbloqueada!`);
+        window.location.reload(); // Recarrega para fechar o scanner sem desbloquear
+    }
+}
+
+// 🔑 EXPÕE A FUNÇÃO para ser chamada pelo scanner
+window.handleQRCodeScan = async function(modelName) {
+    await saveNewStampAndReload(modelName);
+};
 // Monitor de autenticação
 onAuthStateChanged(auth, (user) => {
   if (user) {
