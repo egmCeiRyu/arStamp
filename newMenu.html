@@ -7,9 +7,6 @@
   <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
   <title>3D Model Thumbnails</title>
   
-  <!-- Biblioteca para ler QR da imagem -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
-  
   <style>
     
     .title{
@@ -488,56 +485,45 @@
   </div>  
 </div>
   
-  <div id="qr-code-reader"></div>
-  
-  <input type="file" accept="image/*" capture="environment" id="qr-input" style="display:none">
-
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
   <script src="app.js"></script>
   
-  <script>
-    const qrBtn = document.getElementById("qr-scanner-btn");
-    const qrInput = document.getElementById("qr-input");
+  <video id="video"></video>
 
-    // Abre a câmera nativa do iPhone
-    qrBtn.addEventListener("click", () => {
-      qrInput.click();
+<script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+<script>
+const scanBtn = document.getElementById('qr-scanner-btn');
+const video = document.getElementById('video');
+let qrScanner;
+
+scanBtn.addEventListener('click', async () => {
+    scanBtn.style.display = 'none';
+    video.style.display = 'block';
+
+    qrScanner = new QrScanner(video, result => {
+        // 🔑 CORREÇÃO APLICADA: Acesse a propriedade .data do objeto result.
+        if (result && result.data) {
+            console.log('QR Code decodificado:', result.data);
+            
+            // Redireciona para o link
+            window.location.href = result.data; 
+            qrScanner.stop();
+        }
+    }, {
+        onDecodeError: error => console.log('Não detectado ainda...'),
+        maxScansPerSecond: 5,
+        // Adicione highlightScanRegion: true se quiser ver o quadrado de detecção
+        highlightScanRegion: true 
     });
 
-    // Quando usuário tira foto do QR
-    qrInput.addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function() {
-        const img = new Image();
-        img.onload = function() {
-
-          // Canvas temporário
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-
-          // Lê QR
-          const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-          if (code) {
-            alert("QR detectado: " + code.data);
-          } else {
-            alert("Nenhum QR encontrado. Tente novamente.");
-          }
-
-        };
-        img.src = reader.result;
-      };
-
-      reader.readAsDataURL(file);
-    });
-    </script>
+    try {
+        await qrScanner.start();
+    } catch(e) {
+        alert('Erro ao acessar a câmera. Verifique as permissões. HTTPS é obrigatório para câmeras: ' + e);
+        scanBtn.style.display = 'block';
+        video.style.display = 'none';
+    }
+});
+</script>
 
   <script type="module">
 
