@@ -1,76 +1,74 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Scanner Automático</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #FFF5E1;
-      margin: 0;
-    }
-
-    #scan-btn {
-      font-size: 22px;
-      padding: 15px 30px;
-      background: #ffd54f;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    video {
-      width: 300px;
-      height: 300px;
-      border: 2px solid #ccc;
-      border-radius: 12px;
-      display: none; /* inicia oculto */
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Scanner Automático</title>
+<style>
+  body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #FFF5E1;
+    margin: 0;
+  }
+  #scan-btn {
+    font-size: 22px;
+    padding: 15px 30px;
+    background: #ffd54f;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  video {
+    width: 300px;
+    height: 300px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    display: none;
+    margin-top: 20px;
+  }
+</style>
 </head>
 <body>
 
-  <h2>Scanner de QR</h2>
-  <button id="scan-btn">📸 Abrir Câmera</button>
-  <video id="video"></video>
+<h2>Scanner de QR</h2>
+<button id="scan-btn">📸 Abrir Câmera</button>
+<video id="video"></video>
 
-  <!-- Biblioteca QR Scanner -->
-  <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
-    <script>
-      const scanBtn = document.getElementById('scan-btn');
-      const video = document.getElementById('video');
-      let qrScanner;
+<script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+<script>
+const scanBtn = document.getElementById('scan-btn');
+const video = document.getElementById('video');
+let qrScanner;
 
-      scanBtn.addEventListener('click', async () => {
-        scanBtn.style.display = 'none';
-        video.style.display = 'block';
+scanBtn.addEventListener('click', async () => {
+  scanBtn.style.display = 'none';
+  video.style.display = 'block';
 
-        qrScanner = new QrScanner(video, result => {
-          const qrText = result?.data || result; // pega o texto correto
-          if (qrText) {
-            window.location.href = qrText; // abre na mesma aba
-            qrScanner.stop();
-          }
-        }, {
-          onDecodeError: error => console.log('Não detectado ainda...'),
-          maxScansPerSecond: 5
-        });
+  qrScanner = new QrScanner(video, result => {
+    // 🔹 result já é o texto do QR
+    if (result) {
+      window.location.href = result; // abre na mesma aba
+      qrScanner.stop();
+    }
+  }, {
+    onDecodeError: error => console.log('Não detectado ainda...'),
+    maxScansPerSecond: 5
+  });
 
-        try {
-          await qrScanner.start();
-        } catch(e) {
-          alert('Erro ao acessar a câmera: ' + e);
-          scanBtn.style.display = 'block';
-          video.style.display = 'none';
-        }
-      });
-    </script>
+  try {
+    await qrScanner.start();
+  } catch(e) {
+    alert('Erro ao acessar a câmera: ' + e);
+    scanBtn.style.display = 'block';
+    video.style.display = 'none';
+  }
+});
+</script>
+
 </body>
 </html>
