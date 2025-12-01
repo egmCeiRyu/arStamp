@@ -337,21 +337,20 @@
       }
     }
     
-#qr-code-reader {
-        width: 100%;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background: black;
-        z-index: 2000; 
-        display: none; /* Deixa como 'none' por padrão */
-        /* 🔑 IMPORTANTE: Adiciona flexbox para garantir que o conteúdo da câmera seja centralizado/exibido */
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
+    #qr-code-reader {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: black;
+            z-index: 2000; 
+            display: none; /* Deixa assim para o JS controlar */
+            justify-content: center; /* O JS muda para 'flex' no clique */
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
      
   </style>
 
