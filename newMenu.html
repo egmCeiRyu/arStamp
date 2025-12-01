@@ -211,11 +211,13 @@
     */
 
     /* Botão de visualização */
-    /*
+  
     #view-model-btn.selected {
-      animation: scalePulse 1s infinite ease-in-out;
+        animation: 
+            scalePulse 1s infinite ease-in-out,
+            glowPulse 1s infinite ease-in-out; 
     }
-    */
+    
 
     /*
     @keyframes scalePulse {
@@ -224,6 +226,12 @@
       100% { transform: scale(0.8); }
     }
     */
+    
+    @keyframes glowPulse {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.4)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.9)); }
+    100% { filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.4)); }
+    }
 
     /* Container principal */
     #app-container {
