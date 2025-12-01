@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
   <title>3D Model Thumbnails</title>
   
+  <!-- Biblioteca para ler QR da imagem -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+  
   <style>
     
     .title{
@@ -485,115 +488,51 @@
   </div>  
 </div>
   
-<div id="qr-code-reader"></div>
+  <div id="qr-code-reader"></div>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
-<script>
-const qrCodeRegionId = "qr-code-reader";
-    let html5QrCode = null;
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <script src="app.js"></script>
 
-    window.startQrCodeScanner = function() {
-        // 🔑 Adicione esta verificação para parar o scanner se ele estiver ativo
-        // Embora não seja a causa do "não funcionar", é uma boa prática.
-        if (html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop().then(() => {
-                console.log("Scanner parado antes de reiniciar.");
-            }).catch(err => {
-                console.error("Erro ao tentar parar o scanner: ", err);
-            });
-        }
-        
-        // 1. Ocultar o conteúdo principal e as ações de baixo
-        document.getElementById('stamp-section').style.display = 'none';
-        document.getElementById('bottom-actions').style.display = 'none';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        let qrReaderContainer = document.getElementById(qrCodeRegionId);
-        qrReaderContainer.style.display = 'flex'; // Usar 'flex' aqui, conforme o CSS
-
-        // Garante que o scanner seja criado apenas uma vez por sessão
-        if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode(qrCodeRegionId);
-        }
-
-        const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            disableFlip: false,
-        };
-
-        html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            (decodedText, decodedResult) => {
-                // ... (Lógica de sucesso) ...
-            },
-            (errorMessage) => {
-                // ... (Lógica de erro contínuo) ...
-            }
-        ).catch((err) => {
-            // 🚨 TRATAMENTO CRÍTICO DE ERRO/PERMISSÃO NEGADA 🚨
-            
-            // Reverte a interface:
-            qrReaderContainer.style.display = 'none';
-            document.getElementById('stamp-section').style.display = 'block';
-            document.getElementById('bottom-actions').style.display = 'flex';
-            
-            // Notifica o usuário:
-            let message = "Erro ao acessar a câmera. Verifique se você concedeu as permissões. Certifique-se também de estar em um ambiente **HTTPS**.";
-            if (err.name === "NotAllowedError") {
-                message = "Permissão de câmera negada. Atualize a página e conceda a permissão, ou verifique as configurações de privacidade do seu navegador.";
-            } else if (err.name === "NotFoundError") {
-                message = "Nenhuma câmera encontrada no dispositivo.";
-            }
-            alert(message);
-            console.error("Erro ao iniciar a câmera: ", err);
-        });
+    const firebaseConfig = {
+      apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+      authDomain: "stamp-edfc5.firebaseapp.com",
+      projectId: "stamp-edfc5",
+      storageBucket: "stamp-edfc5.firebasestorage.app",
+      messagingSenderId: "522739532414",
+      appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+      measurementId: "G-2EVLH3GZNS"
     };
-</script>
-<script src="app.js"></script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
-  authDomain: "stamp-edfc5.firebaseapp.com",
-  projectId: "stamp-edfc5",
-  storageBucket: "stamp-edfc5.firebasestorage.app",
-  messagingSenderId: "522739532414",
-  appId: "1:522739532414:web:047e4168251b5542ce8e2f",
-  measurementId: "G-2EVLH3GZNS"
-};
+    let selectedModelUrl = "";
+    let selectedModelName = "";
+    let currentUserId = null;
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+    const thumbnails = document.querySelectorAll('.thumbnail-link');
+    const viewModelBtn = document.getElementById('view-model-btn');
 
-let selectedModelUrl = "";
-let selectedModelName = "";
-let currentUserId = null;
-
-const thumbnails = document.querySelectorAll('.thumbnail-link');
-const viewModelBtn = document.getElementById('view-model-btn');
-
-// Carrega estampas do Firebase
-async function loadStampedModelsFromFirebase(uid) {
-  if (!uid) return [];
-  try {
-    const docRef = doc(db, "users", uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data().stamps || [];
-    } else {
-      await setDoc(docRef, { stamps: [] });
-      return [];
+    async function loadStampedModelsFromFirebase(uid) {
+      if (!uid) return [];
+      try {
+        const docRef = doc(db, "users", uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          return docSnap.data().stamps || [];
+        } else {
+          await setDoc(docRef, { stamps: [] });
+          return [];
+        }
+      } catch(e) { console.error(e); return []; }
     }
-  } catch(e) { console.error(e); return []; }
-}
 
-// Renderiza estampas e anima apenas a nova
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -602,8 +541,7 @@ async function loadStampedModelsFromFirebase(uid) {
     async function loadAndRenderStamps() {
       if (!currentUserId) return;
       const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
-
-      const newStamp = getQueryParam('newStamp'); // 🔑 modelo recém desbloqueado
+      const newStamp = getQueryParam('newStamp');
 
       thumbnails.forEach(thumb => {
         const modelName = thumb.getAttribute('data-name');
@@ -614,9 +552,7 @@ async function loadStampedModelsFromFirebase(uid) {
 
           if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
             imgElement.classList.add('stamp-unlock');
-            imgElement.addEventListener('animationend', () => {
-              imgElement.classList.remove('stamp-unlock');
-            }, { once: true });
+            imgElement.addEventListener('animationend', () => imgElement.classList.remove('stamp-unlock'), { once: true });
           }
 
           imgElement.classList.add('stamped');
@@ -627,148 +563,116 @@ async function loadStampedModelsFromFirebase(uid) {
 
       checkAllStamps(stampedModels);
     }
-async function saveNewStampAndReload(modelName) {
-    if (!currentUserId || !modelName) {
-        // Se a estampa já está desbloqueada, apenas recarrega para fechar o scanner.
-        window.location.reload(); 
-        return;
-    }
 
-    const docRef = doc(db, "users", currentUserId);
-    const docSnap = await getDoc(docRef);
-    let stampedModels = [];
+    async function saveNewStampAndReload(modelName) {
+      if (!currentUserId || !modelName) return window.location.reload();
 
-    if (docSnap.exists()) {
-        stampedModels = docSnap.data().stamps || [];
-    }
+      const docRef = doc(db, "users", currentUserId);
+      const docSnap = await getDoc(docRef);
+      let stampedModels = docSnap.exists() ? docSnap.data().stamps || [] : [];
 
-    if (!stampedModels.includes(modelName)) {
+      if (!stampedModels.includes(modelName)) {
         stampedModels.push(modelName);
         await setDoc(docRef, { stamps: stampedModels }, { merge: true });
-
-        // Redireciona na MESMA ABA, adicionando o parâmetro 'newStamp'
         window.location.href = window.location.pathname + `?newStamp=${modelName}`;
-    } else {
+      } else {
         alert(`A estampa ${modelName} já foi desbloqueada!`);
-        window.location.reload(); // Recarrega para fechar o scanner sem desbloquear
+        window.location.reload();
+      }
     }
-}
 
-// 🔑 EXPÕE A FUNÇÃO para ser chamada pelo scanner
-window.handleQRCodeScan = async function(modelName) {
-    await saveNewStampAndReload(modelName);
-};
-// Monitor de autenticação
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUserId = user.uid;
-    loadAndRenderStamps();
-  } else {
-    currentUserId = null;
-  }
-});
+    window.handleQRCodeScan = async function(modelName) {
+      await saveNewStampAndReload(modelName);
+    };
 
-// Lógica de seleção de miniaturas
-thumbnails.forEach(thumb => {
-  thumb.addEventListener('click', (event) => {
-    const modelName = thumb.getAttribute('data-name');
-    const imgElement = thumb.querySelector('.thumbnail-img');
-    if (imgElement.src.endsWith('white_thumb.png')) {
-      event.preventDefault();
-      thumbnails.forEach(t => t.classList.remove('selected'));
-      viewModelBtn.classList.remove('selected');
-      selectedModelUrl = "";
-      return;
-    }
-    thumbnails.forEach(t => t.classList.remove('selected'));
-    thumb.classList.add('selected');
-    selectedModelUrl = thumb.getAttribute('data-model');
-    selectedModelName = thumb.getAttribute('data-name');
-    viewModelBtn.classList.add('selected');
-  });
-});
+    onAuthStateChanged(auth, (user) => {
+      currentUserId = user ? user.uid : null;
+      if (user) loadAndRenderStamps();
+    });
 
-// Botão de visualização
-viewModelBtn.addEventListener('click', () => {
-  if (selectedModelUrl) {
-    window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-  }
-});
-  
-    function launchParticleExplosionOverButton(button) {
-        const container = document.getElementById('particleContainer');
-        container.style.display = 'block';
+    thumbnails.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const modelName = thumb.getAttribute('data-name');
+        const imgElement = thumb.querySelector('.thumbnail-img');
 
-        // Posiciona o container no centro do botão
-        const rect = button.getBoundingClientRect();
-        container.style.position = 'fixed'; // importante para acompanhar o viewport
-        container.style.left = rect.left + rect.width / 2 + 'px';
-        container.style.top = rect.top + rect.height / 2 + 'px';
-        container.style.width = '0px';
-        container.style.height = '0px';
-        container.style.pointerEvents = 'none';
-        container.style.transform = 'translate(-50%, -50%)';
-
-        const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
-        const numParticles = 200;
-
-        for (let i = 0; i < numParticles; i++) {
-            const particle = document.createElement('div');
-            const size = Math.random() * 10 + 4;
-            particle.style.width = particle.style.height = size + 'px';
-            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.position = 'absolute';
-            particle.style.borderRadius = '50%';
-            particle.style.left = '0px';
-            particle.style.top = '0px';
-            particle.style.pointerEvents = 'none';
-            container.appendChild(particle);
-
-            const angle = Math.random() * 2 * Math.PI;
-            const distance = Math.random() * 300 + 100;
-            const x = Math.cos(angle) * distance;
-            const y = Math.sin(angle) * distance;
-            const duration = Math.random() * 1 + 1.5;
-
-            particle.animate([
-                { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                { transform: `translate(${x}px, ${y}px) scale(0.3)`, opacity: 0 }
-            ], {
-                duration: duration * 1000,
-                easing: 'ease-out',
-                fill: 'forwards'
-            });
-
-            setTimeout(() => particle.remove(), duration * 1000);
+        if (imgElement.src.endsWith('white_thumb.png')) {
+          thumbnails.forEach(t => t.classList.remove('selected'));
+          viewModelBtn.classList.remove('selected');
+          selectedModelUrl = "";
+          return;
         }
 
-    setTimeout(() => container.style.display = 'none', 3000);
-}
-// Checa todas as estampas
-    function checkAllStamps(stampedModels) {
-        const totalModels = thumbnails.length;
-        if (stampedModels.length !== totalModels) return;
-        if (document.getElementById("final-reward-btn")) return;
+        thumbnails.forEach(t => t.classList.remove('selected'));
+        thumb.classList.add('selected');
+        selectedModelUrl = thumb.getAttribute('data-model');
+        selectedModelName = modelName;
+        viewModelBtn.classList.add('selected');
+      });
+    });
 
-        const header = document.querySelector(".title");
-        const imgBtn = document.createElement("img");
-        imgBtn.id = "final-reward-btn";
-        imgBtn.src = "icon/giftBTN.png";   
-        imgBtn.style.cursor = "pointer";
-        imgBtn.style.marginLeft = "50px";
-        imgBtn.style.height = "auto";
-        imgBtn.style.width = "150px";
-        imgBtn.style.objectFit = "contain"; 
-        imgBtn.addEventListener("click", () => {
-            window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
-        });
-        header.appendChild(imgBtn);
+    viewModelBtn.addEventListener('click', () => {
+      if (selectedModelUrl) {
+        window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
+      }
+    });
 
-        // 🔹 Delay antes de lançar as partículas
-        setTimeout(() => {
-            launchParticleExplosionOverButton(imgBtn);
-        }, 1000); // espera 1 segundo, você pode ajustar (ex: 1500ms)
+    function launchParticleExplosionOverButton(button) {
+      const container = document.getElementById('particleContainer');
+      container.style.display = 'block';
+      const rect = button.getBoundingClientRect();
+      container.style.position = 'fixed';
+      container.style.left = rect.left + rect.width/2 + 'px';
+      container.style.top = rect.top + rect.height/2 + 'px';
+      container.style.transform = 'translate(-50%, -50%)';
+
+      const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
+      for (let i=0;i<200;i++){
+        const particle = document.createElement('div');
+        const size = Math.random()*10+4;
+        particle.style.width = particle.style.height = size+'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        particle.style.position='absolute';
+        particle.style.borderRadius='50%';
+        container.appendChild(particle);
+
+        const angle = Math.random()*2*Math.PI;
+        const distance = Math.random()*300+100;
+        const duration = Math.random()*1+1.5;
+
+        const x = Math.cos(angle)*distance;
+        const y = Math.sin(angle)*distance;
+
+        particle.animate([
+          { transform:'translate(0,0) scale(1)', opacity:1 },
+          { transform:`translate(${x}px, ${y}px) scale(0.3)`, opacity:0 }
+        ], { duration:duration*1000, easing:'ease-out', fill:'forwards' });
+
+        setTimeout(()=>particle.remove(), duration*1000);
+      }
+
+      setTimeout(()=>container.style.display='none',3000);
     }
-</script>
+
+    function checkAllStamps(stampedModels){
+      if (stampedModels.length !== thumbnails.length) return;
+      if (document.getElementById("final-reward-btn")) return;
+
+      const header = document.querySelector(".title");
+      const imgBtn = document.createElement("img");
+      imgBtn.id = "final-reward-btn";
+      imgBtn.src = "icon/giftBTN.png";
+      imgBtn.style.cursor = "pointer";
+      imgBtn.style.marginLeft = "50px";
+      imgBtn.style.width = "150px";
+      imgBtn.style.height = "auto";
+      imgBtn.style.objectFit = "contain";
+      imgBtn.addEventListener("click", () => {
+        window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
+      });
+      header.appendChild(imgBtn);
+
+      setTimeout(()=>launchParticleExplosionOverButton(imgBtn), 1000);
+    }
+  </script>
 </body>
 </html>
