@@ -46,27 +46,32 @@ const video = document.getElementById('video');
 let qrScanner;
 
 scanBtn.addEventListener('click', async () => {
-  scanBtn.style.display = 'none';
-  video.style.display = 'block';
+    scanBtn.style.display = 'none';
+    video.style.display = 'block';
 
-  qrScanner = new QrScanner(video, result => {
-    // 🔹 result já é o texto do QR
-    if (result) {
-      window.location.href = result; // abre na mesma aba
-      qrScanner.stop();
+    qrScanner = new QrScanner(video, result => {
+        // 🔑 CORREÇÃO APLICADA: Acesse a propriedade .data do objeto result.
+        if (result && result.data) {
+            console.log('QR Code decodificado:', result.data);
+            
+            // Redireciona para o link
+            window.location.href = result.data; 
+            qrScanner.stop();
+        }
+    }, {
+        onDecodeError: error => console.log('Não detectado ainda...'),
+        maxScansPerSecond: 5,
+        // Adicione highlightScanRegion: true se quiser ver o quadrado de detecção
+        highlightScanRegion: true 
+    });
+
+    try {
+        await qrScanner.start();
+    } catch(e) {
+        alert('Erro ao acessar a câmera. Verifique as permissões. HTTPS é obrigatório para câmeras: ' + e);
+        scanBtn.style.display = 'block';
+        video.style.display = 'none';
     }
-  }, {
-    onDecodeError: error => console.log('Não detectado ainda...'),
-    maxScansPerSecond: 5
-  });
-
-  try {
-    await qrScanner.start();
-  } catch(e) {
-    alert('Erro ao acessar a câmera: ' + e);
-    scanBtn.style.display = 'block';
-    video.style.display = 'none';
-  }
 });
 </script>
 
