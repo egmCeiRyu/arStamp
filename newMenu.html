@@ -292,24 +292,24 @@
         background-color: #e09634;
     }
     
-  .thumbnail-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); /* always 2 columns */
-      justify-items: center;
-      background-color: rgb(247, 246, 240);
+    .thumbnail-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+        justify-items: center;
+        background-color: rgb(247, 246, 240);
 
-      /* 🔑 FIX: Constrain the maximum width */
-      max-width: 420px; /* Use the same max-width as #app-container */
+        /* 🔑 FIX: Constrain the maximum width */
+        max-width: 420px; /* Use the same max-width as #app-container */
 
-      /* 🔑 FIX: Center the container horizontally */
-      width: 100%;
-      margin: 0 auto;
+        /* 🔑 FIX: Center the container horizontally */
+        width: 100%;
+        margin: 0 auto;
 
-      box-sizing: border-box;
-      padding-top: -5px;
-      padding-bottom: 93px;
-      overflow-y: hidden;
-  }
+        box-sizing: border-box;
+        padding-top: -5px;
+        padding-bottom: 93px;
+        overflow-y: hidden;
+    }
     
     .bottom-stripe{
       display: flex;
@@ -347,7 +347,7 @@
         z-index: 2000; 
         display: none; 
         /* 🔑 IMPORTANTE: Adiciona flexbox para garantir que o conteúdo da câmera seja centralizado/exibido */
-        display: flex;
+        display: none;
         justify-content: center;
         align-items: center;
         padding: 20px; /* Adiciona algum padding interno */
