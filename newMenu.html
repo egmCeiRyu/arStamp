@@ -338,14 +338,20 @@
     }
     
     #qr-code-reader {
-    width: 100%;
-    height: 100vh; /* Garante que cubra toda a altura da viewport */
-    position: fixed; /* Essencial para cobrir a tela inteira */
-    top: 0;
-    left: 0;
-    background: black; /* Fundo preto para o scanner */
-    z-index: 2000; /* Deve ser alto para cobrir todos os outros elementos */
-    display: none; /* Oculto até a função startQrCodeScanner() ser chamada */
+        width: 100%;
+        height: 100vh; /* Garante que cubra toda a altura da viewport */
+        position: fixed; /* Essencial para cobrir a tela inteira */
+        top: 0;
+        left: 0;
+        background: black; /* Fundo preto para o scanner */
+        z-index: 2000; 
+        display: none; 
+        /* 🔑 IMPORTANTE: Adiciona flexbox para garantir que o conteúdo da câmera seja centralizado/exibido */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px; /* Adiciona algum padding interno */
+        box-sizing: border-box;
     }
      
   </style>
@@ -485,17 +491,16 @@
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
 <script>
-    // 🔑 NOVO CÓDIGO: Lógica do Scanner (deve estar ANTES do módulo Firebase)
     const qrCodeRegionId = "qr-code-reader";
     let html5QrCode = null;
 
     window.startQrCodeScanner = function() {
-        // Ocultar o conteúdo principal e as ações de baixo
+        // 1. Ocultar o conteúdo principal e as ações de baixo
         document.getElementById('stamp-section').style.display = 'none';
         document.getElementById('bottom-actions').style.display = 'none';
 
         let qrReaderContainer = document.getElementById(qrCodeRegionId);
-        qrReaderContainer.style.display = 'block';
+        qrReaderContainer.style.display = 'flex'; // Usar 'flex' aqui, conforme o CSS
 
         // Garante que o scanner seja criado apenas uma vez por sessão
         if (!html5QrCode) {
@@ -512,28 +517,28 @@
             { facingMode: "environment" },
             config,
             (decodedText, decodedResult) => {
-                // SUCESSO: QR Code lido com sucesso
-                html5QrCode.stop().then(() => {
-                    qrReaderContainer.style.display = 'none';
-                    // Extrair o nome do modelo (assumindo que o QR code é o nome, ex: model1)
-                    const modelName = decodedText.trim(); 
-                    
-                    // Chama a função de desbloqueio no seu módulo Firebase
-                    window.handleQRCodeScan(modelName);
-
-                }).catch(err => {
-                    console.error("Erro ao parar o scanner: ", err);
-                });
+                // ... (Lógica de sucesso) ...
             },
             (errorMessage) => {
-                // Chamado continuamente - pode ser ignorado na maioria dos casos.
+                // ... (Lógica de erro contínuo) ...
             }
         ).catch((err) => {
-            alert("Erro ao acessar a câmera. Verifique as permissões.");
-            console.error("Erro ao iniciar a câmera: ", err);
+            // 🚨 TRATAMENTO CRÍTICO DE ERRO/PERMISSÃO NEGADA 🚨
+            
+            // Reverte a interface:
             qrReaderContainer.style.display = 'none';
             document.getElementById('stamp-section').style.display = 'block';
             document.getElementById('bottom-actions').style.display = 'flex';
+            
+            // Notifica o usuário:
+            let message = "Erro ao acessar a câmera. Verifique se você concedeu as permissões. Certifique-se também de estar em um ambiente **HTTPS**.";
+            if (err.name === "NotAllowedError") {
+                message = "Permissão de câmera negada. Atualize a página e conceda a permissão, ou verifique as configurações de privacidade do seu navegador.";
+            } else if (err.name === "NotFoundError") {
+                message = "Nenhuma câmera encontrada no dispositivo.";
+            }
+            alert(message);
+            console.error("Erro ao iniciar a câmera: ", err);
         });
     };
 </script>
