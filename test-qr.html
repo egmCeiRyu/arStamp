@@ -1,47 +1,56 @@
 <!DOCTYPE html>
 <html lang="jp">
 <head>
-  <meta charset="UTF-8">
-  <title>QR Scan Simples</title>
-
-  <!-- Biblioteca para ler QR da imagem -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-    #scan-btn {
-      font-size: 22px;
-      padding: 15px 30px;
-      background: #ffd54f;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>QR Scanner com Botão</title>
+<style>
+  body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #FFF5E1;
+    margin: 0;
+    padding: 20px;
+  }
+  #scan-btn {
+    font-size: 22px;
+    padding: 15px 30px;
+    background: #ffd54f;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  #result {
+    margin-top: 20px;
+    font-size: 18px;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
 
 <h2>Scanner de QR</h2>
-
-<!-- Botão -->
 <button id="scan-btn">📸 Abrir Câmera</button>
+<div id="result">Resultado aparecerá aqui</div>
 
-<!-- Input escondido que abre a câmera do iPhone -->
+<!-- Input oculto para abrir câmera nativa do iPhone/Android -->
 <input type="file" accept="image/*" capture="environment" id="qr-input" style="display:none">
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 <script>
-const qrBtn = document.getElementById("scan-btn");
+const scanBtn = document.getElementById("scan-btn");
 const qrInput = document.getElementById("qr-input");
+const resultDiv = document.getElementById("result");
 
-// Abre a câmera nativa do iPhone
-qrBtn.addEventListener("click", () => {
+// Quando clica no botão, abre a câmera
+scanBtn.addEventListener("click", () => {
   qrInput.click();
 });
 
-// Quando usuário tira foto do QR
+// Quando usuário tira a foto do QR
 qrInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -50,8 +59,7 @@ qrInput.addEventListener("change", (event) => {
   reader.onload = function() {
     const img = new Image();
     img.onload = function() {
-
-      // Canvas temporário
+      // Cria canvas temporário
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
@@ -59,19 +67,17 @@ qrInput.addEventListener("change", (event) => {
       ctx.drawImage(img, 0, 0);
 
       // Lê QR
-      const imageData = ctx.getImageData(0, 0, img.width, img.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height);
 
       if (code) {
-        alert("QR detectado: " + code.data);
+        resultDiv.textContent = "QR detectado: " + code.data;
       } else {
-        alert("Nenhum QR encontrado. Tente novamente.");
+        resultDiv.textContent = "Nenhum QR encontrado. Tente novamente.";
       }
-
     };
     img.src = reader.result;
   };
-
   reader.readAsDataURL(file);
 });
 </script>
