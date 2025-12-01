@@ -1,251 +1,80 @@
 <!DOCTYPE html>
 <html lang="jp">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>QR Code Test</title>
+  <meta charset="UTF-8">
+  <title>QR Scan Simples</title>
 
-  <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
+  <!-- Biblioteca para ler QR da imagem -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 
   <style>
-    /* Estilos do body e container principal */
     body {
-      margin: 0;
-      padding-bottom: 60px;
-      background: #FFF5E1;
-      max-width: 100%;
-      overflow-x: hidden;
-      touch-action: pan-y;
+      font-family: sans-serif;
+      padding: 20px;
     }
-    
-    /* Container principal de visualização */
-    #app-container {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      min-height: 100vh;
-      box-sizing: border-box;
-      padding-left: 10px;
-      padding-right: 10px;
-      background: #FFF5E1;
-    }
-
-    /* Estilos do título e miniaturas (mantidos) */
-    .title {
-      position: sticky;
-      top: 0;
-      display: flex;
-      background: #FFF5E1;
-      flex-wrap: wrap;
-      margin: auto;
-      width: 100%;
-      text-align: center;
-    }
-
-    .titlebook {
-      height: 144px;
-      margin: auto;
-    }
-    
-    .thumbnail-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      justify-items: center;
-      background-color: rgb(247, 246, 240);
-      max-width: 420px;
-      width: 100%;
-      margin: 0 auto;
-      box-sizing: border-box;
-      padding-bottom: 93px;
-    }
-
-    /* --- Botões de Ação Fixos --- */
-    .bottom-stripe{
-      display: flex;
-      bottom: 0;
-      left: 0;
-      z-index: 999;
-      height: 91px;
-      width: 100%;
-      justify-content: center;
-      position: fixed;
-      background-color: #FFF5E1;
-    }
-
-    #bottom-actions {
-      position: fixed;
-      bottom: 25px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 420px;
-      padding: 0 10px;
-      box-sizing: border-box;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      z-index: 1000;
-    }
-
-    #qr-code-btn-box {
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-end;
-    }
-
-    #qr-scanner-btn {
-      background-color: rgba(255, 110, 204, 0.46);
-      color: white;
-      padding: 10px 8px;
+    #scan-btn {
+      font-size: 22px;
+      padding: 15px 30px;
+      background: #ffd54f;
       border: none;
-      border-radius: 8px;
-      font-size: 1em;
+      border-radius: 12px;
       cursor: pointer;
-      box-shadow: 0 2px 9px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s;
-    }
-
-    /* --- QR Scanner Tela Cheia --- */
-    #qr-code-reader {
-      width: 100%;
-      height: 100vh;
-      background: black;
-      display: none; /* Começa oculto */
-      justify-content: center;
-      align-items: center;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 2000;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    #qr-reader {
-      width: 100%;
-      max-width: 400px; /* Limita o tamanho do feed de vídeo */
-      height: auto;
-    }
-    
-    /* Estilo do botão de fechar */
-    #close-qr-scanner-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 10px 15px;
-        border: 1px solid white;
-        border-radius: 8px;
-        cursor: pointer;
-        z-index: 2001;
-        font-family: sans-serif;
-        font-weight: bold;
-    }
-
-    @media screen and (max-width: 1280px) {
-        #qr-code-btn-box {
-            display: flex;
-        }
     }
   </style>
 </head>
-
 <body>
 
-  <div id="app-container">
-    <div class="title">
-      <img src="thumbnails/titleStampBook.png" alt="logo" class="titlebook">
-    </div>
+<h2>Scanner de QR</h2>
 
-    <div class="thumbnail-container">
-        <p style="text-align: center; width: 100%; color: #333;">Conteúdo Principal (Estampas)</p>
-    </div>
-  </div>
+<!-- Botão -->
+<button id="scan-btn">📸 Abrir Câmera</button>
 
-  <div class="bottom-stripe">
-      <div id="bottom-actions">
-          <div id="qr-code-btn-box">
-              <button id="qr-scanner-btn" onclick="startQrCodeScanner()">qrcode</button>
-          </div>
-          </div>
-  </div>
+<!-- Input escondido que abre a câmera do iPhone -->
+<input type="file" accept="image/*" capture="environment" id="qr-input" style="display:none">
 
-  <div id="qr-code-reader">
-    <div id="qr-reader"></div> 
-    
-    <button id="close-qr-scanner-btn" onclick="stopQrCodeScanner()">FECHAR</button>
-  </div>
+<script>
+const qrBtn = document.getElementById("scan-btn");
+const qrInput = document.getElementById("qr-input");
 
+// Abre a câmera nativa do iPhone
+qrBtn.addEventListener("click", () => {
+  qrInput.click();
+});
 
-  <script src="https://unpkg.com/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
+// Quando usuário tira foto do QR
+qrInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
 
-  <script>
-  const qrReaderContainer = document.getElementById("qr-code-reader");
-  let html5QrCode = null;
+  const reader = new FileReader();
+  reader.onload = function() {
+    const img = new Image();
+    img.onload = function() {
 
-  function startQrCodeScanner() {
-    
-    // Ocultar o conteúdo principal antes de abrir o scanner
-    document.getElementById('app-container').style.display = 'none';
-    document.getElementById('bottom-actions').style.display = 'none';
+      // Canvas temporário
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
 
-    // 1. Mostrar a tela do scanner
-    qrReaderContainer.style.display = "flex";
+      // Lê QR
+      const imageData = ctx.getImageData(0, 0, img.width, img.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-    // 2. Inicializar o scanner se ainda não tiver sido
-    if (!html5QrCode) {
-        // 'qr-reader' é o ID do div onde a câmera será renderizada
-        html5QrCode = new Html5Qrcode("qr-reader");
-    }
-    
-    const videoConstraints = {
-        // Usar facingMode como preferência (melhor para iOS)
-        facingMode: "environment"
+      if (code) {
+        alert("QR detectado: " + code.data);
+      } else {
+        alert("Nenhum QR encontrado. Tente novamente.");
+      }
+
     };
+    img.src = reader.result;
+  };
 
-    const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        disableFlip: false, // Importante para iOS
-    };
+  reader.readAsDataURL(file);
+});
+</script>
 
-    html5QrCode.start(
-        videoConstraints,
-        config,
-        qrCodeMessage => {
-            // Lógica de Sucesso: Mostra alerta e para o scanner
-            alert("QR Code detectado: " + qrCodeMessage);
-            stopQrCodeScanner(); // Chama a função para fechar tudo
-        },
-        errorMessage => {
-            // Lógica de Erro contínuo (não crítico)
-            // console.log(errorMessage);
-        }
-    ).catch(err => {
-        // Lógica de Erro Crítico (Permissão Negada, Câmera Não Encontrada)
-        alert("Erro ao iniciar a câmera. Verifique permissões (HTTPS obrigatório). Detalhe: " + err);
-        stopQrCodeScanner();
-    });
-  }
-  
-  function stopQrCodeScanner() {
-    // 1. Tenta parar ativamente o scanner se estiver rodando
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-            console.log("Scanner parado com sucesso.");
-        }).catch(err => {
-            console.warn("Erro ao parar o scanner, mas continuando o fechamento: ", err);
-        });
-    }
-
-    // 2. Ocultar a tela do scanner
-    qrReaderContainer.style.display = "none";
-    
-    // 3. Restaurar o conteúdo principal
-    document.getElementById('app-container').style.display = 'block';
-    document.getElementById('bottom-actions').style.display = 'flex';
-  }
-  </script>
 </body>
 </html>
