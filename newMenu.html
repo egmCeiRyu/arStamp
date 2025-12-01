@@ -240,18 +240,19 @@
     
     #bottom-actions {
         position: fixed;
-        bottom: 20px; 
+        bottom: 25px; 
         left: 50%;
         transform: translateX(-50%);
-        width: 100%; 
-        max-width: 420px; 
+        width: 100%; 
 
-        /* 🔑 Ensure there is 10px padding on the left and right */
+        /* 🔑 Recomendação: Alinhe ao container principal (420px) */
+        max-width: 420px; 
+
+        /* Adicione padding para o espaço nas laterais (ex: 10px) */
         padding: 0 10px;
-
         box-sizing: border-box;
-        display: flex; 
-        justify-content: space-between; 
+        display: flex; 
+        justify-content: space-between; /* Mantém os itens nas extremidades */
         align-items: flex-end;
         z-index: 1000;
     }
@@ -268,15 +269,18 @@
 
     /* Estilo para o botão QR Code */
     #qr-code-btn-box {
-        /* Define o estilo da caixa do botão QR */
-        display: flex;
-        align-items: flex-end; /* Alinha o botão ao canto inferior */
-        margin-left: 0; /* Alinha à esquerda do container #bottom-actions */
+        display: none; /* Oculta em telas grandes */
+        justify-content: flex-start; /* Força o item para a esquerda */
+        align-items: flex-end; 
+
+        /* 🔑 REMOVA MARGIN: Deixe o padding do pai (#bottom-actions) cuidar do espaço */
+        /* margin-right: -3; <-- Remover ou reverter */
+        margin-right: 0; 
     }
 
     #qr-scanner-btn {
         /* Estilos do botão QR */
-        background-color: #f7a73a; /* Exemplo: uma cor diferente */
+        background-color: #f73a3a; /* Exemplo: uma cor diferente */
         color: white;
         padding: 10px 8px;
         border: none;
@@ -327,6 +331,13 @@
       overflow-x: hidden;
       max-width: 100%;
       touch-action: pan-y; 
+    }
+    
+    @media screen and (max-width: 1220px) {
+    /* 🔑 FIX: Mostra o botão QR Code em QUALQUER dispositivo com largura de até 992px (inclui Tablets e Smartphones) */
+    #qr-code-btn-box {
+        display: flex; /* Restaura o Flexbox para que ele apareça */
+      }
     }
      
   </style>
@@ -444,22 +455,22 @@
 </div>
 
 <div class="bottom-stripe">
-  <div id="particleContainer" style="
-      position: absolute;
-      pointer-events: none;
-      overflow: visible;
-      z-index: 9999;">
-  </div>
-  
+  <div id="particleContainer" style="
+      position: absolute;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 9999;">
+  </div>
+  
   <div id="bottom-actions">
-      <div id="qr-code-btn-box">
+          <div id="qr-code-btn-box">
         <button id="qr-scanner-btn" onclick="window.startQrCodeScanner()">qrcode</button>
       </div>
 
       <div id="view-model-btn-box">
         <img src="icon/selectionIcon.png" id="view-model-btn">
       </div>
-  </div>  
+  </div>  
 </div>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
