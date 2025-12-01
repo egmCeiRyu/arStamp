@@ -491,10 +491,20 @@
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
 <script>
-    const qrCodeRegionId = "qr-code-reader";
+const qrCodeRegionId = "qr-code-reader";
     let html5QrCode = null;
 
     window.startQrCodeScanner = function() {
+        // 🔑 Adicione esta verificação para parar o scanner se ele estiver ativo
+        // Embora não seja a causa do "não funcionar", é uma boa prática.
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                console.log("Scanner parado antes de reiniciar.");
+            }).catch(err => {
+                console.error("Erro ao tentar parar o scanner: ", err);
+            });
+        }
+        
         // 1. Ocultar o conteúdo principal e as ações de baixo
         document.getElementById('stamp-section').style.display = 'none';
         document.getElementById('bottom-actions').style.display = 'none';
