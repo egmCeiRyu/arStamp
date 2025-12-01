@@ -1,10 +1,4 @@
-    body{
-      margin: 0px;
-      background: #FFF5E1;
-      overflow-x: hidden;
-      max-width: 100%;
-      touch-action: pan-y; 
-    }
+
 
     .companylogo{
       height: 86px;
@@ -186,24 +180,7 @@
         padding-top: 5px;
       }
       
-      .hosokawalogo{
-        padding-top: 0px;
-        padding-bottom: 1px;
-        height: 31px;
-        margin: auto;
-        padding-right: 83px;
-      }
 
-      #view-model-btn {
-        display: flex;
-        align-items: center;
-        position: fixed;
-        color: white;
-        cursor: pointer;
-        margin: auto;
-        bottom: 25%;
-        scale: 100%;
-      }
       
       #view-model-btn-bg {
         position: fixed;

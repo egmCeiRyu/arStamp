@@ -114,19 +114,53 @@
     #qr-scanner-btn:hover {
         background-color: #e09634;
     }
+    
+    .thumbnail-container{
+      display: flex;
+      justify-content: space-evenly;
+      align-content: center;
+      flex-wrap: wrap;
+      gap: 2em;
+    }
+    
+    .bottom-stripe{
+      display: flex;
+      bottom: 0;
+      left: 0;
+      z-index: 999;
+      height: 91px;
+      width: 100&;
+      justify-content: center;
+    }
+    #bottom-actions{
+      
+    }
+    
+    body{
+      padding-bottom: 60px;
+      margin: 0px;
+      background: #FFF5E1;
+      overflow-x: hidden;
+      max-width: 100%;
+      touch-action: pan-y; 
+    }
+    
+    #reade{
+      position: fixed;
+    }
+    
   </style>
 
 </head>
 
 <body>
-  
-<div id="stamp-section">
-  <div id="reader" style="width: 159px; height: -px;"></div>       
-  <button onclick="window.startQrCodeScanner()">qrcode</button></div>
+
   <div class="title">
     <img src=thumbnails/titleStampBook.png alt="logo" class="titlebook">
   </div>
 
+  
+<div id="stamp-section">
   <div class="thumbnail-container" id="model-thumbnails">
     <!-- Modelos -->
     <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
@@ -228,30 +262,26 @@
       -->
     </div>
   </div>
+</div>
 
-
-  <div class="bottom-stripe"></div>
-  
-<div id="particleContainer" style="
-    position: absolute;
-    pointer-events: none;
-    overflow: visible;
-    z-index: 9999;
-"></div>
+<div class="bottom-stripe">
+  <div id="particleContainer" style="
+      position: absolute;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 9999;">
+  </div>
   
   <div id="bottom-actions">
-            <div id="qr-code-btn-box">
+      <div id="qr-code-btn-box">
         <button id="qr-scanner-btn" onclick="window.startQrCodeScanner()">qrcode</button>
       </div>
 
-            <div id="view-model-btn-box">
+      <div id="view-model-btn-box">
         <img src="icon/selectionIcon.png" id="view-model-btn">
       </div>
-  </div>
-
-  <div class="bottom-stripe"></div>
-  
-
+  </div>  
+</div>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
 
