@@ -24,7 +24,7 @@
 </head>
 <body>
 
-  <button onclick="window.startQrCodeScanner()">Abrir QR Scanner</button>
+  <button onclick="startQrCodeScanner()">Abrir QR Scanner</button>
 
   <!-- DIV OBRIGATÓRIO -->
   <div id="qr-code-reader">
@@ -32,12 +32,22 @@
   </div>
 
 <script>
-window.startQrCodeScanner = function () {
+let html5QrCode = null;
 
+function startQrCodeScanner() {
     const container = document.getElementById("qr-code-reader");
+
+    // Se já estiver rodando, para antes de reiniciar
+    if (html5QrCode) {
+        html5QrCode.stop().catch(err => console.warn("Erro ao parar QR scanner", err));
+    }
+
     container.style.display = "flex";
 
-    const html5QrCode = new Html5Qrcode("qr-reader");
+    // Cria o scanner apenas se não existir
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+    }
 
     html5QrCode.start(
         { facingMode: "environment" },
@@ -47,12 +57,18 @@ window.startQrCodeScanner = function () {
         },
         qrCodeMessage => {
             alert("QR detected: " + qrCodeMessage);
-            html5QrCode.stop();
-            container.style.display = "none";
+            html5QrCode.stop().then(() => {
+                container.style.display = "none";
+            }).catch(err => console.error("Erro ao parar QR scanner", err));
         },
-        errorMessage => {}
-    );
-};
+        errorMessage => {
+            // console.log("QR scan error: ", errorMessage);
+        }
+    ).catch(err => {
+        container.style.display = "none";
+        alert("Erro ao acessar a câmera: " + err);
+    });
+}
 </script>
 
 </body>
