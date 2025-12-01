@@ -454,6 +454,8 @@
   </div>
 </div>
 
+<div id="qr-code-reader"></div>
+  
 <div class="bottom-stripe">
   <div id="particleContainer" style="
       position: absolute;
@@ -474,7 +476,59 @@
 </div>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+<script>
+    // 🔑 NOVO CÓDIGO: Lógica do Scanner (deve estar ANTES do módulo Firebase)
+    const qrCodeRegionId = "qr-code-reader";
+    let html5QrCode = null;
 
+    window.startQrCodeScanner = function() {
+        // Ocultar o conteúdo principal e as ações de baixo
+        document.getElementById('stamp-section').style.display = 'none';
+        document.getElementById('bottom-actions').style.display = 'none';
+
+        let qrReaderContainer = document.getElementById(qrCodeRegionId);
+        qrReaderContainer.style.display = 'block';
+
+        // Garante que o scanner seja criado apenas uma vez por sessão
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode(qrCodeRegionId);
+        }
+
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            disableFlip: false,
+        };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText, decodedResult) => {
+                // SUCESSO: QR Code lido com sucesso
+                html5QrCode.stop().then(() => {
+                    qrReaderContainer.style.display = 'none';
+                    // Extrair o nome do modelo (assumindo que o QR code é o nome, ex: model1)
+                    const modelName = decodedText.trim(); 
+                    
+                    // Chama a função de desbloqueio no seu módulo Firebase
+                    window.handleQRCodeScan(modelName);
+
+                }).catch(err => {
+                    console.error("Erro ao parar o scanner: ", err);
+                });
+            },
+            (errorMessage) => {
+                // Chamado continuamente - pode ser ignorado na maioria dos casos.
+            }
+        ).catch((err) => {
+            alert("Erro ao acessar a câmera. Verifique as permissões.");
+            console.error("Erro ao iniciar a câmera: ", err);
+            qrReaderContainer.style.display = 'none';
+            document.getElementById('stamp-section').style.display = 'block';
+            document.getElementById('bottom-actions').style.display = 'flex';
+        });
+    };
+</script>
 <script src="app.js"></script>
 
 <script type="module">
