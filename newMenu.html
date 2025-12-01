@@ -275,15 +275,15 @@
 
     #qr-scanner-btn {
         /* Estilos do botão QR */
-        background-color: rgba(255, 110, 204, 0.46); /* Exemplo: uma cor diferente */
+        background-color: rgba(255, 0, 165, 0.46); /* Exemplo: uma cor diferente */
         color: white;
         border: none;
         border-radius: 59px;
-        font-size: 1em;
+        font-size: 1.1em;
         cursor: pointer;
-        box-shadow: 0 2px 9px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 0px rgba(0, 0, 0, 0.1);
         transition: background-color 0.3s;
-        padding-left: 7px;
+        padding-left: 8px;
     }
 
     #qr-scanner-btn:hover {
@@ -361,6 +361,23 @@
     z-index: 2000; /* Garante que fique acima de todos os outros elementos */
     background-color: black;
     display: none; /* Começa escondido, o JS vai mudar para 'block' */
+    }
+    
+    #close-camera-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2001; /* Z-index mais alto que a câmera (2000) */
+    background: rgba(255, 255, 255, 0.8);
+    color: black;
+    border: 1px solid black;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: none; /* Começa escondido */
+    font-weight: bold;
     }
      
   </style>
@@ -500,40 +517,60 @@
   
   <video id="video"></video>
 
+  <button id="close-camera-btn" style="display: none;">X</button> 
+
 <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
 <script>
 const scanBtn = document.getElementById('qr-scanner-btn');
 const video = document.getElementById('video');
+const closeCameraBtn = document.getElementById('close-camera-btn'); // NOVO: Captura o botão "X"
 let qrScanner;
 
+// Função para fechar a câmera
+function closeCamera() {
+    if (qrScanner) {
+        qrScanner.stop();
+        qrScanner.destroy(); // Libera recursos da câmera
+        qrScanner = null;
+    }
+    video.style.display = 'none';
+    closeCameraBtn.style.display = 'none'; // Oculta o botão "X"
+    scanBtn.style.display = 'flex'; // Mostra o botão QR Code novamente
+}
+
+// Evento para abrir a câmera (Clique no botão QR Code)
 scanBtn.addEventListener('click', async () => {
+    // Esconde o botão QR e mostra o vídeo e o botão "X"
     scanBtn.style.display = 'none';
     video.style.display = 'block';
+    closeCameraBtn.style.display = 'block';
 
     qrScanner = new QrScanner(video, result => {
-        // 🔑 CORREÇÃO APLICADA: Acesse a propriedade .data do objeto result.
         if (result && result.data) {
             console.log('QR Code decodificado:', result.data);
             
-            // Redireciona para o link
-            window.location.href = result.data; 
-            qrScanner.stop();
+            // Redireciona para o link e fecha a câmera
+            const dataUrl = result.data;
+            closeCamera(); 
+            window.location.href = dataUrl;
         }
     }, {
         onDecodeError: error => console.log('Não detectado ainda...'),
         maxScansPerSecond: 5,
-        // Adicione highlightScanRegion: true se quiser ver o quadrado de detecção
-        highlightScanRegion: true 
+        highlightScanRegion: true
     });
 
     try {
         await qrScanner.start();
     } catch(e) {
         alert('Erro ao acessar a câmera. Verifique as permissões. HTTPS é obrigatório para câmeras: ' + e);
-        scanBtn.style.display = 'block';
-        video.style.display = 'none';
+        // Se houver erro, fecha o modo de câmera
+        closeCamera();
     }
 });
+
+// NOVO: Evento para fechar a câmera (Clique no botão "X")
+closeCameraBtn.addEventListener('click', closeCamera);
 </script>
 
   <script type="module">
