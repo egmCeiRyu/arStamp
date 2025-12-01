@@ -337,20 +337,33 @@
       }
     }
     
-#qr-code-reader {
-        width: 100%;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background: black;
-        z-index: 2000; 
-        display: none; 
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
+    #qr-code-reader {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: black;
+            z-index: 2000; 
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+    
+    #video {
+    /* Torna o vídeo uma sobreposição de tela cheia */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw; /* 100% da largura da viewport */
+    height: 100vh; /* 100% da altura da viewport */
+    object-fit: cover; /* Garante que o vídeo cubra toda a área */
+    z-index: 2000; /* Garante que fique acima de todos os outros elementos */
+    background-color: black;
+    display: none; /* Começa escondido, o JS vai mudar para 'block' */
+    }
      
   </style>
 
