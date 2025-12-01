@@ -269,18 +269,20 @@
     #view-model-btn-box {
         width: 120px; /* Tamanho do seu ícone de visualização */
         height: 120px;
-        display: n;
+        display: flex;
         justify-content: center;
         align-items: center;
         margin-right: 0; /* Alinha à direita do container #bottom-actions */
     }
 
-    /* Estilo para o botão QR Code */
     #qr-code-btn-box {
         position: fixed; /* Fixa na viewport */
         bottom: 9px; /* Ajuste a altura vertical */
         left: 0px; /* Define a distância da margem esquerda */
         z-index: 1001; /* Garante que fique acima de outros elementos do rodapé */
+
+        /* 🔑 Mantenha o display: flex; aqui ou deixe-o implícito para que apareça em mobile/tablet */
+        display: flex; 
     }
 
     #qr-scanner-btn {
@@ -338,11 +340,11 @@
       touch-action: pan-y; 
     }
     
-    @media screen and (max-width: 1280px) {
-    /* 🔑 FIX: Mostra o botão QR Code em QUALQUER dispositivo com largura de até 992px (inclui Tablets e Smartphones) */
-    #qr-code-btn-box {
-        display: flex; /* Restaura o Flexbox para que ele apareça */
-      }
+    @media screen and (min-width: 1281px) {
+        /* Se a tela for de 1281px ou mais (PCs), esconda o botão QR Code. */
+        #qr-code-btn-box {
+            display: none !important; /* Esconda para telas grandes */
+        }
     }
     
     #qr-code-reader {
