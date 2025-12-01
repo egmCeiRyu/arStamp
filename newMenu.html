@@ -547,7 +547,7 @@ scanBtn.addEventListener('click', async () => {
 
     qrScanner = new QrScanner(video, result => {
         if (result && result.data) {
-            console.log('QR Code decodificado:', result.data);
+            console.log('デコードされたQRコード:', result.data);
             
             // Redireciona para o link e fecha a câmera
             const dataUrl = result.data;
@@ -555,7 +555,7 @@ scanBtn.addEventListener('click', async () => {
             window.location.href = dataUrl;
         }
     }, {
-        onDecodeError: error => console.log('Não detectado ainda...'),
+        onDecodeError: error => console.log('まだ検出されません...'),
         maxScansPerSecond: 5,
         highlightScanRegion: true
     });
@@ -563,7 +563,7 @@ scanBtn.addEventListener('click', async () => {
     try {
         await qrScanner.start();
     } catch(e) {
-        alert('Erro ao acessar a câmera. Verifique as permissões. HTTPS é obrigatório para câmeras: ' + e);
+        alert('カメラへのアクセスに失敗しました。権限を確認してください。カメラにはHTTPSが必須です： ' + e);
         // Se houver erro, fecha o modo de câmera
         closeCamera();
     }
