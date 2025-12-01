@@ -1,10 +1,11 @@
-<!doctype html>
-<html lang="jp">
+<!DOCTYPE html>
+<html>
 <head>
   <meta charset="UTF-8">
   <title>QR Test</title>
 
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <!-- CDN CORRETA -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
 
   <style>
     #qr-code-reader {
@@ -25,16 +26,17 @@
 
   <button onclick="window.startQrCodeScanner()">Abrir QR Scanner</button>
 
-  <!-- ESTE DIV É O MAIS IMPORTANTE -->
+  <!-- DIV OBRIGATÓRIO -->
   <div id="qr-code-reader">
       <div id="qr-reader" style="width:300px"></div>
   </div>
 
 <script>
 window.startQrCodeScanner = function () {
+
     const container = document.getElementById("qr-code-reader");
-    container.style.display = "flex";  // ⚠️ se container for null → erro
-     
+    container.style.display = "flex";
+
     const html5QrCode = new Html5Qrcode("qr-reader");
 
     html5QrCode.start(
@@ -48,7 +50,7 @@ window.startQrCodeScanner = function () {
             html5QrCode.stop();
             container.style.display = "none";
         },
-        errorMessage => { /* ignore */ }
+        errorMessage => {}
     );
 };
 </script>
