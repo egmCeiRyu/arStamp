@@ -31,12 +31,6 @@
       border-radius: 12px;
       display: none; /* inicia oculto */
     }
-
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -44,26 +38,22 @@
   <h2>Scanner de QR</h2>
   <button id="scan-btn">📸 Abrir Câmera</button>
   <video id="video"></video>
-  <div id="result"></div>
 
   <!-- Biblioteca QR Scanner (versão correta 1.4.2) -->
   <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
   <script>
     const scanBtn = document.getElementById('scan-btn');
     const video = document.getElementById('video');
-    const resultDiv = document.getElementById('result');
     let qrScanner;
 
     scanBtn.addEventListener('click', async () => {
       scanBtn.style.display = 'none'; // esconde o botão
       video.style.display = 'block';  // mostra o vídeo
 
-      // Cria o QR Scanner
       qrScanner = new QrScanner(video, result => {
-        resultDiv.textContent = "QR Detectado: " + result;
-        qrScanner.stop(); // para scanner depois de detectar
-        video.style.display = 'none'; // esconde o vídeo
-        scanBtn.style.display = 'block'; // mostra o botão novamente
+        // Quando detecta, abre o link na mesma aba
+        window.location.href = result;
+        qrScanner.stop(); 
       }, {
         onDecodeError: error => {
           console.log('Não detectado ainda...');
@@ -71,7 +61,6 @@
         maxScansPerSecond: 5
       });
 
-      // Inicia a câmera
       try {
         await qrScanner.start();
       } catch(e) {
