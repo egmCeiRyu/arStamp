@@ -7,8 +7,7 @@
   <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
   <title>3D Model Thumbnails</title>
   
-  <style>
-    
+  <style> 
     .title{
       position: sticky;
       top: 0;
@@ -277,15 +276,19 @@
 
     #qr-scanner-btn {
         /* Estilos do botão QR */
-        background-color: rgba(255, 110, 204, 0.46); /* Exemplo: uma cor diferente */
         color: white;
-        padding: 10px 8px;
+        padding: 0px 8px;
         border: none;
-        border-radius: 8px;
         font-size: 1em;
         cursor: pointer;
         box-shadow: 0 2px 9px rgba(0, 0, 0, 0.1);
         transition: background-color 0.3s;
+        width: 10px;
+    }
+    
+    #qr-scanner-btn     img {
+      width: 64px; /* Sets a fixed width */
+      height: auto; /* Adjusts height proportionally */
     }
 
     #qr-scanner-btn:hover {
@@ -337,20 +340,21 @@
       }
     }
     
-    #qr-code-reader {
-            width: 100%;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: black;
-            z-index: 2000; 
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+    #qr-code-reader 
+    {
+      width: 100%;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: black;
+      z-index: 2000; 
+      display: none; 
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
     
     #video {
     /* Torna o vídeo uma sobreposição de tela cheia */
@@ -489,7 +493,7 @@
   
   <div id="bottom-actions">
           <div id="qr-code-btn-box">
-        <button id="qr-scanner-btn">qrcode</button>
+        <button id="qr-scanner-btn"><img src="thumbnails/qrcode.png" alt="buttonpng"/></button>
       </div>
 
       <div id="view-model-btn-box">
