@@ -109,22 +109,17 @@
 
     #view-model-btn {
         position: fixed;
-        /* 🔑 KEY FIX for Horizontal Centering */
+
+        /* 🔑 Ensure the button itself is centered in the viewport */
         left: 50%; 
         transform: translateX(-50%); 
 
-        align-items: center;
-        bottom: 0%;
+        bottom: 0%; /* Or your desired vertical position */
         height: 150px;
         width: 150px;
         cursor: pointer;
         z-index: 1000;
-        justify-content: center;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
-        /* Stabilize animation rendering */
-        backface-visibility: hidden;
-        will-change: transform;
+        /* ... other styles ... */
     }
 
 
@@ -244,19 +239,19 @@
     }
     
     #bottom-actions {
-        position: fixed; /* Fixa o container na tela */
-        bottom: 20px; /* Distância da parte inferior da tela */
-
-        /* 🔑 Fix for Centering the Container */
+        position: fixed;
+        bottom: 20px; 
         left: 50%;
         transform: translateX(-50%);
+        width: 100%; 
+        max-width: 420px; 
 
-        width: 100%;
-        max-width: 400px; /* Limita a largura para ficar dentro do #app-container */
+        /* 🔑 Ensure there is 10px padding on the left and right */
         padding: 0 10px;
+
         box-sizing: border-box;
-        display: flex; /* Habilita o Flexbox */
-        justify-content: space-between; /* Espaça os elementos para ficarem nos cantos */
+        display: flex; 
+        justify-content: space-between; 
         align-items: flex-end;
         z-index: 1000;
     }
@@ -296,13 +291,24 @@
         background-color: #e09634;
     }
     
-    .thumbnail-container{
-      display: flex;
-      justify-content: space-evenly;
-      align-content: center;
-      flex-wrap: wrap;
-      gap: 2em;
-    }
+  .thumbnail-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+      justify-items: center;
+      background-color: rgb(247, 246, 240);
+
+      /* 🔑 FIX: Constrain the maximum width */
+      max-width: 420px; /* Use the same max-width as #app-container */
+
+      /* 🔑 FIX: Center the container horizontally */
+      width: 100%;
+      margin: 0 auto;
+
+      box-sizing: border-box;
+      padding-top: -5px;
+      padding-bottom: 93px;
+      overflow-y: hidden;
+  }
     
     .bottom-stripe{
       display: flex;
@@ -322,7 +328,7 @@
       max-width: 100%;
       touch-action: pan-y; 
     }
-    
+     
   </style>
 
 </head>
