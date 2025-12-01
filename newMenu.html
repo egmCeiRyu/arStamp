@@ -251,7 +251,6 @@
         padding: 0 10px;
         box-sizing: border-box;
         display: flex; 
-        justify-content: space-between; /* Mantém os itens nas extremidades */
         align-items: flex-end;
         z-index: 1000;
     }
@@ -268,23 +267,24 @@
 
     /* Estilo para o botão QR Code */
     #qr-code-btn-box {
-        display: none; /* Oculta em telas grandes */
-        justify-content: flex-start; /* Força o item para a esquerda */
-        align-items: flex-end; 
-        margin-right: 0; 
+        position: fixed; /* Fixa na viewport */
+        bottom: 18px; /* Ajuste a altura vertical */
+        left: 10px; /* Define a distância da margem esquerda */
+        z-index: 1001;
+        border: 10px;/
     }
 
     #qr-scanner-btn {
         /* Estilos do botão QR */
         background-color: rgba(255, 110, 204, 0.46); /* Exemplo: uma cor diferente */
         color: white;
-        padding: 10px 8px;
         border: none;
-        border-radius: 8px;
+        border-radius: 59px;
         font-size: 1em;
         cursor: pointer;
         box-shadow: 0 2px 9px rgba(0, 0, 0, 0.1);
         transition: background-color 0.3s;
+        padding-left: 7px;
     }
 
     #qr-scanner-btn:hover {
