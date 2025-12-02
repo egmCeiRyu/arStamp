@@ -1,7 +1,8 @@
 // ------------------------------------------------------------------
-// 1. CONFIGURAÇÃO FIREBASE
+// 1. FIREBASE CONFIGURATION
 // ------------------------------------------------------------------
 const firebaseConfig = {
+    // Keep your existing configuration
     apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
     authDomain: "stamp-edfc5.firebaseapp.com",
     projectId: "stamp-edfc5",
@@ -11,75 +12,111 @@ const firebaseConfig = {
     measurementId: "G-2EVLH3GZNS"
 };
 
-// Inicializa o Firebase (Compat)
+// Initialize Firebase (Compat)
 const app = firebase.initializeApp(firebaseConfig);
 const auth = app.auth();
 const statusDisplay = document.getElementById('auth-status');
 
-// Define a persistência como LOCAL para salvar o login
-// Isso é crucial para que o usuário não precise logar novamente
+// Persistence setting is maintained, although less critical for passwordless flow
 const persistence = firebase.auth.Auth.Persistence.LOCAL;
 
-// ------------------------------------------------------------------
-// 2. FUNÇÃO ÚNICA: LOGIN → ou → SIGNUP AUTOMÁTICO
-// ------------------------------------------------------------------
-function loginOrSignup() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
 
-    if (!email || !password) {
-        alert("メールアドレスとパスワードを入力してください。");
+// ------------------------------------------------------------------
+// 2. PASSWORDLESS SIGN-IN LINK SETTINGS
+// ------------------------------------------------------------------
+const actionCodeSettings = {
+    // 💡 IMPORTANT: Replace this with the full URL of the page 
+    // where the sign-in link is handled (e.g., your login page: index.html).
+    // Ensure this URL is also whitelisted in your Firebase Console -> Authentication -> Settings -> Authorized domains.
+    url: window.location.href.split('?')[0], 
+    
+    // Must be true to handle the sign-in in the app/browser
+    handleCodeInApp: true, 
+};
+
+
+// ------------------------------------------------------------------
+// 3. NEW AUTH FLOW: SEND SIGN-IN LINK
+// ------------------------------------------------------------------
+function sendSignInLink() {
+    const email = document.getElementById('email').value.trim();
+
+    if (!email) {
+        alert("Please enter your email address.");
         return;
     }
 
-    // A. CONFIGURA a persistência antes de tentar autenticar
-    auth.setPersistence(persistence)
+    auth.sendSignInLinkToEmail(email, actionCodeSettings)
         .then(() => {
-            // B. Tenta LOGIN primeiro
-            return auth.signInWithEmailAndPassword(email, password);
-        })
-        .then(() => {
-            console.log("ログイン成功");
-            // O onAuthStateChanged (Seção 3) cuidará do redirecionamento
+            // Save the email locally to complete the sign-in when the link is clicked
+            localStorage.setItem('emailForSignIn', email);
+            if (statusDisplay) {
+                statusDisplay.textContent = `A confirmation link has been sent to your email (${email}). Please check your inbox.`;
+                statusDisplay.style.backgroundColor = '#c8e6c9';
+            }
+            console.log("Sign-in link sent successfully.");
         })
         .catch((error) => {
-            
-            // C. Se o usuário NÃO EXISTE → cria conta automaticamente (SIGNUP)
-            if (error.code === "auth/user-not-found") {
-                console.log("ユーザーが存在しません → 新規登録します");
-
-                // Note: a persistência já está configurada do passo A
-                return auth.createUserWithEmailAndPassword(email, password)
-                    .then(() => {
-                        alert("新規登録完了！ログインしました。");
-                    });
-
-            } else {
-                // Qualquer outro erro (senha errada, email inválido, etc.)
-                alert(`ログインエラー: ${error.message}`);
+            if (statusDisplay) {
+                statusDisplay.textContent = `Error sending link: ${error.message}`;
+                statusDisplay.style.backgroundColor = '#ffcdd2';
             }
-        })
-        .catch((finalError) => {
-             // Captura erros de sign-up, setPersistence ou outros erros que não são "user-not-found"
-             // Garante que o usuário veja a mensagem de erro.
-             if (finalError) {
-                 alert(`認証エラー: ${finalError.message}`);
-                 console.error("Erro final de autenticação:", finalError);
-             }
+            console.error("Sign-in link error:", error);
         });
 }
 
-// Disponibiliza para o HTML
-window.loginOrSignup = loginOrSignup;
+window.sendSignInLink = sendSignInLink;
 
 
 // ------------------------------------------------------------------
-// 3. LISTENER DE AUTENTICAÇÃO (REDIRECIONAMENTO)
+// 4. HANDLE SIGN-IN LINK REDIRECT (Complete Sign-in)
 // ------------------------------------------------------------------
+function handleSignInLink() {
+    // Check if the current URL contains the sign-in link parameters
+    if (auth.isSignInWithEmailLink(window.location.href)) {
+        let email = localStorage.getItem('emailForSignIn');
+        
+        // If the email is not in storage, prompt the user to re-enter it for security
+        if (!email) {
+            email = window.prompt('Please re-enter your email to complete the sign-in process.'); 
+        }
+
+        if (email) {
+            if (statusDisplay) {
+                statusDisplay.textContent = "Completing authentication...";
+                statusDisplay.style.backgroundColor = '#fff3cd';
+            }
+
+            // Complete the sign-in process
+            auth.signInWithEmailLink(email, window.location.href)
+                .then((result) => {
+                    // Cleanup local storage and URL
+                    localStorage.removeItem('emailForSignIn');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    
+                    // The onAuthStateChanged listener (Section 5) handles the final redirection
+                    console.log(`Login successful: ${result.user.email}`);
+                })
+                .catch((error) => {
+                    // Handle sign-in errors (e.g., expired link, invalid link)
+                    if (statusDisplay) {
+                        statusDisplay.textContent = `Login Error: ${error.message}`;
+                        statusDisplay.style.backgroundColor = '#ffcdd2';
+                    }
+                    console.error("Login Error:", error);
+                });
+        }
+    }
+}
+// Run this function immediately on page load
+handleSignInLink();
+
+
+// ------------------------------------------------------------------
+// 5. AUTHENTICATION LISTENER (REDIRECTION)
+// ------------------------------------------------------------------
+// This listener remains the same and handles redirection after successful login/logout
 auth.onAuthStateChanged((user) => {
-    // Melhoria: Garante que a lógica de redirecionamento só aconteça 
-    // após o primeiro carregamento, e não em cada autenticação do firebase.
-
     if (statusDisplay) {
         if (user) {
             statusDisplay.textContent = `Current User: ${user.email} (UID: ${user.uid})`;
@@ -87,23 +124,23 @@ auth.onAuthStateChanged((user) => {
             const redirectUrl = localStorage.getItem('redirectAfterLogin');
             const currentPage = window.location.pathname.split('/').pop();
 
-            // 1️⃣ Se havia uma URL salva (modelo 3D) → Vai pra lá
+            // 1️⃣ Redirect to a saved URL if one exists
             if (redirectUrl) {
                 localStorage.removeItem('redirectAfterLogin');
                 window.location.href = redirectUrl;
-                console.log(`保存されたURLへのリダイレクト： ${redirectUrl}`);
+                console.log(`Redirecting to saved URL: ${redirectUrl}`);
 
-            // 2️⃣ Se está na página de login → vai para o menu
+            // 2️⃣ If on the login page, redirect to the menu
             } else if (currentPage === 'index.html' || currentPage === '') {
                 window.location.href = 'newMenu.html';
-                console.log("メインメニューにリダイレクト中...");
+                console.log("Redirecting to main menu...");
             }
 
         } else {
-            // Quando está deslogado
-            statusDisplay.textContent = "現在のユーザー: なし (サインインしてください)";
+            // User is logged out
+            statusDisplay.textContent = "Current User: None (Please sign in)";
 
-            // Se está no menu sem login → voltar para login
+            // If on the menu page without login, redirect back to login
             if (window.location.pathname.endsWith('newMenu.html')) {
                 window.location.href = 'index.html';
             }
@@ -115,58 +152,19 @@ auth.onAuthStateChanged((user) => {
 
 
 // ------------------------------------------------------------------
-// 4. REDEFINIÇÃO DE SENHA (Forgot Password)
-// ------------------------------------------------------------------
-function handlePasswordReset(event) {
-    // 1. Previne o comportamento padrão do link
-    event.preventDefault(); 
-    
-    // Pega o e-mail do campo de input.
-    const email = document.getElementById('email').value.trim();
-    const authStatus = document.getElementById('auth-status');
-
-    // 2. Verifica se o campo de e-mail está preenchido
-    if (!email) {
-        authStatus.textContent = "上記のメールアドレスを入力してパスワードを再設定してください。";
-        authStatus.style.backgroundColor = '#ffcdd2'; 
-        return;
-    }
-
-    // 3. Chama o método do Firebase
-    auth.sendPasswordResetEmail(email)
-        .then(() => {
-            // Mensagem de segurança: sucesso genérico para não vazar se o e-mail existe.
-            authStatus.textContent = `メールアドレスが登録されている場合、再設定リンクを ${email} に送信しました。`;
-            authStatus.style.backgroundColor = '#c8e6c9'; 
-            console.log("再設定メールが正常に送信されました！");
-        })
-        .catch((error) => {
-            // Se o erro for 'user-not-found' ou 'invalid-email', mantém a mensagem de sucesso 
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-                 authStatus.textContent = `メールアドレスが登録されている場合、再設定リンクを ${email} に送信しました。`;
-                 authStatus.style.backgroundColor = '#c8e6c9'; 
-                 console.warn("Segurança: Reset solicitado, mas e-mail não encontrado/inválido.");
-            } else {
-                authStatus.textContent = `予期せぬエラー: ${error.message}`;
-                authStatus.style.backgroundColor = '#ffcdd2';
-                console.error("パスワードリセットエラー：", error);
-            }
-        });
-}
-window.handlePasswordReset = handlePasswordReset;
-
-
-// ------------------------------------------------------------------
-// 5. LOGOUT (se você quiser reativar futuramente)
+// 6. LOGOUT 
 // ------------------------------------------------------------------
 function signOutUser() {
     auth.signOut().then(() => {
-        alert("ログアウト成功");
+        alert("Logout successful");
         if (window.location.pathname.endsWith('newMenu.html')) {
             window.location.href = 'index.html';
         }
     }).catch(error => {
-        console.error("Erro ao sair:", error);
+        console.error("Error during sign out:", error);
     });
 }
 window.signOutUser = signOutUser;
+
+// NOTE: The original handlePasswordReset function has been removed as it is not applicable 
+// to a pure passwordless authentication flow.

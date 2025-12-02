@@ -92,23 +92,24 @@
         <h1>ログイン</h1>
         
         <input type="email" id="email" placeholder="メールアドレス">
-        <input type="password" id="password" placeholder="パスワード">
+        <!--<input type="password" id="password" placeholder="パスワード">-->
 
         <!-- BOTÃO ÚNICO → LOGIN + SIGNUP AUTOMÁTICO -->
-        <button onclick="loginOrSignup()">ログイン / 新規登録</button>
+        <button onclick="sendSignInLink()">ログイン / 新規登録</button>
+        <!--<button onclick="loginOrSignup()">ログイン / 新規登録</button>-->
         
+        <!--
         <p style="margin-top: 10px;">
             <a href="#" onclick="handlePasswordReset(event)" style="font-size: 0.9em; color: #007bff; text-decoration: none;">
                 パスワードを忘れた場合
             </a>
         </p>
+        -->
 
         <p id="auth-status">現在のユーザー: ロード中...</p>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
     <script src="app.js"></script>
 </body>
 </html>
