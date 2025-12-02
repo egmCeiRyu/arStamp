@@ -23,9 +23,9 @@ auth.setPersistence(persistence);
 
 
 // ------------------------------------------------------------------
-// 2. MAIN AUTH FUNCTION: LOGIN ONLY (No Automatic Signup)
+// 2. MAIN AUTH FUNCTION: LOGIN OR SIGNUP (Single Button)
 // ------------------------------------------------------------------
-function loginOrSignup() { // Function name remains the same for HTML compatibility
+function loginOrSignup() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
 
@@ -42,30 +42,42 @@ function loginOrSignup() { // Function name remains the same for HTML compatibil
         statusDisplay.style.backgroundColor = '#fff3cd';
     }
 
-    // 🔑 ACTION: Only attempt to sign in. 
+    // 1. Attempt to sign in (for existing users)
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             // Signed in successfully
             console.log("Login successful:", userCredential.user.email);
-            // Redirection handled by onAuthStateChanged listener (Section 4)
+            // Redirection handled by onAuthStateChanged listener
         })
-        .catch((error) => {
-            // 🔑 IMPORTANT: Handles all errors (incorrect password, user not found, invalid credential)
-            // No attempt to create a new user is made.
-            let errorMessage = "Login failed. Please check your email and password.";
+        .catch((loginError) => {
             
-            // Provide more specific feedback for common errors if needed:
-            if (error.code === 'auth/user-not-found') {
-                errorMessage = "Login failed. This email address is not registered.";
-            } else if (error.code === 'auth/wrong-password') {
-                errorMessage = "Login failed. The password you entered is incorrect.";
-            }
+            // 2. If sign-in fails because the user does NOT exist, attempt to sign up
+            if (loginError.code === 'auth/user-not-found') {
+                console.log("User not found. Attempting to sign up...");
 
-            if (statusDisplay) {
-                statusDisplay.textContent = errorMessage;
-                statusDisplay.style.backgroundColor = '#ffcdd2';
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // User created and logged in successfully
+                        console.log("Sign up successful:", userCredential.user.email);
+                        // Redirection handled by onAuthStateChanged listener
+                    })
+                    .catch((signupError) => {
+                        // Handle sign-up specific errors (e.g., weak password, invalid email format)
+                        if (statusDisplay) {
+                            statusDisplay.textContent = `Sign Up Error: ${signupError.message}`;
+                            statusDisplay.style.backgroundColor = '#ffcdd2';
+                        }
+                        console.error("Sign Up Error:", signupError);
+                    });
+            } 
+            // 3. Handle other login errors (wrong password, invalid format, etc.)
+            else {
+                if (statusDisplay) {
+                    statusDisplay.textContent = `Login Error: ${loginError.message}`;
+                    statusDisplay.style.backgroundColor = '#ffcdd2';
+                }
+                console.error("Login Error:", loginError);
             }
-            console.error("Login Error:", error);
         });
 }
 
