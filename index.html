@@ -87,24 +87,19 @@
 </head>
 
 <body>
-
     <div class="auth-container">
-        <h1>ログイン</h1>
-        
-        <input type="email" id="email" placeholder="メールアドレス">
-        <!--<input type="password" id="password" placeholder="パスワード">-->
+        <h1>ログイン (Login)</h1>
 
-        <!-- BOTÃO ÚNICO → LOGIN + SIGNUP AUTOMÁTICO -->
-        <button onclick="sendSignInLink()">ログイン / 新規登録</button>
-        <!--<button onclick="loginOrSignup()">ログイン / 新規登録</button>-->
-        
-        <!--
+        <input type="email" id="email" placeholder="メールアドレス">
+        <input type="password" id="password" placeholder="パスワード">
+
+        <button onclick="loginOrSignup()">ログイン / 新規登録 (Login / Sign Up)</button>
+
         <p style="margin-top: 10px;">
             <a href="#" onclick="handlePasswordReset(event)" style="font-size: 0.9em; color: #007bff; text-decoration: none;">
-                パスワードを忘れた場合
+                パスワードを忘れた場合 (Forgot Password)
             </a>
         </p>
-        -->
 
         <p id="auth-status">現在のユーザー: ロード中...</p>
     </div>
