@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
   <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
   <title>Firebase Auth</title>
-
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="app.js"></script> 
   <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -89,11 +91,12 @@
 <body>
     <div class="auth-container">
         <h1>ログイン (Login)</h1>
+        <form onsubmit="loginOrSignup(); return false;"> 
+            <input type="email" id="email" placeholder="メールアドレス">
+            <input type="password" id="password" placeholder="パスワード">
 
-        <input type="email" id="email" placeholder="メールアドレス">
-        <input type="password" id="password" placeholder="パスワード">
-
-        <button onclick="loginOrSignup()">ログイン / 新規登録 (Login / Sign Up)</button>
+            <button type="submit">ログイン / 新規登録</button>
+        </form>
 
         <p style="margin-top: 10px;">
             <a href="#" onclick="handlePasswordReset(event)" style="font-size: 0.9em; color: #007bff; text-decoration: none;">
@@ -103,8 +106,5 @@
 
         <p id="auth-status">現在のユーザー: ロード中...</p>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="app.js"></script>
 </body>
 </html>
