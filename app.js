@@ -105,9 +105,10 @@ function handlePasswordReset(event) {
 auth.onAuthStateChanged(user => {
     if (user) {
         console.log("ログイン中ユーザー:", user.email);
-        if (window.location.pathname.includes("index.html") || window.location.pathname === "/") {
-            window.location.href = "newMenu.html";
-        }
+        // Redireciona sempre que usuário está logado
+        window.location.href = "newMenu.html";
+    } else {
+        console.log("ユーザー未ログイン");
     }
 });
 
