@@ -61,7 +61,7 @@
     
     .thumbnail-link.selected  {
       border: 6px solid rgba(252, 221, 91, 0.87);
-      padding: 5px;
+      /*padding: 5px;*/
 
     }
     
@@ -687,7 +687,7 @@ closeCameraBtn.addEventListener('click', closeCamera);
         await setDoc(docRef, { stamps: stampedModels }, { merge: true });
         window.location.href = window.location.pathname + `?newStamp=${modelName}`;
       } else {
-        alert(`A estampa ${modelName} já foi desbloqueada!`);
+        alert(`The stamp ${modelName} was already unlocked!`);
         window.location.reload();
       }
     }
