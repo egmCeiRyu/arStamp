@@ -1,375 +1,745 @@
 <!doctype html>
 <html lang="jp">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
-    <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
-    <title>3D Model Thumbnails</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no" />
+  <!--<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">-->
+  <link rel="stylesheet" href="https://use.typekit.net/zfi8dmc.css">
+  <title>3D Model Thumbnails</title>
+  
+  <style> 
+    .title{
+      position: sticky;
+      top: 0;
+      display: flex;
+      background: #FFF5E1;
+      flex-wrap: wrap;
+      font-family: "novecento-sans", sans-serif;
+      margin:auto;
+      width: 100%;
+      text-align: center;
+      overflow-y:auto;
+      justify-content: center;
+    }
+
+    .thumbnail-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+      justify-items: center;
+      background-color: rgb(247, 246, 240);
+      width: 100%;
+      margin: auto;
+      box-sizing: border-box;
+      padding-top: -5px;
+      padding-bottom: 93px;
+      overflow-y: hidden;
+
+    }
     
-    <style>
-        /* ========================================================= */
-        /* ESTILOS GERAIS/CATÁLOGO */
-        /* ========================================================= */
-        body{
-            padding-bottom: 60px;
-            margin: 0px;
-            background: #FFF5E1;
-            overflow-x: hidden;
-            max-width: 100%;
-            touch-action: pan-y; 
-        }
+    /* === Thumbnail Image === */
+    .thumbnail-img {
+        width: 142px;
+        height: 135px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+        border-radius: -7px;
+    }
 
-        #app-container {
-            width: 100%;
-            max-width: 420px;
-            min-width: 320px;
-            margin: 0 auto;
-            background: #FFF5E1;
-            min-height: 100vh;
-            box-sizing: border-box;
-            overflow-x: hidden;
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-
-        .title {
-            position: sticky;
-            top: 0;
-            display: flex;
-            background: #FFF5E1;
-            flex-wrap: wrap;
-            font-family: "novecento-sans", sans-serif;
-            margin: auto;
-            width: 100%;
-            text-align: center;
-            overflow-y: auto;
-            justify-content: center;
-            z-index: 10; /* Garante que o título fixo esteja acima dos thumbnails */
-        }
         
-        .titlebook {
-            padding-top: -4px;
-            padding-bottom: -3px;
-            height: 144px;
-            margin: auto;
-        }
+    .thumbnail-link {
+      cursor: pointer;
+      display: inline-block;
+      text-align: center;
+      /*transition: border 0.2s, box-shadow 0.2s;*/
+      /* set the border of the choose button*/
+      padding: 5px;
+      margin: 10px;
+      background-color:#ffdbdb;
+      border-radius: 103px;
 
-        .thumbnail-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            justify-items: center;
-            background-color: rgb(247, 246, 240);
-            max-width: 420px; /* Consistente com #app-container */
-            width: 100%;
-            margin: 0 auto;
-            box-sizing: border-box;
-            padding-bottom: 93px;
-            overflow-y: hidden;
-        }
+      /* 💡 NOVO: Borda transparente para reservar espaço */
+      border: 6px solid transparent; 
+    }
+    
+    .thumbnail-link.selected  {
+      border: 6px solid rgba(252, 221, 91, 0.87);
+      /*padding: 5px;*/
 
-        .thumbnail-link {
-            cursor: pointer;
-            display: inline-block;
-            text-align: center;
-            padding: 5px;
-            margin: 10px;
-            background-color: #ffdbdb;
-            border-radius: 103px;
-            border: 6px solid transparent; 
-        }
-        
-        .thumbnail-link.selected {
-            border: 6px solid rgba(252, 221, 91, 0.87);
-        }
-        
-        .thumbnail-img {
-            width: 142px;
-            height: 135px;
-            object-fit: cover;
-            display: block;
-            margin: 0 auto;
-            border-radius: -7px; /* Valor inválido, mas mantido. Recomenda-se um valor positivo (ex: 7px) */
-        }
+    }
+    
+    .titlebook{
+      padding-top: -4px;
+      padding-bottom: -3px;
+      height: 144px;
+      margin: auto;
+    }
 
-        /* ========================================================= */
-        /* RODAPÉ E BOTÕES (FIXED) */
-        /* ========================================================= */
-        .bottom-stripe {
-            background-color: #FFF5E1;
-            display: block;
-            height : 91px;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            z-index: 999;
-            width: 100%;
-            justify-content: center;
-        }
-        
-        #bottom-actions {
-            position: fixed;
-            bottom: 25px; 
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%; 
-            max-width: 420px; 
-            padding: 0 10px;
-            box-sizing: border-box;
-            display: flex; 
-            align-items: flex-end;
-            justify-content: space-between; /* Novo: Para espaçar os botões */
-            z-index: 999; /* Z-index do container de botões */
-        }
+      
+    .bottom-stripe{
+      background-color: #FFF5E1;
+      display: block;
+      height : 80px;
+      position: fixed;
+      bottom: 0;
+      z-index: 50;
+      width: 100%;
+    }
 
-        #view-model-btn-box {
-            width: 120px; 
-            height: 120px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001; /* Fica acima de #bottom-actions */
-        }
+    .foot {
+      background-color: #FFF5E1;
+      width: 100%;
+      height: 82px;
+      text-align: center;
+      margin: 0 auto;         /* centraliza como o container */
+      box-sizing: border-box;
+    }
+    
+    .catalog {
+        display: block;
+        color: #e0e0e0;
+        font-size: 28px;
+    }
 
-        #view-model-btn {
-            height: 150px; /* Estilos movidos de #view-model-btn-box para aqui */
-            width: 150px;
-            cursor: pointer;
-            z-index: 1002;
-            position: relative; /* Ajusta a posição dentro do box */
-            left: 15px; /* Ajuste manual para centralizar melhor */
-            bottom: 0px;
-        }
+    #view-model-btn-box{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        outline: none;
+    }
 
+    #view-model-btn {
+        position: fixed;
+
+        /* 🔑 Ensure the button itself is centered in the viewport */
+        left: 50%; 
+        transform: translateX(-50%); 
+
+        bottom: 0%; /* Or your desired vertical position */
+        height: 150px;
+        width: 150px;
+        cursor: pointer;
+        z-index: 1000;
+        /* ... other styles ... */
+    }
+
+
+    #view-model-btn-bg {
+      position: fixed;
+      bottom: -5px; /* Distance from the bottom of the screen */
+      color: white;
+      cursor: pointer;
+    }
+
+
+    /* Optional: Shrink button slightly on smaller screens */
+    @media screen and (max-width: 600px) and (orientation: landscape){
+      #view-model-btn {
+        width: 100px;
+        height: 100px;
+        font-size: 24px;
+        color: #e0e0e0;
+      }
+      .thumbnail-container {
+        max-width: 600px;
+        width: 50%;
+      }
+    }
+
+    @media screen and (orientation: landscape){
+      .thumbnail-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+        width: 58%;
+      }
+      
+      .thumbnail-link img{
+        height: 122px;
+        width: 121px;
+      }
+      
+      #thumbnail-box{
+        height: 192px;
+      }
+      
+      
+      #view-model-btn-bg {
+        position: fixed;
+        bottom: 67px; /* Distance from the bottom of the screen */
+        color: white;
+        cursor: pointer;
+        scale: 149%
+      } 
+      
+      bottom-stripe {
+        background-color: #FFF5E1;
+        display: block;
+        height: 80px;
+        position: fixed;
+        bottom: 5%;
+        left: 0;
+        z-index: 50;
+        width: 100%;
+      }
+    }
+    /* Animação de conquista de estampa */
+    @keyframes stampUnlock {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+        filter: drop-shadow(0 0 0 rgba(255, 223, 91, 0.8));
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+        filter: drop-shadow(0 0 15px rgba(255, 223, 91, 1));
+      }
+      80% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: drop-shadow(0 0 0 rgba(255, 223, 91, 0));
+      }
+    }
+
+    /* Classe temporária para disparar a animação */
+    /*
+    .stamp-unlock {
+      animation: stampUnlock 0.8s ease-out forwards;
+    }
+    */
+
+    /* Botão de visualização */
+  
+    #view-model-btn.selected {
+        animation: 
+            /*scalePulse 1s infinite ease-in-out,*/
+            glowPulse 1s infinite ease-in-out; 
+    }
+    
+
+    /*
+    @keyframes scalePulse {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(0.8); }
+    }
+    */
+    
+    @keyframes glowPulse {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.4)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.9)); }
+    100% { filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.4)); }
+    }
+
+    /* Container principal */
+    #app-container {
+      width: 100%;
+      max-width: 420px;
+      min-width: 320px;
+      margin: 0 auto;
+      background: #FFF5E1;
+      min-height: 100vh;
+      box-sizing: border-box;
+      overflow-x: hidden;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    
+    #bottom-actions {
+        position: fixed;
+        bottom: 25px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%; 
+
+        /* 🔑 Recomendação: Alinhe ao container principal (420px) */
+        max-width: 420px; 
+
+        /* Adicione padding para o espaço nas laterais (ex: 10px) */
+        padding: 0 10px;
+        box-sizing: border-box;
+        display: flex; 
+        align-items: flex-end;
+        z-index: 1000;
+    }
+
+    /* Estilo para o botão de visualização (manter o tamanho original) */
+    #view-model-btn-box {
+        width: 120px; /* Tamanho do seu ícone de visualização */
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 0; /* Alinha à direita do container #bottom-actions */
+    }
+
+    #qr-code-btn-box {
+        position: fixed; /* Fixa na viewport */
+        bottom: 9px; /* Ajuste a altura vertical */
+        left: 0px; /* Define a distância da margem esquerda */
+        z-index: 1001; /* Garante que fique acima de outros elementos do rodapé */
+
+        /* 🔑 Mantenha o display: flex; aqui ou deixe-o implícito para que apareça em mobile/tablet */
+        display: flex; 
+    }
+
+    #qr-scanner-btn {
+        /* Estilos do botão QR */
+        background-color: rgba(255, 0, 165, 0.46); /* Exemplo: uma cor diferente */
+        color: white;
+        border: none;
+        border-radius: 59px;
+        font-size: 1.1em;
+        cursor: pointer;
+        box-shadow: 0 4px 0px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s;
+        padding-left: 8px;
+    }
+
+    #qr-scanner-btn:hover {
+        background-color: #e09634;
+    }
+    
+    .thumbnail-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+        justify-items: center;
+        background-color: rgb(247, 246, 240);
+
+        /* 🔑 FIX: Constrain the maximum width */
+        max-width: 420px; /* Use the same max-width as #app-container */
+
+        /* 🔑 FIX: Center the container horizontally */
+        width: 100%;
+        margin: 0 auto;
+
+        box-sizing: border-box;
+        padding-top: -5px;
+        padding-bottom: 93px;
+        overflow-y: hidden;
+    }
+    
+    .bottom-stripe{
+      display: flex;
+      bottom: 0;
+      left: 0;
+      z-index: 999;
+      height: 91px;
+      width: 100&;
+      justify-content: center;
+    }
+    
+    body{
+      padding-bottom: 60px;
+      margin: 0px;
+      background: #FFF5E1;
+      overflow-x: hidden;
+      max-width: 100%;
+      touch-action: pan-y; 
+    }
+    
+    @media screen and (min-width: 1281px) {
+        /* Se a tela for de 1281px ou mais (PCs), esconda o botão QR Code. */
         #qr-code-btn-box {
-            /* Removido position: fixed e ajustado para ser um elemento flexível dentro de #bottom-actions */
-            display: flex;
-            align-items: center;
-            z-index: 1001;
-            height: 120px; /* Para alinhar com o outro botão */
-            left: -10px; /* Ajuste manual para centralizar o botão QR */
-            position: relative;
+            display: none !important; /* Esconda para telas grandes */
         }
-
-        #qr-scanner-btn {
-            background-color: rgba(255, 0, 165, 0.46);
-            color: white;
-            border: none;
-            border-radius: 59px;
-            font-size: 1.1em;
-            cursor: pointer;
-            box-shadow: 0 4px 0px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s;
-            padding: 10px 15px; /* Padding ajustado para ser mais consistente */
+        #stamp-section{
+            padding-top: 123px;
         }
-        
-        /* ========================================================= */
-        /* ESTILOS CÂMERA/QR CODE (Z-INDEX ALTO) */
-        /* ========================================================= */
-
-        /* 🔑 Estilo do Vídeo */
-        #video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            z-index: 2000; /* Z-Index do feed da câmera */
-            background-color: black;
-            display: none;
+        .thumbnail-container{
+          max-width: 1796px;
+          max-height: 1020px;
+          display: grid;
+          grid-template-columns: repeat(7, 1fr); /* always 2 columns */
+          justify-items: center;
+          align-content: center;
+          row-gap: 398px;
+          padding-top: 74px;
         }
-
-        #close-camera-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2003; /* Acima de tudo */
-            background: rgba(255, 255, 255, 0.8);
-            color: black;
-            border: 1px solid black;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.5em;
-            cursor: pointer;
-            display: none;
-            font-weight: bold;
-        }
-
-        /* 🔑 A Máscara: Cobre a tela, exceto a "janela" de QR Code (z-index 2001) */
-        .scan-region {
-            /* Esta regra cria a máscara preta semi-transparente */
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
-            border-radius: 0 !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 2001 !important; 
-        }
-
-        /* 🔑 Bordas de Canto Vermelhas (z-index 2002) */
-        .highlight-region {
-            /* Centraliza a região de destaque */
-            position: absolute !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-
-            /* Define o tamanho da "janela" de escaneamento */
-            width: 70vw !important; 
-            height: 70vw !important; 
-            max-width: 300px !important;
-            max-height: 300px !important;
-
-            border: none !important;
-
-            /* A Mágica: 4 box-shadows inset para simular os 4 cantos */
-            box-shadow: 
-                /* Canto Superior Esquerdo */
-                inset 5px 5px 0 0 red, 
-                /* Canto Superior Direito */
-                inset -5px 5px 0 0 red, 
-                /* Canto Inferior Esquerdo */
-                inset 5px -5px 0 0 red, 
-                /* Canto Inferior Direito */
-                inset -5px -5px 0 0 red;
-
-            padding: 10px !important;
-            box-sizing: content-box !important; 
-            border-radius: 10px !important; 
-
-            /* 🚨 GARANTE que a borda fique acima da máscara */
-            z-index: 2002 !important; 
+        .thumbnail-link img{
+          height: 198px;
+          width: auto;
         }
         
-        /* ========================================================= */
-        /* MEDIA QUERIES E ANIMAÇÕES */
-        /* ========================================================= */
-        /* ... (Mantenha as suas media queries e animações aqui) ... */
+    }
 
-        @media screen and (min-width: 1281px) {
-            /* Se a tela for de 1281px ou mais (PCs), esconda o botão QR Code. */
-            #qr-code-btn-box {
-                display: none !important;
-            }
-            /* ... (Outros estilos de desktop) ... */
-        }
-        /* ... (Outras media queries e animações) ... */
-    </style>
+      #qr-code-reader {
+              width: 100%;
+              height: 100vh;
+              position: fixed;
+              top: 0;
+              left: 0;
+              background: black;
+              z-index: 2000; 
+              display: none; 
+              justify-content: center;
+              align-items: center;
+              padding: 20px;
+              box-sizing: border-box;
+          }
+
+      #close-camera-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2001; /* Z-index mais alto que a câmera (2000) */
+      background: rgba(255, 255, 255, 0.8);
+      color: black;
+      border: 1px solid black;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5em;
+      cursor: pointer;
+      display: none; /* Começa escondido */
+      font-weight: bold;
+      }
+       
+
+    /* 🔑 Estilo do Vídeo */
+    #video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: 2000; /* Mantenha o vídeo em 2000 */
+        background-color: black;
+        display: none;
+    }
+
+    /* 🔑 A Máscara: Precisa ter um Z-Index ALTO */
+    .scan-region {
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
+        border-radius: 0 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 2001 !important; /* Aumente o z-index para garantir que fique acima do vídeo */
+    }
+
+    /* 🔑 Bordas de Canto Vermelhas: Usamos um seletor mais específico da biblioteca */
+    .highlight-region {
+        /* Centraliza a região de destaque */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        /* Define o tamanho da "janela" de escaneamento */
+        width: 70vw; 
+        height: 70vw; 
+        max-width: 300px;
+        max-height: 300px;
+
+        border: none !important;
+
+        /* A Mágica: 4 box-shadows inset para simular os 4 cantos */
+        box-shadow: 
+            /* Canto Superior Esquerdo */
+            inset 3px 3px 0 0 red, 
+            /* Canto Superior Direito */
+            inset -3px 3px 0 0 red, 
+            /* Canto Inferior Esquerdo */
+            inset 3px -3px 0 0 red, 
+            /* Canto Inferior Direito */
+            inset -3px -3px 0 0 red;
+
+        padding: 10px;
+        box-sizing: content-box; 
+        border-radius: 10px; 
+
+        /* 🚨 Garante que a borda fique acima da máscara, se o 'qr-scanner' injetar como irmão */
+        z-index: 2002; 
+    }
+    
+        /* Seletor Alternativo (Adicione abaixo do .highlight-region) */
+    .scan-region canvas.highlight-region {
+        /* Copie e cole os mesmos estilos de box-shadow e tamanho de .highlight-region aqui */
+        width: 70vw; 
+        height: 70vw; 
+        max-width: 300px;
+        max-height: 300px;
+
+        border: none !important;
+
+        box-shadow: 
+            inset 3px 3px 0 0 red, 
+            inset -3px 3px 0 0 red, 
+            inset 3px -3px 0 0 red, 
+            inset -3px -3px 0 0 red;
+
+        padding: 10px;
+        box-sizing: content-box; 
+        border-radius: 10px; 
+        z-index: 2002; /* Mantenha o z-index alto */
+    }
+
+    /* Borda superior esquerda */
+    .highlight-region::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        /* Linha horizontal e vertical, ajuste o tamanho (ex: 30px) e a espessura (ex: 3px) */
+        width: 30px; 
+        height: 30px; 
+        border-top: 3px solid red; /* Linha superior */
+        border-left: 3px solid red; /* Linha esquerda */
+    }
+
+    /* Borda superior direita */
+    .highlight-region::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        border-top: 3px solid red; /* Linha superior */
+        border-right: 3px solid red; /* Linha direita */
+    }
+
+    /* Borda inferior esquerda */
+    .highlight-region:nth-child(2)::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        border-bottom: 3px solid red; /* Linha inferior */
+        border-left: 3px solid red; /* Linha esquerda */
+    }
+
+    /* Borda inferior direita */
+    .highlight-region:nth-child(2)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        border-bottom: 3px solid red; /* Linha inferior */
+        border-right: 3px solid red; /* Linha direita */
+    }
+    
+
+     
+  </style>
+
 </head>
 
 <body>
-    <div class="title">
-        <img src="thumbnails/titleStampBook.png" alt="logo" class="titlebook">
+
+  <div class="title">
+    <img src=thumbnails/titleStampBook.png alt="logo" class="titlebook">
+  </div>
+
+<div id="stamp-section">
+  <div class="thumbnail-container" id="model-thumbnails">
+    <!-- Modelos -->
+    <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
+          <img src="thumbnails/white_thumb.png" alt="Model 1" class="thumbnail-img">
+          <!--
+          <span class="label">微粉砕<br>ACMパルペライザ®<br>
+      ACM-15F</span>
+      -->
     </div>
-
-    <div id="stamp-section">
-        <div class="thumbnail-container" id="model-thumbnails">
-            <div class="thumbnail-link" data-model="models/model1.glb" data-name="model1">
-                <img src="thumbnails/white_thumb.png" alt="Model 1" class="thumbnail-img">
-            </div>
-            <div class="thumbnail-link" data-model="models/model14.glb" data-name="model14">
-                <img src="thumbnails/white_thumb.png" alt="Model 14" class="thumbnail-img">
-            </div>
-        </div>
+    <div class="thumbnail-link" data-model="models/model2.glb" data-name="model2">
+        <img src="thumbnails/white_thumb.png" alt="Model 2" class="thumbnail-img">
+        <!--
+        <span class="label">微粉砕<br>ACMパルペライザ®<br>
+      ACM-30F</span>
+      -->
     </div>
-    
-    <div class="bottom-stripe">
-        <div id="particleContainer" style="
-            position: absolute;
-            pointer-events: none;
-            overflow: visible;
-            z-index: 9999;">
-        </div>
-        
-        <div id="bottom-actions">
-            <div id="qr-code-btn-box">
-                <button id="qr-scanner-btn">QRコード</button>
-            </div>
-
-            <div id="view-model-btn-box">
-                <img src="icon/selectionIcon.png" id="view-model-btn">
-            </div>
-        </div> 
+    <div class="thumbnail-link" data-model="models/model3.glb" data-name="model3">
+        <img src="thumbnails/white_thumb.png" alt="Model 3" class="thumbnail-img">
+        <!--
+        <span class="label">微粉砕<br>ACMパルペライザ®<br>
+      ACM-60F</span>
+      -->
     </div>
-    
-    <script src="app.js"></script>
-    
-    <video id="video"></video>
-    <button id="close-camera-btn" style="display: none;">X</button> 
+    <div class="thumbnail-link" data-model="models/model4.glb" data-name="model4">
+      <img src="thumbnails/white_thumb.png" alt="Model 4" class="thumbnail-img">
+      <!--
+      <span class="label">粒子設計<br> ノビルタ® NOB<br>
+      NOB-130</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model5.glb" data-name="model5">
+      <img src="thumbnails/white_thumb.png" alt="Model 5" class="thumbnail-img">
+      <!--
+      <span class="label" style="font-size:12px"> 分級<br>ミクロンセパレータ®MS<br>
+      MS-1H</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model6.glb" data-name="model6">
+      <img src="thumbnails/white_thumb.png" alt="Model 6" class="thumbnail-img">
+     <!--
+     <span class="label">混合<br>ナウタミキサ®<br>
+      DBX-1000R</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model7.glb" data-name="model7">
+      <img src="thumbnails/white_thumb.png" alt="Model 7" class="thumbnail-img">
+      <!--
+      <span class="label" >超微粉砕<br>カウンタジェット®<br>ミルAFG<br>
+      200AFG</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model8.glb" data-name="model8">
+      <img src="thumbnails/white_thumb.png" alt="Model 8" class="thumbnail-img">
+      <!--
+      <span class="label">乾燥<br>ソリッドエアー® SJS<br>
+      SJS-8-5</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model9.glb" data-name="model9">
+      <img src="thumbnails/white_thumb.png" alt="Model 9" class="thumbnail-img">
+      <!--
+      <span style="font-size: calc(12.5px)" class="label">集塵<br>パルスジェットコレクタ<br>
+      CP-57-8</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model10.glb" data-name="model10">
+      <img src="thumbnails/white_thumb.png" alt="Model 10" class="thumbnail-img">
+      <!--
+      <span class="label"><br>ACM-30F粉砕設備<br>
+      </span>
+      -->
+    </div>
+        <div class="thumbnail-link" data-model="models/model11.glb" data-name="model11">
+      <img src="thumbnails/white_thumb.png" alt="Model 11" class="thumbnail-img">
+      <!--
+      <span style="font-size: calc(12.5px)" class="label">集塵<br>パルスジェットコレクタ<br>
+      CP-57-8</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model12.glb" data-name="model12">
+      <img src="thumbnails/white_thumb.png" alt="Model 12" class="thumbnail-img">
+      <!--
+      <span class="label"><br>ACM-30F粉砕設備<br>
+      </span>
+      -->
+    </div>
+        <div class="thumbnail-link" data-model="models/model13.glb" data-name="model13">
+      <img src="thumbnails/white_thumb.png" alt="Model 13" class="thumbnail-img">
+      <!--
+      <span style="font-size: calc(12.5px)" class="label">集塵<br>パルスジェットコレクタ<br>
+      CP-57-8</span>
+      -->
+    </div>
+    <div class="thumbnail-link" data-model="models/model14.glb" data-name="model14">
+      <img src="thumbnails/white_thumb.png" alt="Model 14" class="thumbnail-img">
+      <!--
+      <span class="label"><br>ACM-30F粉砕設備<br>
+      </span>
+      -->
+    </div>
+  </div>
+</div>
+  
+<div class="bottom-stripe">
+  <div id="particleContainer" style="
+      position: absolute;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 9999;">
+  </div>
+  
+  <div id="bottom-actions">
+          <div id="qr-code-btn-box">
+        <button id="qr-scanner-btn">QRコード</button>
+      </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
-    <script>
-    const scanBtn = document.getElementById('qr-scanner-btn');
-    const video = document.getElementById('video');
-    const closeCameraBtn = document.getElementById('close-camera-btn');
-    let qrScanner;
+      <div id="view-model-btn-box">
+        <img src="icon/selectionIcon.png" id="view-model-btn">
+      </div>
+  </div>  
+</div>
+  
+  <script src="app.js"></script>
+  
+  <video id="video"></video>
+  <button id="close-camera-btn" style="display: none;">X</button> 
 
-    // Função para fechar a câmera
-    function closeCamera() {
-        if (qrScanner) {
-            qrScanner.stop();
-            qrScanner.destroy(); 
-            qrScanner = null;
-        }
-        video.style.display = 'none';
-        closeCameraBtn.style.display = 'none'; 
-        scanBtn.style.display = 'flex'; // Usado 'flex' para corresponder ao display em #qr-code-btn-box
+<script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+<script>
+const scanBtn = document.getElementById('qr-scanner-btn');
+const video = document.getElementById('video');
+const closeCameraBtn = document.getElementById('close-camera-btn'); // NOVO: Captura o botão "X"
+let qrScanner;
+
+// Função para fechar a câmera
+function closeCamera() {
+    if (qrScanner) {
+        qrScanner.stop();
+        qrScanner.destroy(); // Libera recursos da câmera
+        qrScanner = null;
     }
+    video.style.display = 'none';
+    closeCameraBtn.style.display = 'none'; // Oculta o botão "X"
+    scanBtn.style.display = 'flex'; // Mostra o botão QR Code novamente
+}
 
-    // Evento para abrir a câmera (Clique no botão QR Code)
-    scanBtn.addEventListener('click', async () => {
-        // Esconde o botão QR e mostra o vídeo e o botão "X"
-        scanBtn.style.display = 'none';
-        video.style.display = 'block';
-        closeCameraBtn.style.display = 'block';
+// Evento para abrir a câmera (Clique no botão QR Code)
+scanBtn.addEventListener('click', async () => {
+    // Esconde o botão QR e mostra o vídeo e o botão "X"
+    scanBtn.style.display = 'none';
+    video.style.display = 'block';
+    closeCameraBtn.style.display = 'block';
 
-        qrScanner = new QrScanner(video, result => {
-            if (result && result.data) {
-                console.log('デコードされたQRコード:', result.data);
-                
-                // Redireciona para o link e fecha a câmera
-                const dataUrl = result.data;
-                closeCamera(); 
-                window.location.href = dataUrl;
-            }
-        }, {
-            onDecodeError: error => console.log('まだ検出されません...'),
-            maxScansPerSecond: 5,
-            highlightScanRegion: true // ESSENCIAL: Permite que as classes .scan-region e .highlight-region sejam injetadas
-        });
-
-        try {
-            await qrScanner.start();
-        } catch(e) {
-            alert('カメラへのアクセスに失敗しました。権限を確認してください。カメラにはHTTPSが必須です： ' + e);
-            closeCamera();
+    qrScanner = new QrScanner(video, result => {
+        if (result && result.data) {
+            console.log('デコードされたQRコード:', result.data);
+            
+            // Redireciona para o link e fecha a câmera
+            const dataUrl = result.data;
+            closeCamera(); 
+            window.location.href = dataUrl;
         }
+    }, {
+        onDecodeError: error => console.log('まだ検出されません...'),
+        maxScansPerSecond: 5,
+        highlightScanRegion: true
     });
 
-    // Evento para fechar a câmera (Clique no botão "X")
-    closeCameraBtn.addEventListener('click', closeCamera);
-    </script>
-    
-    <script type="module">
-    // ... (Seu código Firebase e lógica de thumbnails) ...
-    // Seus scripts com a lógica de inicialização do firebase, seleção de thumbnail e animação
-    // Estão corretos e não foram alterados aqui.
-    
+    try {
+        await qrScanner.start();
+    } catch(e) {
+        alert('カメラへのアクセスに失敗しました。権限を確認してください。カメラにはHTTPSが必須です： ' + e);
+        // Se houver erro, fecha o modo de câmera
+        closeCamera();
+    }
+});
+
+// NOVO: Evento para fechar a câmera (Clique no botão "X")
+closeCameraBtn.addEventListener('click', closeCamera);
+  
+</script>
+
+  <script type="module">
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
-        authDomain: "stamp-edfc5.firebaseapp.com",
-        projectId: "stamp-edfc5",
-        storageBucket: "stamp-edfc5.firebasestorage.app",
-        messagingSenderId: "522739532414",
-        appId: "1:522739532414:web:047e4168251b5542ce8e2f",
-        measurementId: "G-2EVLH3GZNS"
+      apiKey: "AIzaSyAM88d_Qu-_FFDf-NF7Ckk0eYYYKAZA3pU",
+      authDomain: "stamp-edfc5.firebaseapp.com",
+      projectId: "stamp-edfc5",
+      storageBucket: "stamp-edfc5.firebasestorage.app",
+      messagingSenderId: "522739532414",
+      appId: "1:522739532414:web:047e4168251b5542ce8e2f",
+      measurementId: "G-2EVLH3GZNS"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -384,159 +754,159 @@
     const viewModelBtn = document.getElementById('view-model-btn');
 
     async function loadStampedModelsFromFirebase(uid) {
-        if (!uid) return [];
-        try {
-            const docRef = doc(db, "users", uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                return docSnap.data().stamps || [];
-            } else {
-                await setDoc(docRef, { stamps: [] });
-                return [];
-            }
-        } catch(e) { console.error(e); return []; }
+      if (!uid) return [];
+      try {
+        const docRef = doc(db, "users", uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          return docSnap.data().stamps || [];
+        } else {
+          await setDoc(docRef, { stamps: [] });
+          return [];
+        }
+      } catch(e) { console.error(e); return []; }
     }
 
     function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
     }
 
     async function loadAndRenderStamps() {
-        if (!currentUserId) return;
-        const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
-        const newStamp = getQueryParam('newStamp');
+      if (!currentUserId) return;
+      const stampedModels = await loadStampedModelsFromFirebase(currentUserId);
+      const newStamp = getQueryParam('newStamp');
 
-        thumbnails.forEach(thumb => {
-            const modelName = thumb.getAttribute('data-name');
-            const imgElement = thumb.querySelector('.thumbnail-img');
+      thumbnails.forEach(thumb => {
+        const modelName = thumb.getAttribute('data-name');
+        const imgElement = thumb.querySelector('.thumbnail-img');
 
-            if (stampedModels.includes(modelName)) {
-                imgElement.src = `thumbnails/${modelName}_thumb.png`;
+        if (stampedModels.includes(modelName)) {
+          imgElement.src = `thumbnails/${modelName}_thumb.png`;
 
-                if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
-                    imgElement.classList.add('stamp-unlock');
-                    imgElement.addEventListener('animationend', () => imgElement.classList.remove('stamp-unlock'), { once: true });
-                }
+          if (modelName === newStamp && !imgElement.classList.contains('stamped')) {
+            imgElement.classList.add('stamp-unlock');
+            imgElement.addEventListener('animationend', () => imgElement.classList.remove('stamp-unlock'), { once: true });
+          }
 
-                imgElement.classList.add('stamped');
-            } else {
-                imgElement.src = 'thumbnails/white_thumb.png';
-            }
-        });
+          imgElement.classList.add('stamped');
+        } else {
+          imgElement.src = 'thumbnails/white_thumb.png';
+        }
+      });
 
-        checkAllStamps(stampedModels);
+      checkAllStamps(stampedModels);
     }
 
     async function saveNewStampAndReload(modelName) {
-        if (!currentUserId || !modelName) return window.location.reload();
+      if (!currentUserId || !modelName) return window.location.reload();
 
-        const docRef = doc(db, "users", currentUserId);
-        const docSnap = await getDoc(docRef);
-        let stampedModels = docSnap.exists() ? docSnap.data().stamps || [] : [];
+      const docRef = doc(db, "users", currentUserId);
+      const docSnap = await getDoc(docRef);
+      let stampedModels = docSnap.exists() ? docSnap.data().stamps || [] : [];
 
-        if (!stampedModels.includes(modelName)) {
-            stampedModels.push(modelName);
-            await setDoc(docRef, { stamps: stampedModels }, { merge: true });
-            window.location.href = window.location.pathname + `?newStamp=${modelName}`;
-        } else {
-            alert(`The stamp ${modelName} was already unlocked!`);
-            window.location.reload();
-        }
+      if (!stampedModels.includes(modelName)) {
+        stampedModels.push(modelName);
+        await setDoc(docRef, { stamps: stampedModels }, { merge: true });
+        window.location.href = window.location.pathname + `?newStamp=${modelName}`;
+      } else {
+        alert(`The stamp ${modelName} was already unlocked!`);
+        window.location.reload();
+      }
     }
 
     window.handleQRCodeScan = async function(modelName) {
-        await saveNewStampAndReload(modelName);
+      await saveNewStampAndReload(modelName);
     };
 
     onAuthStateChanged(auth, (user) => {
-        currentUserId = user ? user.uid : null;
-        if (user) loadAndRenderStamps();
+      currentUserId = user ? user.uid : null;
+      if (user) loadAndRenderStamps();
     });
 
     thumbnails.forEach(thumb => {
-        thumb.addEventListener('click', () => {
-            const modelName = thumb.getAttribute('data-name');
-            const imgElement = thumb.querySelector('.thumbnail-img');
+      thumb.addEventListener('click', () => {
+        const modelName = thumb.getAttribute('data-name');
+        const imgElement = thumb.querySelector('.thumbnail-img');
 
-            if (imgElement.src.endsWith('white_thumb.png')) {
-                thumbnails.forEach(t => t.classList.remove('selected'));
-                viewModelBtn.classList.remove('selected');
-                selectedModelUrl = "";
-                return;
-            }
+        if (imgElement.src.endsWith('white_thumb.png')) {
+          thumbnails.forEach(t => t.classList.remove('selected'));
+          viewModelBtn.classList.remove('selected');
+          selectedModelUrl = "";
+          return;
+        }
 
-            thumbnails.forEach(t => t.classList.remove('selected'));
-            thumb.classList.add('selected');
-            selectedModelUrl = thumb.getAttribute('data-model');
-            selectedModelName = modelName;
-            viewModelBtn.classList.add('selected');
-        });
+        thumbnails.forEach(t => t.classList.remove('selected'));
+        thumb.classList.add('selected');
+        selectedModelUrl = thumb.getAttribute('data-model');
+        selectedModelName = modelName;
+        viewModelBtn.classList.add('selected');
+      });
     });
 
     viewModelBtn.addEventListener('click', () => {
-        if (selectedModelUrl) {
-            window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
-        }
+      if (selectedModelUrl) {
+        window.location.href = `model-viewer.html?model=${encodeURIComponent(selectedModelUrl)}`;
+      }
     });
 
     function launchParticleExplosionOverButton(button) {
-        const container = document.getElementById('particleContainer');
-        container.style.display = 'block';
-        const rect = button.getBoundingClientRect();
-        container.style.position = 'fixed';
-        container.style.left = rect.left + rect.width/2 + 'px';
-        container.style.top = rect.top + rect.height/2 + 'px';
-        container.style.transform = 'translate(-50%, -50%)';
+      const container = document.getElementById('particleContainer');
+      container.style.display = 'block';
+      const rect = button.getBoundingClientRect();
+      container.style.position = 'fixed';
+      container.style.left = rect.left + rect.width/2 + 'px';
+      container.style.top = rect.top + rect.height/2 + 'px';
+      container.style.transform = 'translate(-50%, -50%)';
 
-        const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
-        for (let i=0;i<200;i++){
-            const particle = document.createElement('div');
-            const size = Math.random()*10+4;
-            particle.style.width = particle.style.height = size+'px';
-            particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-            particle.style.position='absolute';
-            particle.style.borderRadius='50%';
-            container.appendChild(particle);
+      const colors = ['#FFD700','#FFDC6E','#FFF5E1','#FFB800','#FFEE99'];
+      for (let i=0;i<200;i++){
+        const particle = document.createElement('div');
+        const size = Math.random()*10+4;
+        particle.style.width = particle.style.height = size+'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        particle.style.position='absolute';
+        particle.style.borderRadius='50%';
+        container.appendChild(particle);
 
-            const angle = Math.random()*2*Math.PI;
-            const distance = Math.random()*300+100;
-            const duration = Math.random()*1+1.5;
+        const angle = Math.random()*2*Math.PI;
+        const distance = Math.random()*300+100;
+        const duration = Math.random()*1+1.5;
 
-            const x = Math.cos(angle)*distance;
-            const y = Math.sin(angle)*distance;
+        const x = Math.cos(angle)*distance;
+        const y = Math.sin(angle)*distance;
 
-            particle.animate([
-                { transform:'translate(0,0) scale(1)', opacity:1 },
-                { transform:`translate(${x}px, ${y}px) scale(0.3)`, opacity:0 }
-            ], { duration:duration*1000, easing:'ease-out', fill:'forwards' });
+        particle.animate([
+          { transform:'translate(0,0) scale(1)', opacity:1 },
+          { transform:`translate(${x}px, ${y}px) scale(0.3)`, opacity:0 }
+        ], { duration:duration*1000, easing:'ease-out', fill:'forwards' });
 
-            setTimeout(()=>particle.remove(), duration*1000);
-        }
+        setTimeout(()=>particle.remove(), duration*1000);
+      }
 
-        setTimeout(()=>container.style.display='none',3000);
+      setTimeout(()=>container.style.display='none',3000);
     }
 
     function checkAllStamps(stampedModels){
-        if (stampedModels.length !== thumbnails.length) return;
-        if (document.getElementById("final-reward-btn")) return;
+      if (stampedModels.length !== thumbnails.length) return;
+      if (document.getElementById("final-reward-btn")) return;
 
-        const header = document.querySelector(".title");
-        const imgBtn = document.createElement("img");
-        imgBtn.id = "final-reward-btn";
-        imgBtn.src = "icon/giftBTN.png";
-        imgBtn.style.cursor = "pointer";
-        imgBtn.style.marginLeft = "50px";
-        imgBtn.style.width = "150px";
-        imgBtn.style.height = "auto";
-        imgBtn.style.objectFit = "contain";
-        imgBtn.addEventListener("click", () => {
-            window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
-        });
-        header.appendChild(imgBtn);
+      const header = document.querySelector(".title");
+      const imgBtn = document.createElement("img");
+      imgBtn.id = "final-reward-btn";
+      imgBtn.src = "icon/giftBTN.png";
+      imgBtn.style.cursor = "pointer";
+      imgBtn.style.marginLeft = "50px";
+      imgBtn.style.width = "150px";
+      imgBtn.style.height = "auto";
+      imgBtn.style.objectFit = "contain";
+      imgBtn.addEventListener("click", () => {
+        window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
+      });
+      header.appendChild(imgBtn);
 
-        setTimeout(()=>launchParticleExplosionOverButton(imgBtn), 1000);
+      setTimeout(()=>launchParticleExplosionOverButton(imgBtn), 1000);
     }
-    </script>
+  </script>
 </body>
 </html>
