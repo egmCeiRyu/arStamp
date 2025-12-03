@@ -413,9 +413,8 @@
     display: none;
 }
 
-/* 🔑 A Máscara: Cria o efeito de escurecer o fundo, mas mantendo a "janela" visível */
+/* 🔑 A Máscara: Mantenha este bloco (já está correto) */
 .scan-region {
-    /* O box-shadow grande cria a máscara escura ao redor da "janela" */
     box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
     border-radius: 0 !important;
     position: fixed !important;
@@ -426,23 +425,40 @@
     z-index: 2000 !important;
 }
 
-/* 🔑 As Bordas Vermelhas de Canto */
-/* O qr-scanner usa este seletor quando highlightScanRegion é true */
+/* 🔑 NOVO E MELHORADO: Bordas de Canto com Box-Shadow */
 .highlight-region {
-    /* Centraliza a região de destaque, se necessário */
+    /* Centraliza a região de destaque (mantido) */
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 
-    /* Define o tamanho da "janela" de escaneamento */
+    /* Define o tamanho da "janela" de escaneamento (mantido) */
     width: 70vw; 
     height: 70vw; 
     max-width: 300px;
     max-height: 300px;
     
-    /* Zera a borda padrão para que possamos usar pseudo-elementos */
+    /* ❌ Zera a borda padrão */
     border: none !important;
+
+    /* 💡 A Mágica: Cria os 4 cantos usando box-shadow. */
+    box-shadow: 
+        /* Canto Superior Esquerdo: vertical, horizontal */
+        inset 3px 3px 0 0 red, 
+        /* Canto Superior Direito: -horizontal, vertical */
+        inset -3px 3px 0 0 red, 
+        /* Canto Inferior Esquerdo: vertical, -horizontal */
+        inset 3px -3px 0 0 red, 
+        /* Canto Inferior Direito: -vertical, -horizontal */
+        inset -3px -3px 0 0 red;
+
+    /* Aumenta o padding para que as sombras não cortem o QR Code */
+    padding: 10px;
+    box-sizing: border-box; 
+    
+    /* Arredonda levemente os cantos internos */
+    border-radius: 10px; 
 }
 
     /* Borda superior esquerda */
