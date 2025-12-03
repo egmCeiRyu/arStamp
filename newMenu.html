@@ -411,13 +411,40 @@
       display: none; /* Começa escondido */
       font-weight: bold;
       }
-    
+       
+    /* O qr-scanner cria um elemento 'div' que envolve o vídeo quando highlightScanRegion é true. 
+   O seletor abaixo mira no elemento que a biblioteca usa para criar a borda/janela. */
+    .highlight-region:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        /* Tamanho da janela de escaneamento */
+        width: 70vw; /* 70% da largura da viewport */
+        height: 70vw; /* Quadrado, ajuste conforme necessário */
+        max-width: 300px;
+        max-height: 300px;
+        transform: translate(-50%, -50%);
+
+        /* 🔑 A borda de destaque: */
+        border: 5px solid rgba(255, 255, 255, 0.8) !important;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    /* 🔑 A Máscara (para escurecer o resto da tela) */
     .scan-region {
-      border: 5px solid rgba(255, 255, 255, 0.5) !important; /* Cor e espessura da borda */
-      box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6); /* Efeito de máscara escura ao redor */
-      border-radius: 20px; /* Borda levemente arredondada (opcional) */
-      position: absolute; /* Garantir posicionamento correto */
-      box-sizing: border-box; /* Opcional: Garante que padding/borda não aumentem o tamanho */
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
+        border-radius: 0; /* A borda é feita pelo :after, aqui é só a máscara */
+        box-sizing: border-box;
+        /* Ajustes se necessário: */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2000;
     }
      
   </style>
