@@ -366,21 +366,21 @@
         }
         
     }
-    
-    #qr-code-reader {
-            width: 100%;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: black;
-            z-index: 2000; 
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+
+      #qr-code-reader {
+              width: 100%;
+              height: 100vh;
+              position: fixed;
+              top: 0;
+              left: 0;
+              background: black;
+              z-index: 2000; 
+              display: none; 
+              justify-content: center;
+              align-items: center;
+              padding: 20px;
+              box-sizing: border-box;
+          }
     
       #video {
       /* Torna o vídeo uma sobreposição de tela cheia */
@@ -411,6 +411,14 @@
       display: none; /* Começa escondido */
       font-weight: bold;
       }
+    
+    .scan-region {
+      border: 5px solid rgba(255, 255, 255, 0.5) !important; /* Cor e espessura da borda */
+      box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6); /* Efeito de máscara escura ao redor */
+      border-radius: 20px; /* Borda levemente arredondada (opcional) */
+      position: absolute; /* Garantir posicionamento correto */
+      box-sizing: border-box; /* Opcional: Garante que padding/borda não aumentem o tamanho */
+    }
      
   </style>
 
