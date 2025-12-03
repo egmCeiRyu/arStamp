@@ -381,19 +381,6 @@
               padding: 20px;
               box-sizing: border-box;
           }
-    
-      #video {
-      /* Torna o vídeo uma sobreposição de tela cheia */
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw; /* 100% da largura da viewport */
-      height: 100vh; /* 100% da altura da viewport */
-      object-fit: cover; /* Garante que o vídeo cubra toda a área */
-      z-index: 2000; /* Garante que fique acima de todos os outros elementos */
-      background-color: black;
-      display: none; /* Começa escondido, o JS vai mudar para 'block' */
-      }
 
       #close-camera-btn {
       position: fixed;
@@ -412,40 +399,102 @@
       font-weight: bold;
       }
        
-    /* O qr-scanner cria um elemento 'div' que envolve o vídeo quando highlightScanRegion é true. 
-   O seletor abaixo mira no elemento que a biblioteca usa para criar a borda/janela. */
-    .highlight-region:after {
+    /* Estilo Base do Scanner */
+#video {
+    /* Mantenha o estilo do vídeo */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 2000;
+    background-color: black;
+    display: none;
+}
+
+/* 🔑 A Máscara: Cria o efeito de escurecer o fundo, mas mantendo a "janela" visível */
+.scan-region {
+    /* O box-shadow grande cria a máscara escura ao redor da "janela" */
+    box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
+    border-radius: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 2000 !important;
+}
+
+/* 🔑 As Bordas Vermelhas de Canto */
+/* O qr-scanner usa este seletor quando highlightScanRegion é true */
+.highlight-region {
+    /* Centraliza a região de destaque, se necessário */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* Define o tamanho da "janela" de escaneamento */
+    width: 70vw; 
+    height: 70vw; 
+    max-width: 300px;
+    max-height: 300px;
+    
+    /* Zera a borda padrão para que possamos usar pseudo-elementos */
+    border: none !important;
+}
+
+    /* Borda superior esquerda */
+    .highlight-region::before {
         content: '';
-        display: block;
         position: absolute;
-        top: 50%;
-        left: 50%;
-        /* Tamanho da janela de escaneamento */
-        width: 70vw; /* 70% da largura da viewport */
-        height: 70vw; /* Quadrado, ajuste conforme necessário */
-        max-width: 300px;
-        max-height: 300px;
-        transform: translate(-50%, -50%);
-
-        /* 🔑 A borda de destaque: */
-        border: 5px solid rgba(255, 255, 255, 0.8) !important;
-        border-radius: 10px;
-        box-sizing: border-box;
-    }
-
-    /* 🔑 A Máscara (para escurecer o resto da tela) */
-    .scan-region {
-        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
-        border-radius: 0; /* A borda é feita pelo :after, aqui é só a máscara */
-        box-sizing: border-box;
-        /* Ajustes se necessário: */
-        position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 2000;
+        /* Linha horizontal e vertical, ajuste o tamanho (ex: 30px) e a espessura (ex: 3px) */
+        width: 30px; 
+        height: 30px; 
+        border-top: 3px solid red; /* Linha superior */
+        border-left: 3px solid red; /* Linha esquerda */
     }
+
+    /* Borda superior direita */
+    .highlight-region::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        border-top: 3px solid red; /* Linha superior */
+        border-right: 3px solid red; /* Linha direita */
+    }
+
+    /* Borda inferior esquerda */
+    .highlight-region:nth-child(2)::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        border-bottom: 3px solid red; /* Linha inferior */
+        border-left: 3px solid red; /* Linha esquerda */
+    }
+
+    /* Borda inferior direita */
+    .highlight-region:nth-child(2)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        border-bottom: 3px solid red; /* Linha inferior */
+        border-right: 3px solid red; /* Linha direita */
+    }
+    
+
      
   </style>
 
