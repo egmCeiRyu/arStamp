@@ -399,67 +399,88 @@
       font-weight: bold;
       }
        
-    /* Estilo Base do Scanner */
-#video {
-    /* Mantenha o estilo do vídeo */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: 2000;
-    background-color: black;
-    display: none;
-}
 
-/* 🔑 A Máscara: Mantenha este bloco (já está correto) */
-.scan-region {
-    box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
-    border-radius: 0 !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: 2000 !important;
-}
+    /* 🔑 Estilo do Vídeo */
+    #video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: 2000; /* Mantenha o vídeo em 2000 */
+        background-color: black;
+        display: none;
+    }
 
-/* 🔑 NOVO E MELHORADO: Bordas de Canto com Box-Shadow */
-.highlight-region {
-    /* Centraliza a região de destaque (mantido) */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    /* 🔑 A Máscara: Precisa ter um Z-Index ALTO */
+    .scan-region {
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
+        border-radius: 0 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 2001 !important; /* Aumente o z-index para garantir que fique acima do vídeo */
+    }
 
-    /* Define o tamanho da "janela" de escaneamento (mantido) */
-    width: 70vw; 
-    height: 70vw; 
-    max-width: 300px;
-    max-height: 300px;
+    /* 🔑 Bordas de Canto Vermelhas: Usamos um seletor mais específico da biblioteca */
+    .highlight-region {
+        /* Centraliza a região de destaque */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        /* Define o tamanho da "janela" de escaneamento */
+        width: 70vw; 
+        height: 70vw; 
+        max-width: 300px;
+        max-height: 300px;
+
+        border: none !important;
+
+        /* A Mágica: 4 box-shadows inset para simular os 4 cantos */
+        box-shadow: 
+            /* Canto Superior Esquerdo */
+            inset 3px 3px 0 0 red, 
+            /* Canto Superior Direito */
+            inset -3px 3px 0 0 red, 
+            /* Canto Inferior Esquerdo */
+            inset 3px -3px 0 0 red, 
+            /* Canto Inferior Direito */
+            inset -3px -3px 0 0 red;
+
+        padding: 10px;
+        box-sizing: content-box; 
+        border-radius: 10px; 
+
+        /* 🚨 Garante que a borda fique acima da máscara, se o 'qr-scanner' injetar como irmão */
+        z-index: 2002; 
+    }
     
-    /* ❌ Zera a borda padrão */
-    border: none !important;
+        /* Seletor Alternativo (Adicione abaixo do .highlight-region) */
+    .scan-region canvas.highlight-region {
+        /* Copie e cole os mesmos estilos de box-shadow e tamanho de .highlight-region aqui */
+        width: 70vw; 
+        height: 70vw; 
+        max-width: 300px;
+        max-height: 300px;
 
-    /* 💡 A Mágica: Cria os 4 cantos usando box-shadow. */
-    box-shadow: 
-        /* Canto Superior Esquerdo: vertical, horizontal */
-        inset 3px 3px 0 0 red, 
-        /* Canto Superior Direito: -horizontal, vertical */
-        inset -3px 3px 0 0 red, 
-        /* Canto Inferior Esquerdo: vertical, -horizontal */
-        inset 3px -3px 0 0 red, 
-        /* Canto Inferior Direito: -vertical, -horizontal */
-        inset -3px -3px 0 0 red;
+        border: none !important;
 
-    /* Aumenta o padding para que as sombras não cortem o QR Code */
-    padding: 10px;
-    box-sizing: border-box; 
-    
-    /* Arredonda levemente os cantos internos */
-    border-radius: 10px; 
-}
+        box-shadow: 
+            inset 3px 3px 0 0 red, 
+            inset -3px 3px 0 0 red, 
+            inset 3px -3px 0 0 red, 
+            inset -3px -3px 0 0 red;
+
+        padding: 10px;
+        box-sizing: content-box; 
+        border-radius: 10px; 
+        z-index: 2002; /* Mantenha o z-index alto */
+    }
 
     /* Borda superior esquerda */
     .highlight-region::before {
@@ -648,7 +669,6 @@
   <script src="app.js"></script>
   
   <video id="video"></video>
-
   <button id="close-camera-btn" style="display: none;">X</button> 
 
 <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
