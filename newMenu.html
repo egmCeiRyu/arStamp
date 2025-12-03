@@ -9,7 +9,7 @@
   
   <style> 
     .title{
-      position: sticky;
+      position: fixed;
       top: 0;
       display: flex;
       background: #FFF5E1;
@@ -19,6 +19,7 @@
       width: 100%;
       text-align: center;
       overflow-y:auto;
+      justify-content: center;
     }
 
     .thumbnail-container {
@@ -381,35 +382,35 @@
             box-sizing: border-box;
         }
     
-    #video {
-    /* Torna o vídeo uma sobreposição de tela cheia */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw; /* 100% da largura da viewport */
-    height: 100vh; /* 100% da altura da viewport */
-    object-fit: cover; /* Garante que o vídeo cubra toda a área */
-    z-index: 2000; /* Garante que fique acima de todos os outros elementos */
-    background-color: black;
-    display: none; /* Começa escondido, o JS vai mudar para 'block' */
-    }
-    
-    #close-camera-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 2001; /* Z-index mais alto que a câmera (2000) */
-    background: rgba(255, 255, 255, 0.8);
-    color: black;
-    border: 1px solid black;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 1.5em;
-    cursor: pointer;
-    display: none; /* Começa escondido */
-    font-weight: bold;
-    }
+      #video {
+      /* Torna o vídeo uma sobreposição de tela cheia */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw; /* 100% da largura da viewport */
+      height: 100vh; /* 100% da altura da viewport */
+      object-fit: cover; /* Garante que o vídeo cubra toda a área */
+      z-index: 2000; /* Garante que fique acima de todos os outros elementos */
+      background-color: black;
+      display: none; /* Começa escondido, o JS vai mudar para 'block' */
+      }
+
+      #close-camera-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2001; /* Z-index mais alto que a câmera (2000) */
+      background: rgba(255, 255, 255, 0.8);
+      color: black;
+      border: 1px solid black;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5em;
+      cursor: pointer;
+      display: none; /* Começa escondido */
+      font-weight: bold;
+      }
      
   </style>
 
@@ -602,6 +603,7 @@ scanBtn.addEventListener('click', async () => {
 
 // NOVO: Evento para fechar a câmera (Clique no botão "X")
 closeCameraBtn.addEventListener('click', closeCamera);
+  
 </script>
 
   <script type="module">
