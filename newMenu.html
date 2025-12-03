@@ -399,8 +399,7 @@
       font-weight: bold;
       }
        
-
-    /* 🔑 Estilo do Vídeo */
+      /* 🔑 Estilo do Vídeo */
     #video {
         position: fixed;
         top: 0;
@@ -408,13 +407,31 @@
         width: 100vw;
         height: 100vh;
         object-fit: cover;
-        z-index: 2000; /* Mantenha o vídeo em 2000 */
+        z-index: 2000; /* Z-Index do feed da câmera */
         background-color: black;
         display: none;
     }
 
-    /* 🔑 A Máscara: Precisa ter um Z-Index ALTO */
+    #close-camera-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2003; /* Acima de tudo */
+        background: rgba(255, 255, 255, 0.8);
+        color: black;
+        border: 1px solid black;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5em;
+        cursor: pointer;
+        display: none;
+        font-weight: bold;
+    }
+
+    /* 🔑 A Máscara: Cria a borda preta (área escura ao redor do QR code) */
     .scan-region {
+        /* box-shadow: 0 0 0 1000px ... É o que cria o overlay escuro na tela */
         box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6) !important; 
         border-radius: 0 !important;
         position: fixed !important;
@@ -422,114 +439,45 @@
         left: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        z-index: 2001 !important; /* Aumente o z-index para garantir que fique acima do vídeo */
+        z-index: 2001 !important; /* Acima do vídeo */
     }
 
-    /* 🔑 Bordas de Canto Vermelhas: Usamos um seletor mais específico da biblioteca */
+    /* 🔑 Bordas de Canto Vermelhas (Região de Destaque) */
     .highlight-region {
         /* Centraliza a região de destaque */
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
 
         /* Define o tamanho da "janela" de escaneamento */
-        width: 70vw; 
-        height: 70vw; 
-        max-width: 300px;
-        max-height: 300px;
+        width: 70vw !important; 
+        height: 70vw !important; 
+        max-width: 300px !important;
+        max-height: 300px !important;
 
         border: none !important;
 
         /* A Mágica: 4 box-shadows inset para simular os 4 cantos */
         box-shadow: 
             /* Canto Superior Esquerdo */
-            inset 3px 3px 0 0 red, 
+            inset 5px 5px 0 0 red, 
             /* Canto Superior Direito */
-            inset -3px 3px 0 0 red, 
+            inset -5px 5px 0 0 red, 
             /* Canto Inferior Esquerdo */
-            inset 3px -3px 0 0 red, 
+            inset 5px -5px 0 0 red, 
             /* Canto Inferior Direito */
-            inset -3px -3px 0 0 red;
+            inset -5px -5px 0 0 red;
 
-        padding: 10px;
-        box-sizing: content-box; 
-        border-radius: 10px; 
+        padding: 10px !important;
+        box-sizing: content-box !important; 
+        border-radius: 10px !important; 
 
-        /* 🚨 Garante que a borda fique acima da máscara, se o 'qr-scanner' injetar como irmão */
-        z-index: 2002; 
-    }
-    
-        /* Seletor Alternativo (Adicione abaixo do .highlight-region) */
-    .scan-region canvas.highlight-region {
-        /* Copie e cole os mesmos estilos de box-shadow e tamanho de .highlight-region aqui */
-        width: 70vw; 
-        height: 70vw; 
-        max-width: 300px;
-        max-height: 300px;
-
-        border: none !important;
-
-        box-shadow: 
-            inset 3px 3px 0 0 red, 
-            inset -3px 3px 0 0 red, 
-            inset 3px -3px 0 0 red, 
-            inset -3px -3px 0 0 red;
-
-        padding: 10px;
-        box-sizing: content-box; 
-        border-radius: 10px; 
-        z-index: 2002; /* Mantenha o z-index alto */
+        /* 🚨 GARANTE que a borda fique acima da máscara */
+        z-index: 2002 !important; 
     }
 
-    /* Borda superior esquerda */
-    .highlight-region::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        /* Linha horizontal e vertical, ajuste o tamanho (ex: 30px) e a espessura (ex: 3px) */
-        width: 30px; 
-        height: 30px; 
-        border-top: 3px solid red; /* Linha superior */
-        border-left: 3px solid red; /* Linha esquerda */
-    }
 
-    /* Borda superior direita */
-    .highlight-region::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 30px;
-        height: 30px;
-        border-top: 3px solid red; /* Linha superior */
-        border-right: 3px solid red; /* Linha direita */
-    }
-
-    /* Borda inferior esquerda */
-    .highlight-region:nth-child(2)::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 30px;
-        height: 30px;
-        border-bottom: 3px solid red; /* Linha inferior */
-        border-left: 3px solid red; /* Linha esquerda */
-    }
-
-    /* Borda inferior direita */
-    .highlight-region:nth-child(2)::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 30px;
-        height: 30px;
-        border-bottom: 3px solid red; /* Linha inferior */
-        border-right: 3px solid red; /* Linha direita */
-    }
     
 
      
