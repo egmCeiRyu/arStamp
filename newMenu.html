@@ -417,18 +417,15 @@
         /* ESTILOS DA CÂMERA EM TELA CHEIA (Z-INDEX ALTO) */
         /* ========================================================= */
 
-        /* 1. O VÍDEO DA CÂMERA */
-        #video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
-            z-index: 2000; 
-            background-color: black;
-            display: none;
+      video {
+          width: 300px;
+          height: 300px;
+          border: 2px solid #ccc;
+          border-radius: 12px;
+          display: none; /* Inicia escondido */
+          margin-top: 20px;
+          position: relative; /* Remove o fixed que causa o conflito */
+          z-index: 10; /* Garante que fique acima do body */
         }
 
         /* 2. BOTÃO FECHAR CÂMERA (X) */
