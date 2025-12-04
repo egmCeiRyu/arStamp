@@ -410,15 +410,22 @@
         #camera-system{
             position:fixed;
             top:250px; 
-            left: 2%;
         }
 
         /* 1. O VÍDEO DA CÂMERA */
         #video {
-            height: 200px;
-            padding: 5px;
-            /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
-            z-index: 2000; 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            /* Size control (adjust as needed) */
+            width: 100vw;
+            max-width: 500px;
+            height: auto;
+
+            z-index: 2000;
+            object-fit: cover;
         }
 
         /* 2. BOTÃO FECHAR CÂMERA (X) */
@@ -629,6 +636,7 @@
 </div>
   
   <script src="app.js"></script>
+  
 <div id="camera-system">
     <video id="video"></video>
     <button id="close-camera-btn" style="display: none;">X</button>
