@@ -676,8 +676,8 @@ function closeCamera() {
         qrScanner = null;
     }
 
-    // REMOVE ALL SCAN OVERLAYS (important!)
-    document.querySelectorAll('.scan-region, .highlight-region').forEach(el => el.remove());
+    // Hide entire camera-system container
+    document.getElementById('camera-system').style.display = 'none';
 
     // Reset camera element
     video.pause();
@@ -693,18 +693,22 @@ function closeCamera() {
 
 // Evento para abrir a câmera (Clique no botão QR Code)
 scanBtn.addEventListener('click', async () => {
-    // Esconde o botão QR e mostra o vídeo e o botão "X"
-    scanBtn.style.display = 'none';
+
+    // ⭐ ADD THESE LINES (This makes the camera system visible again)
+    document.getElementById('camera-system').style.display = 'flex'; 
     video.style.display = 'block';
+    video.style.opacity = 1;
+
+    // Hide scan button, show X
+    scanBtn.style.display = 'none';
     closeCameraBtn.style.display = 'block';
 
+    // Create scanner
     qrScanner = new QrScanner(video, result => {
         if (result && result.data) {
             console.log('デコードされたQRコード:', result.data);
-            
-            // Redireciona para o link e fecha a câmera
             const dataUrl = result.data;
-            closeCamera(); 
+            closeCamera();
             window.location.href = dataUrl;
         }
     }, {
@@ -716,8 +720,7 @@ scanBtn.addEventListener('click', async () => {
     try {
         await qrScanner.start();
     } catch(e) {
-        alert('カメラへのアクセスに失敗しました。権限を確認してください。カメラにはHTTPSが必須です： ' + e);
-        // Se houver erro, fecha o modo de câmera
+        alert('カメラへのアクセスに失敗しました。: ' + e);
         closeCamera();
     }
 });
