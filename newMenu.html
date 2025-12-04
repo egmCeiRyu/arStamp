@@ -508,6 +508,19 @@
             box-sizing: content-box !important; 
             border-radius: 10px !important; 
         }
+    
+        .scan-region,
+        .highlight-region {
+            pointer-events: none !important;
+        }
+
+        #video {
+            pointer-events: none; /* optional */
+        }
+
+        #close-camera-btn {
+            pointer-events: auto !important; /* ensure it works */
+        }
   </style>
 
 </head>
@@ -662,15 +675,7 @@ function closeCamera() {
         qrScanner.destroy();
         qrScanner = null;
     }
-
-    // 🔥 Fully reset the video element
-    video.pause();
-    video.srcObject = null;
-    video.removeAttribute("src");  // <--- important fix
-    video.style.display = "none";
     video.style.opacity = 0;
-
-    // Show buttons back
     closeCameraBtn.style.display = 'none';
     scanBtn.style.display = 'flex';
 }
