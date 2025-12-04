@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Scanner Automático</title>
+<style>
+  body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #FFF5E1;
+    margin: 0;
+  }
+  #scan-btn {
+    font-size: 22px;
+    padding: 15px 30px;
+    background: #ffd54f;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  video {
+    width: 300px;
+    height: 300px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    display: none;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Scanner de QR</h2>
+<button id="scan-btn">📸 Abrir Câmera</button>
+<video id="video"></video>
+
+<script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+<script>
+const scanBtn = document.getElementById('scan-btn');
+const video = document.getElementById('video');
+let qrScanner;
+
+scanBtn.addEventListener('click', async () => {
+    scanBtn.style.display = 'none';
+    video.style.display = 'block';
+
+    qrScanner = new QrScanner(video, result => {
+        // 🔑 CORREÇÃO APLICADA: Acesse a propriedade .data do objeto result.
+        if (result && result.data) {
+            console.log('QR Code decodificado:', result.data);
+            
+            // Redireciona para o link
+            window.location.href = result.data; 
+            qrScanner.stop();
+        }
+    }, {
+        onDecodeError: error => console.log('Não detectado ainda...'),
+        maxScansPerSecond: 5,
+        // Adicione highlightScanRegion: true se quiser ver o quadrado de detecção
+        highlightScanRegion: true 
+    });
+
+    try {
+        await qrScanner.start();
+    } catch(e) {
+        alert('Erro ao acessar a câmera. Verifique as permissões. HTTPS é obrigatório para câmeras: ' + e);
+        scanBtn.style.display = 'block';
+        video.style.display = 'none';
+    }
+});
+</script>
+
+</body>
+</html>

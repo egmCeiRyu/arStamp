@@ -322,22 +322,22 @@
     }
     
     .bottom-stripe{
-      display: flex;
-      bottom: 0;
-      left: 0;
-      z-index: 999;
-      height: 91px;
-      width: 100%;
-      justify-content: center;
+        display: flex;
+        bottom: 0;
+        left: 0;
+        z-index: 999;
+        height: 91px;
+        width: 100%;
+        justify-content: center;
     }
     
     body{
-      padding-bottom: 60px;
-      margin: 0px;
-      background: #FFF5E1;
-      overflow-x: hidden;
-      max-width: 100%;
-      touch-action: pan-y; 
+        padding-bottom: 60px;
+        margin: 0px;
+        background: #FFF5E1;
+        overflow-x: hidden;
+        max-width: 100%;
+        touch-action: pan-y; 
     }
     
     @media screen and (min-width: 1281px) {
@@ -423,6 +423,7 @@
           left: 50%;
           transform: translate(-50%, -50%);
           z-index: 2000;
+
         }
 
         /* 1. O VÍDEO DA CÂMERA */
@@ -431,6 +432,9 @@
             padding: 3px;
             /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
             z-index: 2000; 
+            border: 10px solid #ffdb40;
+            border-radius: 27px;
+            margin-top: 13px;
         }
 
         /* 2. BOTÃO FECHAR CÂMERA (X) */
@@ -667,7 +671,8 @@ const scanBtn = document.getElementById('qr-scanner-btn');
 const video = document.getElementById('video');
 const closeCameraBtn = document.getElementById('close-camera-btn'); // NOVO: Captura o botão "X"
 let qrScanner;
-
+document.getElementById('camera-system').style.display = 'none';
+  
 // Função para fechar a câmera
 function closeCamera() {
     if (qrScanner) {
@@ -721,12 +726,14 @@ scanBtn.addEventListener('click', async () => {
         await qrScanner.start();
     } catch(e) {
         alert('カメラへのアクセスに失敗しました。: ' + e);
+        scanBtn.style.display = 'block';
+        video.style.display = 'none';
         closeCamera();
     }
 });
 
-// NOVO: Evento para fechar a câmera (Clique no botão "X")
-closeCameraBtn.addEventListener('click', closeCamera);
+    // NOVO: Evento para fechar a câmera (Clique no botão "X")
+    closeCameraBtn.addEventListener('click', closeCamera);
   
 </script>
 
