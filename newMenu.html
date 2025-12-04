@@ -662,7 +662,15 @@ function closeCamera() {
         qrScanner.destroy();
         qrScanner = null;
     }
+
+    // 🔥 Fully reset the video element
+    video.pause();
+    video.srcObject = null;
+    video.removeAttribute("src");  // <--- important fix
+    video.style.display = "none";
     video.style.opacity = 0;
+
+    // Show buttons back
     closeCameraBtn.style.display = 'none';
     scanBtn.style.display = 'flex';
 }
