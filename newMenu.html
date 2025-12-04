@@ -411,22 +411,19 @@
         }
     
         #camera-system{
-          position:fixed;
-          background-color: bisque;
-          top:250px; 
-          left: 27%;
+          position: fixed;
+          top: 28%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 2000;
         }
 
         /* 1. O VÍDEO DA CÂMERA */
         #video {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          height: 200px;
-          padding: 5px;
-          /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
-          z-index: 2000; 
+            height: 285px;
+            padding: 3px;
+            /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
+            z-index: 2000; 
         }
 
         /* 2. BOTÃO FECHAR CÂMERA (X) */
