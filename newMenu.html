@@ -395,6 +395,13 @@
           display: none; /* Começa escondido */
           font-weight: bold;
       }
+    
+      #camera-system,
+      #video,
+      .scan-region,
+      .highlight-region {
+          pointer-events: none !important;
+      }
        
 /* Ocupa a tela inteira quando a câmera está ativa */
         .camera-active {
@@ -446,6 +453,7 @@
             line-height: 40px;
             text-align: center;
             padding: 0;
+            pointer-events: auto !important;
         }
 
         /* 3. A MÁSCARA PRETA (A "Borda" que não pode sumir) */
@@ -651,12 +659,12 @@ let qrScanner;
 function closeCamera() {
     if (qrScanner) {
         qrScanner.stop();
-        qrScanner.destroy(); // Libera recursos da câmera
+        qrScanner.destroy();
         qrScanner = null;
     }
-    video.style.display = 'none';
-    closeCameraBtn.style.display = 'none'; // Oculta o botão "X"
-    scanBtn.style.display = 'flex'; // Mostra o botão QR Code novamente
+    video.style.opacity = 0;
+    closeCameraBtn.style.display = 'none';
+    scanBtn.style.display = 'flex';
 }
 
 // Evento para abrir a câmera (Clique no botão QR Code)
