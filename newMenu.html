@@ -675,9 +675,20 @@ function closeCamera() {
         qrScanner.destroy();
         qrScanner = null;
     }
+
+    // REMOVE ALL SCAN OVERLAYS (important!)
+    document.querySelectorAll('.scan-region, .highlight-region').forEach(el => el.remove());
+
+    // Reset camera element
+    video.pause();
+    video.srcObject = null;
+    video.removeAttribute("src");
+    video.style.display = "none";
     video.style.opacity = 0;
-    closeCameraBtn.style.display = 'none';
-    scanBtn.style.display = 'flex';
+
+    // Restore UI
+    closeCameraBtn.style.display = "none";
+    scanBtn.style.display = "flex";
 }
 
 // Evento para abrir a câmera (Clique no botão QR Code)
