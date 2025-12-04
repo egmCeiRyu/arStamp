@@ -33,6 +33,7 @@
       padding-top: -5px;
       padding-bottom: 93px;
       overflow-y: hidden;
+
     }
     
     /* === Thumbnail Image === */
@@ -56,6 +57,7 @@
       margin: 10px;
       background-color:#ffdbdb;
       border-radius: 103px;
+
       /* 💡 NOVO: Borda transparente para reservar espaço */
       border: 6px solid transparent; 
     }
@@ -63,6 +65,7 @@
     .thumbnail-link.selected  {
       border: 6px solid rgba(252, 221, 91, 0.87);
       /*padding: 5px;*/
+
     }
     
     .titlebook{
@@ -232,16 +235,16 @@
 
     /* Container principal */
     #app-container {
-        width: 100%;
-        max-width: 420px;
-        min-width: 320px;
-        margin: 0 auto;
-        background: #FFF5E1;
-        min-height: 100vh;
-        box-sizing: border-box;
-        overflow-x: hidden;
-        padding-left: 10px;
-        padding-right: 10px;
+      width: 100%;
+      max-width: 420px;
+      min-width: 320px;
+      margin: 0 auto;
+      background: #FFF5E1;
+      min-height: 100vh;
+      box-sizing: border-box;
+      overflow-x: hidden;
+      padding-left: 10px;
+      padding-right: 10px;
     }
     
     #bottom-actions {
@@ -319,22 +322,22 @@
     }
     
     .bottom-stripe{
-        display: flex;
-        bottom: 0;
-        left: 0;
-        z-index: 999;
-        height: 91px;
-        width: 100%;
-        justify-content: center;
+      display: flex;
+      bottom: 0;
+      left: 0;
+      z-index: 999;
+      height: 91px;
+      width: 100%;
+      justify-content: center;
     }
     
     body{
-        padding-bottom: 60px;
-        margin: 0px;
-        background: #FFF5E1;
-        overflow-x: hidden;
-        max-width: 100%;
-        touch-action: pan-y; 
+      padding-bottom: 60px;
+      margin: 0px;
+      background: #FFF5E1;
+      overflow-x: hidden;
+      max-width: 100%;
+      touch-action: pan-y; 
     }
     
     @media screen and (min-width: 1281px) {
@@ -408,24 +411,22 @@
         }
     
         #camera-system{
-            position:fixed;
-            top:250px; 
+          position:fixed;
+          background-color: bisque;
+          top:250px; 
+          left: 27%;
         }
 
         /* 1. O VÍDEO DA CÂMERA */
         #video {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            /* Size control (adjust as needed) */
-            width: 100vw;
-            max-width: 500px;
-            height: auto;
-
-            z-index: 999999 !important;
-            object-fit: cover;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          height: 200px;
+          padding: 5px;
+          /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
+          z-index: 2000; 
         }
 
         /* 2. BOTÃO FECHAR CÂMERA (X) */
@@ -636,7 +637,6 @@
 </div>
   
   <script src="app.js"></script>
-  
 <div id="camera-system">
     <video id="video"></video>
     <button id="close-camera-btn" style="display: none;">X</button>
@@ -697,6 +697,7 @@ scanBtn.addEventListener('click', async () => {
 closeCameraBtn.addEventListener('click', closeCamera);
   
 </script>
+
   <script type="module">
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
