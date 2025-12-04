@@ -16,7 +16,7 @@
       flex-wrap: wrap;
       font-family: "novecento-sans", sans-serif;
       margin:auto;
-      width: 100%;
+      width: 66%;
       text-align: center;
       overflow-y:auto;
       justify-content: center;
@@ -33,7 +33,6 @@
       padding-top: -5px;
       padding-bottom: 93px;
       overflow-y: hidden;
-
     }
     
     /* === Thumbnail Image === */
@@ -57,7 +56,6 @@
       margin: 10px;
       background-color:#ffdbdb;
       border-radius: 103px;
-
       /* 💡 NOVO: Borda transparente para reservar espaço */
       border: 6px solid transparent; 
     }
@@ -65,7 +63,6 @@
     .thumbnail-link.selected  {
       border: 6px solid rgba(252, 221, 91, 0.87);
       /*padding: 5px;*/
-
     }
     
     .titlebook{
@@ -110,11 +107,9 @@
 
     #view-model-btn {
         position: fixed;
-
         /* 🔑 Ensure the button itself is centered in the viewport */
         left: 50%; 
         transform: translateX(-50%); 
-
         bottom: 0%; /* Or your desired vertical position */
         height: 150px;
         width: 150px;
@@ -237,16 +232,16 @@
 
     /* Container principal */
     #app-container {
-      width: 100%;
-      max-width: 420px;
-      min-width: 320px;
-      margin: 0 auto;
-      background: #FFF5E1;
-      min-height: 100vh;
-      box-sizing: border-box;
-      overflow-x: hidden;
-      padding-left: 10px;
-      padding-right: 10px;
+        width: 100%;
+        max-width: 420px;
+        min-width: 320px;
+        margin: 0 auto;
+        background: #FFF5E1;
+        min-height: 100vh;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        padding-left: 10px;
+        padding-right: 10px;
     }
     
     #bottom-actions {
@@ -324,22 +319,22 @@
     }
     
     .bottom-stripe{
-      display: flex;
-      bottom: 0;
-      left: 0;
-      z-index: 999;
-      height: 91px;
-      width: 100%;
-      justify-content: center;
+        display: flex;
+        bottom: 0;
+        left: 0;
+        z-index: 999;
+        height: 91px;
+        width: 100%;
+        justify-content: center;
     }
     
     body{
-      padding-bottom: 60px;
-      margin: 0px;
-      background: #FFF5E1;
-      overflow-x: hidden;
-      max-width: 100%;
-      touch-action: pan-y; 
+        padding-bottom: 60px;
+        margin: 0px;
+        background: #FFF5E1;
+        overflow-x: hidden;
+        max-width: 100%;
+        touch-action: pan-y; 
     }
     
     @media screen and (min-width: 1281px) {
@@ -348,7 +343,7 @@
             display: none !important; /* Esconda para telas grandes */
         }
         #stamp-section{
-            padding-top: 123px;
+          padding-top: 123px;
         }
         .thumbnail-container{
           max-width: 1796px;
@@ -365,45 +360,44 @@
           width: auto;
         }
         
-    }
-
+      }
       #qr-code-reader {
-              width: 100%;
-              height: 100vh;
-              position: fixed;
-              top: 0;
-              left: 0;
-              background: black;
-              z-index: 2000; 
-              display: none; 
-              justify-content: center;
-              align-items: center;
-              padding: 20px;
-              box-sizing: border-box;
-          }
+          width: 100%;
+          height: 100vh;
+          position: fixed;
+          top: 0;
+          background: black;
+          z-index: 2000; 
+          display: none; 
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+          box-sizing: border-box;
+          left: 50%; 
+      }
 
       #close-camera-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 2001; /* Z-index mais alto que a câmera (2000) */
-      background: rgba(255, 255, 255, 0.8);
-      color: black;
-      border: 1px solid black;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 1.5em;
-      cursor: pointer;
-      display: none; /* Começa escondido */
-      font-weight: bold;
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 2001; /* Z-index mais alto que a câmera (2000) */
+          background: rgba(255, 255, 255, 0.8);
+          color: black;
+          border: 1px solid black;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          font-size: 1.5em;
+          cursor: pointer;
+          display: none; /* Começa escondido */
+          font-weight: bold;
       }
        
 /* Ocupa a tela inteira quando a câmera está ativa */
         .camera-active {
             overflow: hidden; /* Remove barras de rolagem no modo câmera */
         }
-
+    
         #scan-btn {
             font-size: 22px;
             padding: 15px 30px;
@@ -412,23 +406,19 @@
             border-radius: 12px;
             cursor: pointer;
         }
-        
-        /* ========================================================= */
-        /* ESTILOS DA CÂMERA EM TELA CHEIA (Z-INDEX ALTO) */
-        /* ========================================================= */
+    
+        #camera-system{
+            position:fixed;
+            top:250px; 
+            left: 27%;
+        }
 
         /* 1. O VÍDEO DA CÂMERA */
         #video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
+            height: 200px;
+            padding: 5px;
             /* Z-Index: Deve ser o mais baixo entre os elementos do scanner */
             z-index: 2000; 
-            background-color: black;
-            display: none;
         }
 
         /* 2. BOTÃO FECHAR CÂMERA (X) */
@@ -628,7 +618,7 @@
   </div>
   
   <div id="bottom-actions">
-          <div id="qr-code-btn-box">
+      <div id="qr-code-btn-box">
         <button id="qr-scanner-btn">QRコード</button>
       </div>
 
@@ -639,10 +629,12 @@
 </div>
   
   <script src="app.js"></script>
-  
-  <video id="video"></video>
-  <button id="close-camera-btn" style="display: none;">X</button> 
+<div id="camera-system">
+    <video id="video"></video>
+    <button id="close-camera-btn" style="display: none;">X</button>
+</div>
 
+   
 <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
 <script>
 const scanBtn = document.getElementById('qr-scanner-btn');
@@ -697,7 +689,6 @@ scanBtn.addEventListener('click', async () => {
 closeCameraBtn.addEventListener('click', closeCamera);
   
 </script>
-
   <script type="module">
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
