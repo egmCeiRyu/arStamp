@@ -8,24 +8,18 @@
   <title>3D Model Thumbnails</title>
   
   <style> 
-    
     .title{
       position: sticky;
       top: 0;
       display: flex;
       background: #FFF5E1;
+      flex-wrap: wrap;
       font-family: "novecento-sans", sans-serif;
       margin:auto;
-      width: 50%;
+      width: 100%;
       text-align: center;
       overflow-y:auto;
       justify-content: center;
-    }
-    
-    .thumbnail-topContainer:first-child{
-      position: relative;
-      left: 0;
-      padding-left: 5px;
     }
 
     .thumbnail-container {
@@ -536,12 +530,11 @@
 </head>
 
 <body>
-<div class="thumbnail-topContainer">
+
   <div class="title">
     <img src=thumbnails/titleStampBook.png alt="logo" class="titlebook">
   </div>
-</div>
-  
+
 <div id="stamp-section">
   <div class="thumbnail-container" id="model-thumbnails">
     <!-- Modelos -->
@@ -918,7 +911,6 @@ scanBtn.addEventListener('click', async () => {
       imgBtn.style.width = "150px";
       imgBtn.style.height = "auto";
       imgBtn.style.objectFit = "contain";
-      imgBtn.
       imgBtn.addEventListener("click", () => {
         window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
       });
