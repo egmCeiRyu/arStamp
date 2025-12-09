@@ -9,36 +9,6 @@
   
   <style> 
     
-    /* Initial state – centered */
-    #header-container {
-        display: flex;
-        justify-content: center; /* center content */
-        align-items: center;
-        padding: 10px;
-        padding-bottom: 0px;
-    }
-
-    #header-container img {
-        padding-bottom: 0px;
-        height: 162px; /* optional */
-    }
-
-    /* When the button appears, add this class */
-    #header-container.has-two {
-        justify-content: space-between;
-    }
-    
-    /*
-    .thumbnail-topContainer{
-      display: flex;
-      position: sticky;
-      width: 50%;
-      background: #ffe1f1;
-      margin:auto;
-    }
-    */
-    
-    /*
     .title{
       position: sticky;
       top: 0;
@@ -51,13 +21,12 @@
       overflow-y:auto;
       justify-content: center;
     }
-    */
     
-    /*
     .thumbnail-topContainer:first-child{
-      justify-content: center;
+      position: relative;
+      left: 0;
+      padding-left: 5px;
     }
-    */
 
     .thumbnail-container {
       display: grid;
@@ -287,11 +256,17 @@
     #bottom-actions {
         position: fixed;
         bottom: 25px; 
-        left: 0;
-        width: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%; 
+
+        /* 🔑 Recomendação: Alinhe ao container principal (420px) */
+        max-width: 420px; 
+
+        /* Adicione padding para o espaço nas laterais (ex: 10px) */
         padding: 0 10px;
-        display: flex; 
-        justify-content: space-between;   /* 🔥 BUTTONS NOW ALIGN LEFT ↔ RIGHT */
+        box-sizing: border-box;
+        display: flex; 
         align-items: flex-end;
         z-index: 1000;
     }
@@ -561,9 +536,10 @@
 </head>
 
 <body>
-  
-<div id="header-container">
-    <img src="thumbnails/titleStampBook.png" id="title-img">
+<div class="thumbnail-topContainer">
+  <div class="title">
+    <img src=thumbnails/titleStampBook.png alt="logo" class="titlebook">
+  </div>
 </div>
   
 <div id="stamp-section">
@@ -947,14 +923,6 @@ scanBtn.addEventListener('click', async () => {
         window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
       });
       header.appendChild(imgBtn);
-      
-      const headerContainer = document.getElementById("header-container");
-
-      // Add the gift icon to the container
-      headerContainer.appendChild(final-reward-btn);
-
-      // Switch layout to left & right
-      headerContainer.classList.add("has-two");
 
       setTimeout(()=>launchParticleExplosionOverButton(imgBtn), 1000);
     }
