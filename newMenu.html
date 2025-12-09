@@ -287,17 +287,11 @@
     #bottom-actions {
         position: fixed;
         bottom: 25px; 
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%; 
-
-        /* 🔑 Recomendação: Alinhe ao container principal (420px) */
-        max-width: 420px; 
-
-        /* Adicione padding para o espaço nas laterais (ex: 10px) */
+        left: 0;
+        width: 100%;
         padding: 0 10px;
-        box-sizing: border-box;
-        display: flex; 
+        display: flex; 
+        justify-content: space-between;   /* 🔥 BUTTONS NOW ALIGN LEFT ↔ RIGHT */
         align-items: flex-end;
         z-index: 1000;
     }
