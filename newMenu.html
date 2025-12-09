@@ -8,19 +8,56 @@
   <title>3D Model Thumbnails</title>
   
   <style> 
+    
+    /* Initial state – centered */
+    #header-container {
+        display: flex;
+        justify-content: center; /* center content */
+        align-items: center;
+        padding: 10px;
+        padding-bottom: 0px;
+    }
+
+    #header-container img {
+        padding-bottom: 0px;
+        height: 162px; /* optional */
+    }
+
+    /* When the button appears, add this class */
+    #header-container.has-two {
+        justify-content: space-between;
+    }
+    
+    /*
+    .thumbnail-topContainer{
+      display: flex;
+      position: sticky;
+      width: 50%;
+      background: #ffe1f1;
+      margin:auto;
+    }
+    */
+    
+    /*
     .title{
       position: sticky;
       top: 0;
       display: flex;
       background: #FFF5E1;
-      flex-wrap: wrap;
       font-family: "novecento-sans", sans-serif;
       margin:auto;
-      width: 100%;
+      width: 50%;
       text-align: center;
       overflow-y:auto;
       justify-content: center;
     }
+    */
+    
+    /*
+    .thumbnail-topContainer:first-child{
+      justify-content: center;
+    }
+    */
 
     .thumbnail-container {
       display: grid;
@@ -530,11 +567,11 @@
 </head>
 
 <body>
-
-  <div class="title">
-    <img src=thumbnails/titleStampBook.png alt="logo" class="titlebook">
-  </div>
-
+  
+<div id="header-container">
+    <img src="thumbnails/titleStampBook.png" id="title-img">
+</div>
+  
 <div id="stamp-section">
   <div class="thumbnail-container" id="model-thumbnails">
     <!-- Modelos -->
@@ -911,10 +948,19 @@ scanBtn.addEventListener('click', async () => {
       imgBtn.style.width = "150px";
       imgBtn.style.height = "auto";
       imgBtn.style.objectFit = "contain";
+      imgBtn.
       imgBtn.addEventListener("click", () => {
         window.location.href = "https://www.pref.fukushima.lg.jp/site/portal-english/tiiki-kanko-en.html";
       });
       header.appendChild(imgBtn);
+      
+      const headerContainer = document.getElementById("header-container");
+
+      // Add the gift icon to the container
+      headerContainer.appendChild(final-reward-btn);
+
+      // Switch layout to left & right
+      headerContainer.classList.add("has-two");
 
       setTimeout(()=>launchParticleExplosionOverButton(imgBtn), 1000);
     }
