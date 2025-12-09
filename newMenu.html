@@ -703,6 +703,9 @@ scanBtn.addEventListener('click', async () => {
     document.getElementById('camera-system').style.display = 'flex'; 
     video.style.display = 'block';
     video.style.opacity = 1;
+  
+    // 2️⃣ Wait a tick (IMPORTANT FIX!)
+    await new Promise(r => setTimeout(r, 100));
 
     // Hide scan button, show X
     scanBtn.style.display = 'none';
